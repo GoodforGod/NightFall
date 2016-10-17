@@ -8,12 +8,18 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Entities
 {
-    class Character : Entity
+    class Projectile : Entity
     {
+        World world;
 
-        public Character(World world) : base(world)
+        public Projectile(World world) : base(world)
         {
 
+        }
+
+        public override Entity Clone()
+        {
+            return new Enemy(world);
         }
 
         public override bool IsOnScreen() { return false; }

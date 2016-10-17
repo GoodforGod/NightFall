@@ -9,18 +9,28 @@ using Microsoft.Xna.Framework.Graphics;
 namespace CyberCommando.Entities
 {
     [Flags]
-    public enum EntityState
+    public enum EntityStatus
     {
-        None = 0x00,
-        Active = 0x01,
-        Passive = 0x02,
-        Dead = 0x03,
-        Invisible = 0x04
+        NONE,
+        ACTIVE,
+        PASSIVE,
+        DEAD,
+        INVISIBLE4
+    }
+
+    [Flags]
+    public enum AnimationState
+    {
+        STANDING,
+        WALKING,
+        JUMPING,
+        DUCKING,
+        ATTACKING
     }
 
     public class Entity : IEntity
     {
-        readonly World WORLD;
+        readonly World world;
         
         public Texture2D SpriteSheet { get; set; }
 
@@ -30,15 +40,23 @@ namespace CyberCommando.Entities
 
         public int Health { get; set; }
         
-        public EntityState State { get; set; }
-        
+        public EntityStatus EntState { get; set; }
+
+        public AnimationState AnimState { get; set; }
+
         public BoundingBox boundingBox { get; set; }
 
-        public Entity(World world) { WORLD = world; }
+        public Entity(World world) { this.world = world; }
+
+        public virtual Entity Clone() { return this; } 
+
+        public virtual bool IsOnScreen() { return false; }
+
+        public virtual bool IsGrounded() { return false; }
 
         public virtual void Damage(Entity attacker, int damage) { }
 
-        public virtual void Kill(Entity killer) { WORLD.Kill(this); }
+        public virtual void Kill(Entity killer) { world.Kill(this); }
 
         public virtual void Touch(Entity other) { }
 

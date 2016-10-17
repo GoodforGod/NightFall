@@ -10,11 +10,22 @@ namespace CyberCommando.Entities
 {
     class Enemy : Entity
     {
+        World world;
+
         public Enemy(World world) : base(world)
         {
-
+            this.world = world;
         }
-        
+
+        public override Entity Clone()
+        {
+            return new Enemy(world);
+        }
+
+        public override bool IsOnScreen() { return false; }
+
+        public override bool IsGrounded() { return false; }
+
         public override void Damage(Entity attacker, int damage)
         {
 
