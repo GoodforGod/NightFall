@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using CyberCommando.Controllers;
+
 namespace CyberCommando.Entities
 {
     public class World
@@ -15,9 +17,18 @@ namespace CyberCommando.Entities
         List<Entity> Entities = new List<Entity>();
         List<Entity> EntitiesToKill = new List<Entity>();
 
-        public World(Game game) { GAME = game; }
+        InputHandler handler;
 
-        public virtual void Initialize() { }
+        public World(Game game)
+        {
+            GAME = game;
+            handler = new InputHandler();
+        }
+
+        public virtual void Initialize()
+        {
+            Spawn(typeof(Character).FullName);
+        }
 
         public virtual Entity Spawn(string className) { return Spawn(className, Vector2.Zero); }
         
@@ -26,6 +37,7 @@ namespace CyberCommando.Entities
             var prms = new object[] { this };
             var entity = (Entity)Activator.CreateInstance(Type.GetType(className), prms);
             entity.Position = position;
+            entity.handler = handler;
             Entities.Add(entity);
             return entity;
         }

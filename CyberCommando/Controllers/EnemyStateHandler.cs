@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Controllers
 {
-    class EntityState
+    class EnemyStateHandler
     {
-            // entity state switch is coming...
+
     }
 }

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using CyberCommando.Controllers;
+
 namespace CyberCommando.Entities
 {
     [Flags]
@@ -31,20 +33,22 @@ namespace CyberCommando.Entities
     public class Entity : IEntity
     {
         readonly World world;
-        
-        public Texture2D SpriteSheet { get; set; }
 
-        public Vector2 Position { get; set; }
+        public InputHandler handler;
 
-        public float Angle { get; set; }
+        public Texture2D SpriteSheet;
 
-        public int Health { get; set; }
-        
-        public EntityStatus EntState { get; set; }
+        public Vector2 Position;
 
-        public AnimationState AnimState { get; set; }
+        public float Angle;
 
-        public BoundingBox boundingBox { get; set; }
+        public int Health;
+
+        public EntityStatus EntState; 
+
+        public AnimationState AnimState; 
+
+        public BoundingBox boundingBox; 
 
         public Entity(World world) { this.world = world; }
 

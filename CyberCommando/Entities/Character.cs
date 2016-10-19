@@ -10,10 +10,9 @@ namespace CyberCommando.Entities
 {
     class Character : Entity
     {
-
         public Character(World world) : base(world)
         {
-
+            SpriteSheet = world.GAME.Content.Load<Texture2D>("altar-2");
         }
 
         public override bool IsOnScreen() { return false; }
@@ -37,12 +36,12 @@ namespace CyberCommando.Entities
 
         public override void Update(GameTime gameTime)
         {
-
+            handler.HandleEntityInput(this); 
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch batcher)
         {
-
+            batcher.Draw(SpriteSheet, Position, Color.White);
         }
     }
 }
