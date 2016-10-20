@@ -7,50 +7,46 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using CyberCommando.Controllers;
+using CyberCommando.Animations;
 
 namespace CyberCommando.Entities
 {
-    [Flags]
-    public enum EntityStatus
+    public enum EntityState
     {
         NONE,
         ACTIVE,
         PASSIVE,
+        DYING,
         DEAD,
-        INVISIBLE4
-    }
-
-    [Flags]
-    public enum AnimationState
-    {
-        STANDING,
-        WALKING,
-        JUMPING,
-        DUCKING,
-        ATTACKING
+        INVISIBLE
     }
 
     public class Entity : IEntity
     {
         readonly World world;
 
-        public InputHandler handler;
+        public InputHandler handler { get; set; } 
 
-        public Texture2D SpriteSheet;
+        protected Texture2D SpriteSheet;
 
         public Vector2 Position;
+        public Vector2 VelocityCurrent;
 
-        public float Angle;
+        public virtual float VelocityLimit { get { return 90f; } }
+        public virtual float VelocityInc { get { return 10f; } }
+        public float Angle { get; set; }
+        public virtual int Health { get; set; }
 
-        public int Health;
+        public AnimationState AniState { get; set; }
+        public EntityState EntState { get; set; }
 
-        public EntityStatus EntState; 
+        public BoundingBox boundingBox { get; set; }
 
-        public AnimationState AnimState; 
-
-        public BoundingBox boundingBox; 
-
-        public Entity(World world) { this.world = world; }
+        public Entity(World world)
+        {
+            this.world = world;
+            EntState = EntityState.PASSIVE;
+        }
 
         public virtual Entity Clone() { return this; } 
 

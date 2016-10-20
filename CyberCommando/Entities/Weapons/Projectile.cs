@@ -6,15 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CyberCommando.Entities
+namespace CyberCommando.Entities.Weapons
 {
-    class Enemy : Entity
+    class Projectile : Entity
     {
         World world;
 
-        public Enemy(World world) : base(world)
+        public Projectile(World world) : base(world)
         {
-            this.world = world;
+
         }
 
         public override Entity Clone()

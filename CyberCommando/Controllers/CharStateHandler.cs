@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Controllers
 {
-    class CharStateHandler : StateHandler
+    class CharStateHandler : EntityStateHandler
     {
 
     }

@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+
 using CyberCommando.Entities;
 
 namespace CyberCommando.Controllers.Commands
 {
     abstract class MoveCommand : Command
     {
-        float _X;
-        float _Y;
-        Entity entity;
+        Vector2 Position; 
+        Entity Entity;
 
-        public MoveCommand(Entity entity, float _X, float _Y)
+        public MoveCommand(Entity entity, Vector2 position)
         {
-            this.entity = entity;
-            this._X = _X;
-            this._Y = _Y;
+            this.Entity = entity;
+            this.Position = position;
         }
 
         public override void execute(Entity entity) { }

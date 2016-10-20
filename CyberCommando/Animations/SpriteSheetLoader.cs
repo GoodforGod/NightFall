@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CyberCommando.Controllers
+namespace CyberCommando.Animations
 {
-    class EnemyStateHandler : EntityStateHandler
+    class SpritesheetLoader
     {
 
     }

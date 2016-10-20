@@ -1,18 +1,25 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using CyberCommando.Animations;
+
 namespace CyberCommando.Entities
 {
     class Character : Entity
     {
+
+
         public Character(World world) : base(world)
         {
-            SpriteSheet = world.GAME.Content.Load<Texture2D>("altar-2");
+            SpriteSheet = world.GAME.Content.Load<Texture2D>("c-test");
+            AniState = AnimationState.IDLE;
+            EntState = EntityState.ACTIVE;
         }
 
         public override bool IsOnScreen() { return false; }
@@ -36,7 +43,7 @@ namespace CyberCommando.Entities
 
         public override void Update(GameTime gameTime)
         {
-            handler.HandleEntityInput(this); 
+            handler.HandleEntityInput(this, gameTime); 
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch batcher)

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework;
 
 using CyberCommando.Entities;
 using CyberCommando.Controllers.Commands;
 
 namespace CyberCommando.Controllers
 {
-    [Flags]
     public enum KeysState
     {
         Left = Keys.A | Keys.Left,
@@ -22,75 +22,30 @@ namespace CyberCommando.Controllers
 
     public class InputHandler
     {
-        CharStateHandler CharHandler = new CharStateHandler();
+        private CharStateHandler CharHandler = new CharStateHandler();
 
-        EnemyStateHandler EnemyHandler = new EnemyStateHandler();
-
-        public void HandleEntityInput(Entity entity)
+        public void HandleEntityInput(Entity entity, GameTime gameTime)
         {
             KeyboardState currState = Keyboard.GetState();
 
+            entity.AniState = AnimationStatus.IDLE;
+
             if(currState.IsKeyDown(Keys.A))
-                CharHandler.MoveLeft(entity);
+                CharHandler.MoveLeft(entity, gameTime);
 
             if (currState.IsKeyDown(Keys.D))
-                CharHandler.MoveRight(entity);
+                CharHandler.MoveRight(entity, gameTime);
 
             if (currState.IsKeyDown(Keys.W))
-                CharHandler.Jump(entity);
+                CharHandler.Jump(entity, gameTime);
 
             if (currState.IsKeyDown(Keys.S))
-                CharHandler.Duck(entity);
+                CharHandler.Duck(entity, gameTime);
 
             if (currState.IsKeyDown(Keys.Space))
-                CharHandler.Fire(entity);
+                CharHandler.Fire(entity, gameTime);
+
+            CharHandler.Idle(entity, gameTime);
         } 
-
-        /*
-        void ExecuteUserCommands(IList<Command> cmds)
-        {
-
-        }
-        */
-
-        /*
-        IList<Command> HandlerInput(Entity entity)
-        {
-            var currState = new KeyboardState();
-            IList<Command> cmds = new List<Command>();
-
-            if (IsPressed(currState, KeysState.Left))
-                cmds.Add(new MoveLeftCommand(entity,0,0));
-
-            if (IsPressed(currState, KeysState.Right))
-                cmds.Add(new MoveRightCommand(entity,0,0));
-
-            if (IsPressed(currState, KeysState.Up))
-                cmds.Add(new JumpCommand(entity,0,0));
-
-            if (IsPressed(currState, KeysState.Duck))
-                cmds.Add(new DuckCommand(entity,0,0));
-
-            if (IsPressed(currState, KeysState.Fire))
-                cmds.Add(new FireCommand(entity));
-
-//            if(cmds.Count == 0)
-//                cmds.Add
-
-            return cmds;
-        }
-        */
-
-        bool IsPressed(KeyboardState state, KeysState key)
-        {
-            return state.IsKeyDown((Keys)key);
-        }
-
-        bool IsPressed(MouseState state)
-        {
-
-
-            return false;
-        }
     }
 }

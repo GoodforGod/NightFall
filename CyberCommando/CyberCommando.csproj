@@ -38,16 +38,21 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Animations\Animation.cs" />
+    <Compile Include="Animations\AnimationLoader.cs" />
+    <Compile Include="Animations\Frame.cs" />
+    <Compile Include="Animations\AnimationManager.cs" />
+    <Compile Include="Animations\SpritesheetLoader.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />
     <Compile Include="Controllers\Commands\Command.cs" />
     <Compile Include="Controllers\Commands\EntityCommands.cs" />
     <Compile Include="Controllers\EnemyStateHandler.cs" />
     <Compile Include="Controllers\InputHandler.cs" />
     <Compile Include="Entities\Character.cs" />
-    <Compile Include="Entities\Enemy.cs" />
+    <Compile Include="Entities\Enemies\Enemy.cs" />
     <Compile Include="Entities\Entity.cs" />
-    <Compile Include="Controllers\StateHandler.cs" />
-    <Compile Include="Entities\Projectile.cs" />
+    <Compile Include="Controllers\EntityStateHandler.cs" />
+    <Compile Include="Entities\Weapons\Projectile.cs" />
     <Compile Include="Entities\World.cs" />
     <Compile Include="GameCore.cs" />
     <Compile Include="Program.cs" />
@@ -78,7 +83,6 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Animations\" />
     <Folder Include="Physics\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
