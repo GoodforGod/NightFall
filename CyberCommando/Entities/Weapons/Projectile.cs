@@ -19,7 +19,7 @@ namespace CyberCommando.Entities.Weapons
 
         public override Entity Clone()
         {
-            return new Enemy(world);
+            return new Projectile(world);
         }
 
         public override bool IsOnScreen() { return false; }

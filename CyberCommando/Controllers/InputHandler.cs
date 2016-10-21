@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 
 using CyberCommando.Entities;
 using CyberCommando.Controllers.Commands;
+using CyberCommando.Animations;
 
 namespace CyberCommando.Controllers
 {
@@ -28,24 +29,28 @@ namespace CyberCommando.Controllers
         {
             KeyboardState currState = Keyboard.GetState();
 
-            entity.AniState = AnimationStatus.IDLE;
+            entity.AniState = AnimationState.IDLE;
 
             if(currState.IsKeyDown(Keys.A))
-                CharHandler.MoveLeft(entity, gameTime);
+                CharHandler.MoveLeft(entity);
 
             if (currState.IsKeyDown(Keys.D))
-                CharHandler.MoveRight(entity, gameTime);
+                CharHandler.MoveRight(entity);
 
             if (currState.IsKeyDown(Keys.W))
-                CharHandler.Jump(entity, gameTime);
+                CharHandler.Jump(entity);
 
             if (currState.IsKeyDown(Keys.S))
-                CharHandler.Duck(entity, gameTime);
+                CharHandler.Duck(entity);
 
             if (currState.IsKeyDown(Keys.Space))
-                CharHandler.Fire(entity, gameTime);
+                CharHandler.Fire(entity);
 
-            CharHandler.Idle(entity, gameTime);
+            CharHandler.Gravity(entity);
+
+            CharHandler.Idle(entity);
+
+            CharHandler.HandlePosition(entity, gameTime);
         } 
     }
 }

@@ -1,27 +1,39 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
 using CyberCommando.Controllers;
+using CyberCommando.Animations;
 
 namespace CyberCommando.Entities
 {
     public class World
     {
-        public readonly Game GAME;
+        public readonly Game Game;
+
+        public readonly int FrameWidth;
+        public readonly int FrameHeight;
+
+        public readonly float Gravity = 9.8f;
+        public int WorldOffset = 20;
 
         List<Entity> Entities = new List<Entity>();
         List<Entity> EntitiesToKill = new List<Entity>();
 
+        internal AnimationLoader AniLoader { get; }
         InputHandler handler;
 
-        public World(Game game)
+        public World(Game game, int height, int width)
         {
-            GAME = game;
+            FrameWidth = width;
+            FrameHeight = height;
+            Game = game;
+            AniLoader = new AnimationLoader(game.Content.RootDirectory);
             handler = new InputHandler();
         }
 

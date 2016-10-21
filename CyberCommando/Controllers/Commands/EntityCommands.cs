@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using CyberCommando.Entities;
+using Microsoft.Xna.Framework;
 
 namespace CyberCommando.Controllers.Commands
 {
     class DuckCommand : MoveCommand
     {
-        public DuckCommand(Entity entity, float _X, float _Y) : base(entity, _X, _Y)
+        public DuckCommand(Entity entity, Vector2 position) : base(entity, position)
         {
 
         }
@@ -35,7 +37,7 @@ namespace CyberCommando.Controllers.Commands
 
     class JumpCommand : MoveCommand
     {
-        public JumpCommand(Entity entity, float _X, float _Y) : base(entity, _X, _Y)
+        public JumpCommand(Entity entity, Vector2 position) : base(entity, position)
         {
 
         }
@@ -48,7 +50,7 @@ namespace CyberCommando.Controllers.Commands
 
     class MoveLeftCommand : MoveCommand
     {
-        public MoveLeftCommand(Entity entity, float _X, float _Y) : base(entity, _X, _Y)
+        public MoveLeftCommand(Entity entity, Vector2 position) : base(entity, position)
         {
 
         }
@@ -61,7 +63,7 @@ namespace CyberCommando.Controllers.Commands
 
     class MoveRightCommand : MoveCommand
     {
-        public MoveRightCommand(Entity entity, float _X, float _Y) : base(entity, _X, _Y)
+        public MoveRightCommand(Entity entity, Vector2 position) : base(entity, position)
         {
 
         }

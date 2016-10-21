@@ -23,7 +23,7 @@ namespace CyberCommando.Entities
 
     public class Entity : IEntity
     {
-        readonly World world;
+        public readonly World world;
 
         public InputHandler handler { get; set; } 
 
@@ -31,10 +31,12 @@ namespace CyberCommando.Entities
 
         public Vector2 Position;
         public Vector2 VelocityCurrent;
+        public virtual float VelocityLimit { get { return 290f; } }
+        public virtual float VelocityInc { get { return 15f; } }
 
-        public virtual float VelocityLimit { get { return 90f; } }
-        public virtual float VelocityInc { get { return 10f; } }
+        public SpriteEffects Direction { get; set; }
         public float Angle { get; set; }
+        public float Scale { get; set; }
         public virtual int Health { get; set; }
 
         public AnimationState AniState { get; set; }
@@ -45,6 +47,9 @@ namespace CyberCommando.Entities
         public Entity(World world)
         {
             this.world = world;
+            Direction = SpriteEffects.None;
+            Angle = 0f;
+            Scale = 1f;
             EntState = EntityState.PASSIVE;
         }
 
@@ -53,6 +58,8 @@ namespace CyberCommando.Entities
         public virtual bool IsOnScreen() { return false; }
 
         public virtual bool IsGrounded() { return false; }
+
+        public virtual int GetGround() { return world.WorldOffset; }
 
         public virtual void Damage(Entity attacker, int damage) { }
 

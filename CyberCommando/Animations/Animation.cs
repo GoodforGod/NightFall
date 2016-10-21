@@ -9,23 +9,29 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Animations
 {
+    public enum AnimationState
+    {
+        NONE,
+        IDLE,
+        WALK,
+        JUMP,
+        FALL,
+        DUCK,
+        FIRE
+    }
+
     class Animation
     {
         private List<Frame> FrameList = new List<Frame>();
 
         public TimeSpan TimeIntoAnimation { get; set; }
-        public int SingleAnimationCounter = 0;
-        public DateTime SingleAnimationStartTime;
+        public DateTime SingleAnimStartTime { get; set; }
+
+        public bool SingleAnimFlag { get; set; }
         public SpriteEffects Effect { get; set; }
-        public string Name { get; }
 
-        public Animation(string name) { Name = Name; }
-
-        public Animation(string name, SpriteEffects effect)
-        {
-            Name = name;
-            Effect = effect;
-        }
+        public Animation() { }
+        public Animation(SpriteEffects effect) { Effect = effect; }
 
         public TimeSpan Duration
         {
@@ -71,67 +77,6 @@ namespace CyberCommando.Animations
                 Rectangle = rectangle,
                 Duration = duration
             });
-        }
-
-        public double UpdateSingleAnimationTimeSlapsed(GameTime gameTime)
-        {
-            if (SingleAnimationCounter == 0)
-            {
-                SingleAnimationStartTime = DateTime.Now;
-                SingleAnimationCounter = 1;
-            }
-            double secondsIntoAnimation =
-                TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
-
-            double remainder = secondsIntoAnimation % Duration.TotalSeconds;
-
-            if (remainder == double.NaN || Duration.TotalSeconds == 0)
-                remainder = 0;
-
-            TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
-
-            var TimeElapsed = (DateTime.Now - SingleAnimationStartTime).TotalMilliseconds - Duration.TotalMilliseconds / 100;
-
-            if (TimeElapsed > Duration.TotalMilliseconds)
-            {
-                SingleAnimationCounter = 0;
-                TimeIntoAnimation = TimeSpan.FromSeconds(0);
-                return -1;
-            }
-            else return TimeElapsed;
-        }
-
-        public bool UpdateSingleAnimationIsEnded(GameTime gameTime)
-        {
-            if (SingleAnimationCounter == 0)
-            {
-                SingleAnimationStartTime = DateTime.Now;
-                SingleAnimationCounter = 1;
-            }
-            double secondsIntoAnimation =
-                TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
-
-            double remainder = secondsIntoAnimation % Duration.TotalSeconds;
-
-            TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
-
-            if ((DateTime.Now - SingleAnimationStartTime).TotalMilliseconds - Duration.TotalMilliseconds / 100 > Duration.TotalMilliseconds)
-            {
-                SingleAnimationCounter = 0;
-                TimeIntoAnimation = TimeSpan.FromSeconds(0);
-                return false;
-            }
-            else return true;
-        }
-
-        public void UpdateCycleAnimation(GameTime gameTime)
-        {
-            double secondsIntoAnimation =
-                TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
-
-            double remainder = secondsIntoAnimation % Duration.TotalSeconds;
-
-            TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
         }
     }
 }

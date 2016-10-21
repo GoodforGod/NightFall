@@ -14,9 +14,10 @@ namespace CyberCommando
         GraphicsDeviceManager graphics;
         SpriteBatch batcher;
 
+        Camera camera;
         World world;
 
-        const int WIDTH = 1024;
+        const int WIDTH = 1366;
         const int HEIGHT = 768;
 
         public GameCore()
@@ -33,17 +34,19 @@ namespace CyberCommando
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // ~~~ UNCOMMENT For fullscreen mode~~~
+            //graphics.PreferMultiSampling = true;
+            //graphics.IsFullScreen = true;
 
             graphics.PreferredBackBufferWidth = WIDTH;
-            graphics.PreferredBackBufferHeight = HEIGHT; 
+            graphics.PreferredBackBufferHeight = HEIGHT;
             graphics.ApplyChanges();
 
             Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - WIDTH / 2,
                                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - HEIGHT / 2);
 
             base.Initialize();
-        }
+        } 
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -54,7 +57,11 @@ namespace CyberCommando
             // Create a new SpriteBatch, which can be used to draw textures.
             batcher = new SpriteBatch(GraphicsDevice);
 
-            world = new World(this);
+            camera = new Camera(GraphicsDevice.Viewport);
+            camera.Position = new Vector2(0f, HEIGHT/2);
+            camera.Zoom = 1.0f;
+
+            world = new World(this, HEIGHT, WIDTH);
             world.Initialize();
             // TODO: use this.Content to load your game content here
         }
@@ -75,7 +82,8 @@ namespace CyberCommando
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed 
+                || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             world.Update(gameTime);
@@ -92,10 +100,12 @@ namespace CyberCommando
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            batcher.Begin();
+            //spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend,
+            batcher.Begin(SpriteSortMode.Deferred, 
+                            null, null, null, null, null,
+                            camera.GetViewMatrix(new Vector2(.5f)));
 
             world.Draw(gameTime, batcher);
-            // TODO: Add your drawing code here
 
             batcher.End();
 

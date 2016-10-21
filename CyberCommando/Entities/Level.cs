@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CyberCommando.Animations
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace CyberCommando.Entities
 {
-    class SpritesheetLoader
+    class Level
     {
 
     }

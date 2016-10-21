@@ -6,67 +6,57 @@ using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace CyberCommando.Animations
 {
-    public enum AnimationState
-    {
-        NONE,
-        IDLE,
-        WALK_LEFT,
-        WALK_RIGHT,
-        JUMP,
-        DUCK,
-        FIRE
-    }
-
     class AnimationManager
     {
         public Dictionary<AnimationState, Animation> Animations;
-        public Texture2D Spritesheet;
-        // do animation load and play
+        //public Texture2D Spritesheet;
 
         public Animation CurrentAnimation { get; set; }
         public SpriteEffects CurrentEffect { get; set; }
 
-        public AnimationManager() { }
+        public AnimationManager(AnimationLoader loader, string spritesheetName) { Animations = loader.LoadAll(spritesheetName); }
 
-        public void AddAnimation(Animation animation, AnimationState state)
+        public bool UpdateSingleAnim(AnimationState state, GameTime gameTime)
         {
-            Animations.Add(state, animation);
-        }
-
-        public bool UpdateSingleAnimationIsEnded(Animation animation, GameTime gameTime)
-        {
-            if (animation.SingleAnimationCounter == 0)
+            if (!CurrentAnimation.SingleAnimFlag)
             {
-                animation.SingleAnimationStartTime = DateTime.Now;
-                animation.SingleAnimationCounter = 1;
+                CurrentAnimation.SingleAnimStartTime = DateTime.Now;
+                CurrentAnimation.SingleAnimFlag = true;
             }
+
             double secondsIntoAnimation =
-                animation.TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
+                CurrentAnimation.TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
 
-            double remainder = secondsIntoAnimation % animation.Duration.TotalSeconds;
+            double remainder = 
+                secondsIntoAnimation % CurrentAnimation.Duration.TotalSeconds;
 
-            animation.TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
+            CurrentAnimation.TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
 
-            if ((DateTime.Now - animation.SingleAnimationStartTime).TotalMilliseconds - animation.Duration.TotalMilliseconds / 100 > animation.Duration.TotalMilliseconds)
+            if ((DateTime.Now - CurrentAnimation.SingleAnimStartTime).TotalMilliseconds 
+                - CurrentAnimation.Duration.TotalMilliseconds / 100 > CurrentAnimation.Duration.TotalMilliseconds)
             {
-                animation.SingleAnimationCounter = 0;
-                animation.TimeIntoAnimation = TimeSpan.FromSeconds(0);
+                CurrentAnimation.SingleAnimFlag = false;
+                CurrentAnimation.TimeIntoAnimation = TimeSpan.FromSeconds(0);
                 return false;
             }
             else return true;
         }
 
-        public void UpdateCycleAnimation(Animation animation, GameTime gameTime)
+        public void UpdateCycleAnim(AnimationState state, GameTime gameTime)
         {
+            CurrentAnimation = Animations[state];
+
             double secondsIntoAnimation =
-                animation.TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
+                CurrentAnimation.TimeIntoAnimation.TotalSeconds + gameTime.ElapsedGameTime.TotalSeconds;
 
-            double remainder = secondsIntoAnimation % animation.Duration.TotalSeconds;
+            double remainder = 
+                secondsIntoAnimation % CurrentAnimation.Duration.TotalSeconds;
 
-            animation.TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
+            CurrentAnimation.TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
         }
     }
 }
