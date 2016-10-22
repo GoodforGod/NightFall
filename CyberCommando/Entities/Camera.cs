@@ -11,31 +11,88 @@ namespace CyberCommando.Entities
 {
     class Camera
     {
-        public Vector2 Position { get; set; }
         public Vector2 Origin { get; set; }
-
-        private float zoom;
-        public float Zoom {
-            get { return zoom; }
-            set
-            {
-                if (value < 0.01f)
-                    zoom = 0.01f;
-                else zoom = value;
-            }
-        }
+        private Viewport viewPort; 
 
         public float RotationAngle { get; set; }
 
+        private float _Zoom;
+        public float Zoom
+        {
+            get { return _Zoom; }
+            set
+            {
+                if (value < 0.01f)
+                    _Zoom = 0.01f;
+                else _Zoom = value;
+            }
+        }
+
+        private Rectangle _Limits;
+        public Rectangle Limits
+        {
+            get { return _Limits; }
+            set
+            {
+                if (value != null)
+                {
+                    // Assign limit, should always be bigger then viewport
+                    _Limits = new Rectangle
+                    {
+                        X = value.X,
+                        Y = value.Y,
+                        Width = System.Math.Max(viewPort.Width, value.Width),
+                        Height = System.Math.Max(viewPort.Height, value.Height)
+                    };
+
+                    // Validate camera position with new limit
+                    Position = Position;
+                }
+                else _Limits = Rectangle.Empty;
+            }
+        }
+
+        private Vector2 _Position;
+        public Vector2 Position
+        {
+            get { return _Position; }
+            set
+            {
+                _Position = value;
+                // If there's a limit set and the camera is not transformed clamp position to limits
+                if (_Limits != null && Zoom == 1.0f && RotationAngle == 0.0f)
+                {
+                    _Position = new Vector2(MathHelper.Clamp(_Position.X, Limits.X, Limits.X + Limits.Width - viewPort.Width),
+                                            MathHelper.Clamp(_Position.Y, Limits.Y, Limits.Y + Limits.Height - viewPort.Height));
+                }
+            }
+        }
+
         public Camera(Viewport viewPort)
         {
-            Origin = new Vector2(viewPort.Width * 0.5f, viewPort.Height * 0.5f);
+            this.viewPort = viewPort;
+            Origin = new Vector2(viewPort.Width * 0.5f, 
+                                 viewPort.Height * 0.5f);
             Zoom = 1.0f;
             RotationAngle = 0.0f;
             Position = Vector2.Zero;
         }
 
-        public void Move(Vector2 amount) { Position += amount; }
+        public void LookAt(Vector2 position)
+        {
+            Position = position - new Vector2(viewPort.Width * 0.5f, 
+                                              viewPort.Height * 0.5f);
+        }
+
+        public void Move(Vector2 position, bool respectRotation = false)
+        {
+            //TRUE to move in accordance with the camera’s rotation
+            if (respectRotation)
+                position = Vector2.Transform(position, Matrix.CreateRotationZ(-RotationAngle));
+            Position += position;
+        }
+
+        public void Move(Vector2 position) { Position += position; }
 
         /*
          * to cahnge coordinate system when you zoom in the camera.

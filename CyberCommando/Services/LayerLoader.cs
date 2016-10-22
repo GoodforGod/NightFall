@@ -9,22 +9,32 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 
+using CyberCommando.Entities;
+
 namespace CyberCommando.Services
 {
-    class Layerclass
+    class LayerLoader
     {
-        private ContentManager Content;
+        private ContentManager Content { get; }
 
-        public Layerclass(ContentManager contentRoot) { this.Content = contentRoot; }
+        private List<Layer> Layers = new List<Layer>();
+        private Camera camera;
+        private LevelState LayerState;
+        private LevelState TextureState;
+        private Vector2 parallax;
+        private Dictionary<LevelState, Texture2D> Textures = new Dictionary<LevelState, Texture2D>();
 
-        public List<Tuple<Rectangle, Texture2D>> LoadAll(string layerName)
+        public LayerLoader(ContentManager content, Viewport viewport)
         {
-            Texture2D texture = null;
-            var layers = new List<Tuple<Rectangle, Texture2D>>();
+            this.camera = new Camera(viewport);
+            this.Content = content;
+        }
 
-            string prevState = "";
+        public Tuple<Dictionary<LevelState, Texture2D>, List<Layer>> LoadAll(string layerName)
+        {
+            List<Sprite> layer = new List<Sprite>();
 
-            var dataFile = Path.Combine(Content.RootDirectory, Path.ChangeExtension(layerName, "txt"));
+            var dataFile = Path.Combine(Content.RootDirectory, layerName + ".txt");
             var dataFileLines = File.ReadAllLines(dataFile);
 
             // Line starts with #, is comment
@@ -32,34 +42,82 @@ namespace CyberCommando.Services
                                  where !string.IsNullOrEmpty(row) && !row.StartsWith("#")
                                  select row.Split(';'))
             {
-                if (cols.Length != 5)
-                    throw new InvalidDataException("Incorrect format data in file: " + layerName);
-
-                if (cols[0] != prevState)
+                if(cols[0] == "!")
                 {
-                    texture = Content.Load<Texture2D>(cols[0]);
-                    prevState = cols[0];
+                    if (!Enum.TryParse(cols[1], true, out TextureState))
+                        throw new ArgumentException("Incorrect TextureState format in: " + layerName, cols[0]);
+
+                    for(int i = 1; i < cols.Length - 1; i++)
+                    {
+                        Textures.Add(TextureState, Content.Load<Texture2D>(cols[i + 1]));
+                    }
+
+                    continue;
                 }
+                else if (cols.Length == 3)
+                {
+                    if (layer != null && layer.Count != 0)
+                        Layers.Add(new Layer(camera, layer, parallax, LayerState));
+
+                    var x = .0f;
+                    var y = .0f;
+
+                    if (!Enum.TryParse(cols[0], true, out LayerState))
+                        throw new ArgumentException("Incorrect LayerState format in: " + layerName, cols[0]);
+
+                    if(!float.TryParse(cols[1], out x))
+                            throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[1]);
+
+                    if (!float.TryParse(cols[2], out y))
+                        throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[2]);
+
+                    parallax = new Vector2(x, y);
+                    layer = new List<Sprite>();
+                    continue;
+                }
+                else if (cols.Length != 4 && cols.Length != 6)
+                    throw new InvalidDataException("Incorrect format data in file: " + layerName);
 
                 Rectangle rectangle;
 
                 try
                 {
                     rectangle = new Rectangle(
+                    int.Parse(cols[0]),
                     int.Parse(cols[1]),
                     int.Parse(cols[2]),
-                    int.Parse(cols[3]),
-                    int.Parse(cols[4]));
+                    int.Parse(cols[3]));
                 }
                 catch (Exception ex)
                 {
                     throw new ArgumentException("Inccorect rectangle format in: " + layerName, cols[0]);
                 }
 
-                layers.Add(new Tuple<Rectangle, Texture2D>(rectangle, texture));
-            }
+                if (cols.Length == 4)
+                {
+                    layer.Add(new Sprite(rectangle));
+                }
+                else if (cols.Length == 6)
+                {
+                    Vector2 position = new Vector2();
 
-            return layers;
+                    if (!float.TryParse(cols[4], out position.X))
+                        throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[4]);
+
+                    if (!float.TryParse(cols[5], out position.Y))
+                        throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[5]);
+
+                    layer.Add(new Sprite(rectangle, position));
+                }
+                Layers.Add(new Layer(camera, layer, parallax, LayerState));
+            }
+            return new Tuple<Dictionary<LevelState, Texture2D>, List<Layer>>(Textures, Layers);
+        }
+
+        public Vector2 PositionGenerator()
+        {
+
+            return Vector2.One;
         }
     }
 }

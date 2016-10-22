@@ -42,6 +42,7 @@
     <Compile Include="Animations\AnimationLoader.cs" />
     <Compile Include="Animations\Frame.cs" />
     <Compile Include="Animations\AnimationManager.cs" />
+    <Compile Include="Entities\Sprite.cs" />
     <Compile Include="Services\LayerLoader.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />
     <Compile Include="Controllers\Commands\Command.cs" />

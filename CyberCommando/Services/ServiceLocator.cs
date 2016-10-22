@@ -8,6 +8,6 @@ namespace CyberCommando.Services
 {
     class ServiceLocator
     {
-
+        // Got all services!
     }
 }

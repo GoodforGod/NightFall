@@ -10,11 +10,9 @@ namespace CyberCommando.Entities.Enemies
 {
     class Enemy : Entity
     {
-        World world;
-
         public Enemy(World world) : base(world)
         {
-            this.world = world;
+
         }
 
         public override Entity Clone()

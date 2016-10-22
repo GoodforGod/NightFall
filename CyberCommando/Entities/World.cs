@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using CyberCommando.Controllers;
 using CyberCommando.Animations;
+using CyberCommando.Services;
 
 namespace CyberCommando.Entities
 {
@@ -19,27 +20,43 @@ namespace CyberCommando.Entities
         public readonly int FrameWidth;
         public readonly int FrameHeight;
 
+        private readonly static string level_1 = "level-1";
+
         public readonly float Gravity = 9.8f;
         public int WorldOffset = 20;
 
         List<Entity> Entities = new List<Entity>();
         List<Entity> EntitiesToKill = new List<Entity>();
 
-        internal AnimationLoader AniLoader { get; }
-        InputHandler handler;
+        Level level;
+        Camera camera;
+        Character character;
+        float paral = 0.001f;
 
-        public World(Game game, int height, int width)
+        internal LayerLoader LayLoader { get; } 
+        internal AnimationLoader AniLoader { get; }
+        InputHandler handler = new InputHandler();
+
+        public World(Game game, int height, int width, Viewport viewport)
         {
+            Game = game;
+
             FrameWidth = width;
             FrameHeight = height;
-            Game = game;
+
+            LayLoader = new LayerLoader(game.Content, viewport);
             AniLoader = new AnimationLoader(game.Content.RootDirectory);
-            handler = new InputHandler();
+            level = new Level(level_1, LayLoader);
+
+            camera = new Camera(viewport);
+            camera.Position = new Vector2(0f, FrameHeight / 2);
+            camera.Zoom = 1.0f;
+
         }
 
         public virtual void Initialize()
         {
-            Spawn(typeof(Character).FullName);
+            character = (Character) Spawn(typeof(Character).FullName);
         }
 
         public virtual Entity Spawn(string className) { return Spawn(className, Vector2.Zero); }
@@ -60,6 +77,9 @@ namespace CyberCommando.Entities
             {
                 entity.Update(gameTime);
             }
+
+            camera.LookAt(character.Position);
+            level.LayersLookAt(character.Position);
 
             foreach (var a in Entities)
             {
@@ -83,10 +103,20 @@ namespace CyberCommando.Entities
 
         public virtual void Draw(GameTime gameTime, SpriteBatch batcher)
         {
+            //spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend,
+
+            level.Draw(batcher);
+
+            batcher.Begin(SpriteSortMode.Deferred,
+                            null, null, null, null, null,
+                            camera.GetViewMatrix(new Vector2(0.5f)));
+
             foreach (var entity in Entities)
             {
                 entity.Draw(gameTime, batcher);
             }
+
+            batcher.End();
         }
     }
 }

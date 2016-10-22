@@ -14,7 +14,6 @@ namespace CyberCommando
         GraphicsDeviceManager graphics;
         SpriteBatch batcher;
 
-        Camera camera;
         World world;
 
         const int WIDTH = 1366;
@@ -57,11 +56,7 @@ namespace CyberCommando
             // Create a new SpriteBatch, which can be used to draw textures.
             batcher = new SpriteBatch(GraphicsDevice);
 
-            camera = new Camera(GraphicsDevice.Viewport);
-            camera.Position = new Vector2(0f, HEIGHT/2);
-            camera.Zoom = 1.0f;
-
-            world = new World(this, HEIGHT, WIDTH);
+            world = new World(this, HEIGHT, WIDTH, GraphicsDevice.Viewport);
             world.Initialize();
             // TODO: use this.Content to load your game content here
         }
@@ -100,14 +95,7 @@ namespace CyberCommando
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            //spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend,
-            batcher.Begin(SpriteSortMode.Deferred, 
-                            null, null, null, null, null,
-                            camera.GetViewMatrix(new Vector2(.5f)));
-
             world.Draw(gameTime, batcher);
-
-            batcher.End();
 
             base.Draw(gameTime);
         }

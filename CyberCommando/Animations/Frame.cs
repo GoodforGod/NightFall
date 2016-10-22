@@ -10,11 +10,6 @@ namespace CyberCommando.Animations
 {
     class Frame
     {
-        public Frame()
-        {
-
-        }
-
         public Rectangle Rectangle { get; set; }
         
         public TimeSpan Duration { get; set; } 

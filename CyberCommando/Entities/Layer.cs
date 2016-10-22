@@ -11,15 +11,26 @@ namespace CyberCommando.Entities
 {
     class Layer
     {
-        public Layer(Camera camera, List<Tuple<Rectangle, Texture2D>> sprites)
+        public LevelState State { get; set; }
+        public Texture2D Texture { get; set; }
+        public Vector2 Parallax { get; set; }
+        public List<Sprite> LayerSprites { get; set; }
+        public readonly Camera camera;
+
+        public Layer(Camera camera, List<Sprite> layerRects, LevelState state)
         {
             this.camera = camera;
+            this.LayerSprites = layerRects;
             Parallax = Vector2.One;
-            Sprites = sprites; 
         }
 
-        public Vector2 Parallax { get; set; }
-        public List<Tuple<Rectangle, Texture2D>> Sprites { get; private set; }
+        public Layer(Camera camera, List<Sprite> layerRects, Vector2 parallax, LevelState state)
+        {
+            this.camera = camera;
+            this.LayerSprites = layerRects;
+            this.State = state;
+            Parallax = parallax;
+        }
 
         public void Draw(SpriteBatch batcher)
         {
@@ -27,14 +38,12 @@ namespace CyberCommando.Entities
                 null, null, null, null, null, 
                 camera.GetViewMatrix(Parallax));
 
-            foreach (Tuple<Rectangle, Texture2D> sprite in Sprites)
+            foreach (var sprite in LayerSprites)
             {
-                batcher.Draw(sprite.Item2, sprite.Item1, Color.White);
+                batcher.Draw(Texture, sprite.Position, sprite.Source, Color.White);
             } 
 
             batcher.End();
         }
-
-        private readonly Camera camera;
     }
 }

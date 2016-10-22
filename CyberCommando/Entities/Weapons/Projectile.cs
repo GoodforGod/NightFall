@@ -10,8 +10,6 @@ namespace CyberCommando.Entities.Weapons
 {
     class Projectile : Entity
     {
-        World world;
-
         public Projectile(World world) : base(world)
         {
 
