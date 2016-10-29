@@ -10,17 +10,27 @@ using Microsoft.Xna.Framework.Content;
 
 namespace CyberCommando.Animations
 {
-    class AnimationManager
+    class AnimationManager<TEnum>
+         where TEnum : struct, IConvertible
     {
-        public Dictionary<AnimationState, Animation> Animations;
+        public Dictionary<TEnum, Animation> Animations { get; private set; }
         //public Texture2D Spritesheet;
-
         public Animation CurrentAnimation { get; set; }
         public SpriteEffects CurrentEffect { get; set; }
 
-        public AnimationManager(AnimationLoader loader, string spritesheetName) { Animations = loader.LoadAll(spritesheetName); }
+        public AnimationManager()
+        {
+            Animations = new Dictionary<TEnum, Animation>();
+        }
 
-        public bool UpdateSingleAnim(AnimationState state, GameTime gameTime)
+        public void LoadAnimations(AnimationLoader loader, string spritesheetName)
+        {
+            Animations = loader.LoadAll<TEnum>(spritesheetName);
+            if (Animations == null || Animations.Count == 0)
+                throw new NullReferenceException("Animations is null or empty, check animation files for: " + spritesheetName);
+        }
+
+        public bool UpdateSingleAnim(TEnum state, GameTime gameTime)
         {
             if (!CurrentAnimation.SingleAnimFlag)
             {
@@ -46,7 +56,7 @@ namespace CyberCommando.Animations
             else return true;
         }
 
-        public void UpdateCycleAnim(AnimationState state, GameTime gameTime)
+        public void UpdateCycleAnim(TEnum state, GameTime gameTime)
         {
             CurrentAnimation = Animations[state];
 

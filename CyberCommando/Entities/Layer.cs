@@ -21,7 +21,7 @@ namespace CyberCommando.Entities
         {
             this.camera = camera;
             this.LayerSprites = layerRects;
-            Parallax = Vector2.One;
+            this.Parallax = Vector2.One;
         }
 
         public Layer(Camera camera, List<Sprite> layerRects, Vector2 parallax, LevelState state)
@@ -29,7 +29,7 @@ namespace CyberCommando.Entities
             this.camera = camera;
             this.LayerSprites = layerRects;
             this.State = state;
-            Parallax = parallax;
+            this.Parallax = parallax;
         }
 
         public void Draw(SpriteBatch batcher)

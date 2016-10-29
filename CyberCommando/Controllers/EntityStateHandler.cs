@@ -21,7 +21,7 @@ namespace CyberCommando.Controllers
 
         public virtual void MoveRight(Entity entity)
         {
-            entity.Direction = SpriteEffects.None;
+            //entity.Direction = SpriteEffects.None;
             if (entity.VelocityCurrent.X < entity.VelocityLimit)
                 entity.VelocityCurrent.X += entity.VelocityInc;
             entity.AniState = AnimationState.WALK;
@@ -29,7 +29,7 @@ namespace CyberCommando.Controllers
 
         public virtual void MoveLeft(Entity entity)
         {
-            entity.Direction = SpriteEffects.FlipHorizontally;
+            //entity.Direction = SpriteEffects.FlipHorizontally;
             if (entity.VelocityCurrent.X > -entity.VelocityLimit)
                 entity.VelocityCurrent.X -= entity.VelocityInc;
             entity.AniState = AnimationState.WALK;
@@ -48,7 +48,7 @@ namespace CyberCommando.Controllers
 
         public virtual void Fire(Entity entity)
         {
-            entity.AniState = AnimationState.FIRE;
+            //entity.AniState = AnimationState.FIRE;
         }
 
         public virtual void Idle(Entity entity)
@@ -64,11 +64,11 @@ namespace CyberCommando.Controllers
 
         public virtual void HandlePosition(Entity entity, GameTime gameTime)
         {
-            entity.Position.X += entity.VelocityCurrent.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            entity.Position.Y += entity.VelocityCurrent.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            entity.WorldPosition.X += entity.VelocityCurrent.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            entity.WorldPosition.Y += entity.VelocityCurrent.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (entity.Position.Y > entity.GetGround())
-                entity.Position.Y = entity.GetGround();
+            if (entity.WorldPosition.Y > entity.GetGround())
+                entity.WorldPosition.Y = entity.GetGround();
         }
 
         public virtual void Gravity(Entity entity)

@@ -41,6 +41,8 @@ namespace CyberCommando
             graphics.PreferredBackBufferHeight = HEIGHT;
             graphics.ApplyChanges();
 
+            IsMouseVisible = true;
+
             Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - WIDTH / 2,
                                 GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - HEIGHT / 2);
 

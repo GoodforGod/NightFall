@@ -22,7 +22,7 @@ namespace CyberCommando.Animations
 
     class Animation
     {
-        private List<Frame> FrameList = new List<Frame>();
+        public List<Frame> FrameList { get; private set; }
 
         public TimeSpan TimeIntoAnimation { get; set; }
         public DateTime SingleAnimStartTime { get; set; }
@@ -30,8 +30,8 @@ namespace CyberCommando.Animations
         public bool SingleAnimFlag { get; set; }
         public SpriteEffects Effect { get; set; }
 
-        public Animation() { }
-        public Animation(SpriteEffects effect) { Effect = effect; }
+        public Animation() { FrameList = new List<Frame>(); }
+        public Animation(SpriteEffects effect) { FrameList = new List<Frame>(); Effect = effect; }
 
         public TimeSpan Duration
         {

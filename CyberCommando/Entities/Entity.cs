@@ -23,13 +23,14 @@ namespace CyberCommando.Entities
 
     public class Entity : IEntity
     {
-        public readonly World world;
+        public World world { get; }
 
-        public InputHandler handler { get; set; } 
+        internal InputHandler handler { get; set; } 
 
         protected Texture2D SpriteSheet;
 
-        public Vector2 Position;
+        public Vector2 DrawPosition;
+        public Vector2 WorldPosition;
         public Vector2 VelocityCurrent;
         public virtual float VelocityLimit { get { return 290f; } }
         public virtual float VelocityInc { get { return 15f; } }
@@ -61,6 +62,8 @@ namespace CyberCommando.Entities
 
         public virtual int GetGround() { return world.WorldOffset; }
 
+        public virtual void CorrectDrawPosition() { }
+
         public virtual void Damage(Entity attacker, int damage) { }
 
         public virtual void Kill(Entity killer) { world.Kill(this); }
@@ -82,7 +85,7 @@ namespace CyberCommando.Entities
         /// <param name="damage">damage amount</param>
         void Touch(Entity other);
 
-        /// <param name="killer">Убийца сущности</param>
+        /// <param name="killer">entity killer</param>
         void Kill(Entity killer);
 
         /// <param name="gameTime">time ellapsed</param>

@@ -10,17 +10,32 @@ namespace CyberCommando.Entities.Weapons
 {
     class Projectile : Entity
     {
-        public Projectile(World world) : base(world)
-        {
+        private Rectangle Source { get; set; }
+        public GunState State { get; set; }
 
+        public Projectile(World world, Vector2 position, GunState state, Texture2D texture, Rectangle source) 
+            : base(world)
+        {
+            this.WorldPosition = position;
+            this.State = state;
+            this.SpriteSheet = texture;
+            this.Source = source;
+            this.VelocityCurrent = new Vector2(5f, 5f);
+            Scale = 0.4f;
         }
 
         public override Entity Clone()
         {
-            return new Projectile(world);
+            return new Projectile(world, WorldPosition, State, SpriteSheet, Source);
         }
 
-        public override bool IsOnScreen() { return false; }
+        public override bool IsOnScreen()
+        {
+            if (WorldPosition.X < 3200 && WorldPosition.X > -200 && WorldPosition.Y < 900 && WorldPosition.Y > -200)
+                return true;
+            else
+                return false;
+        }
 
         public override bool IsGrounded() { return false; }
 
@@ -41,12 +56,23 @@ namespace CyberCommando.Entities.Weapons
 
         public override void Update(GameTime gameTime)
         {
+            WorldPosition += VelocityCurrent * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            if (!this.IsOnScreen())
+                this.Kill(this);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch batcher)
         {
-
+            batcher.Draw(SpriteSheet,
+                               WorldPosition,
+                               Source,
+                               Color.White,
+                               Angle,
+                               new Vector2(1, 1),
+                               Scale,
+                               Direction,
+                               .0f);
         }
     }
 }

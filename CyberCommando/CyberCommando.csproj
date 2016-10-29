@@ -42,7 +42,13 @@
     <Compile Include="Animations\AnimationLoader.cs" />
     <Compile Include="Animations\Frame.cs" />
     <Compile Include="Animations\AnimationManager.cs" />
+    <Compile Include="Engine\Light.cs" />
+    <Compile Include="Engine\QuadRenderComponent.cs" />
+    <Compile Include="Engine\Shadows.cs" />
+    <Compile Include="Entities\SpriteTextured.cs" />
+    <Compile Include="Entities\SpriteAnimated.cs" />
     <Compile Include="Entities\Sprite.cs" />
+    <Compile Include="Entities\Weapons\Gun.cs" />
     <Compile Include="Services\LayerLoader.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />
     <Compile Include="Controllers\Commands\Command.cs" />
@@ -87,7 +93,7 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Physics\" />
+    <Folder Include="Engine\Physics\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />

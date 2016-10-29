@@ -16,13 +16,9 @@ namespace CyberCommando.Services
     class LayerLoader
     {
         private ContentManager Content { get; }
-
-        private List<Layer> Layers = new List<Layer>();
-        private Camera camera;
-        private LevelState LayerState;
         private LevelState TextureState;
-        private Vector2 parallax;
-        private Dictionary<LevelState, Texture2D> Textures = new Dictionary<LevelState, Texture2D>();
+        private LevelState LayerState;
+        private Camera camera;
 
         public LayerLoader(ContentManager content, Viewport viewport)
         {
@@ -32,7 +28,11 @@ namespace CyberCommando.Services
 
         public Tuple<Dictionary<LevelState, Texture2D>, List<Layer>> LoadAll(string layerName)
         {
-            List<Sprite> layer = new List<Sprite>();
+            var layers = new List<Layer>();
+            var sprite = new List<Sprite>();
+            var textures = new Dictionary<LevelState, Texture2D>();
+
+            var parallax = new Vector2();
 
             var dataFile = Path.Combine(Content.RootDirectory, layerName + ".txt");
             var dataFileLines = File.ReadAllLines(dataFile);
@@ -48,31 +48,35 @@ namespace CyberCommando.Services
                         throw new ArgumentException("Incorrect TextureState format in: " + layerName, cols[0]);
 
                     for(int i = 1; i < cols.Length - 1; i++)
-                    {
-                        Textures.Add(TextureState, Content.Load<Texture2D>(cols[i + 1]));
-                    }
+                        textures.Add(TextureState, Content.Load<Texture2D>(cols[i + 1]));
 
                     continue;
                 }
+                else if (cols[0] == "@")
+                {
+                    
+                }
+                else if (cols[0] == "$")
+                {
+
+                }
                 else if (cols.Length == 3)
                 {
-                    if (layer != null && layer.Count != 0)
-                        Layers.Add(new Layer(camera, layer, parallax, LayerState));
+                    if (sprite != null && sprite.Count != 0)
+                        layers.Add(new Layer(camera, sprite, parallax, LayerState));
 
                     var x = .0f;
                     var y = .0f;
 
                     if (!Enum.TryParse(cols[0], true, out LayerState))
                         throw new ArgumentException("Incorrect LayerState format in: " + layerName, cols[0]);
-
                     if(!float.TryParse(cols[1], out x))
                             throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[1]);
-
                     if (!float.TryParse(cols[2], out y))
                         throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[2]);
 
                     parallax = new Vector2(x, y);
-                    layer = new List<Sprite>();
+                    sprite = new List<Sprite>();
                     continue;
                 }
                 else if (cols.Length != 4 && cols.Length != 6)
@@ -94,30 +98,39 @@ namespace CyberCommando.Services
                 }
 
                 if (cols.Length == 4)
-                {
-                    layer.Add(new Sprite(rectangle));
-                }
+                    sprite.Add(new Sprite(rectangle));
                 else if (cols.Length == 6)
                 {
                     Vector2 position = new Vector2();
-
-                    if (!float.TryParse(cols[4], out position.X))
+                    if (cols[4] == "$")
+                        position.X = GetRandomCoordinate();
+                    else if (!float.TryParse(cols[4], out position.X))
                         throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[4]);
-
-                    if (!float.TryParse(cols[5], out position.Y))
+                    if (cols[5] == "$")
+                        position.Y = GetRandomCoordinate();
+                    else if (!float.TryParse(cols[5], out position.Y))
                         throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[5]);
 
-                    layer.Add(new Sprite(rectangle, position));
+                    sprite.Add(new Sprite(rectangle, position));
                 }
-                Layers.Add(new Layer(camera, layer, parallax, LayerState));
+                layers.Add(new Layer(camera, sprite, parallax, LayerState));
             }
-            return new Tuple<Dictionary<LevelState, Texture2D>, List<Layer>>(Textures, Layers);
+            return new Tuple<Dictionary<LevelState, Texture2D>, List<Layer>>(textures, layers);
         }
 
-        public Vector2 PositionGenerator()
+        public float GetRandomCoordinate()
         {
+            return 1;
+        }
 
-            return Vector2.One;
+        public float GetRandomCoordinate(int limit)
+        {
+            return 1;
+        }
+
+        public float GetRandomCoordinate(int minimal, int limit)
+        {
+            return 1;
         }
     }
 }

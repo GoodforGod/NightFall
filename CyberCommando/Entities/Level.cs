@@ -22,7 +22,7 @@ namespace CyberCommando.Entities
     {
         public Dictionary<LevelState, Texture2D> Textures;
         private List<Layer> Layers;
-        private Rectangle Limits = new Rectangle(0, 0, 3200, 600);
+        private Rectangle Limits = new Rectangle(0, 0, 3200, 860);
 
         public Level(string levelName, LayerLoader loader)
         {

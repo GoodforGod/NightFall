@@ -17,36 +17,36 @@ namespace CyberCommando.Animations
 
         public AnimationLoader(string contentRoot) { this.ContentRoot = contentRoot; }
 
-        public Dictionary<AnimationState, Animation> LoadAll(string spritesheetName)
+        public Dictionary<TEnum, Animation> LoadAll<TEnum>(string spritesheetName)
+             where TEnum : struct, IConvertible
         {
-            //var texture = content.Load<Texture2D>(spritesheetName);
-            var animationCollection = new Dictionary<AnimationState, Animation>();
+            //var type = Type.GetType(keyType);
+            TEnum state = default(TEnum);
 
-            AnimationState prevState = AnimationState.NONE;
-            AnimationState state;
-            Animation animation = new Animation();
+            var animationCollection = new Dictionary<TEnum, Animation>();
+            var animation = new Animation();
 
             var dataFile = Path.Combine(ContentRoot, Path.ChangeExtension(spritesheetName, "txt"));
             var dataFileLines = File.ReadAllLines(dataFile);
 
-            // Line starts with #, is comment
+            // Line starts with #, is comment, 2 cols = new animation, 7 cols = frame in animation
             foreach (var cols in from row in dataFileLines
                                  where !string.IsNullOrEmpty(row) && !row.StartsWith("#")
                                  select row.Split(';'))
             {
-                if (cols.Length != 7)
+                if (cols.Length == 2)
+                {
+                    if (animation.FrameList.Count != 0)
+                        animationCollection.Add(state, animation);
+                    animation = new Animation();
+
+                    continue;
+                }
+                else if (cols.Length != 7)
                     throw new InvalidDataException("Incorrect format data in file: " + spritesheetName);
 
                 if (!Enum.TryParse(cols[0], true, out state))
                     throw new ArgumentException("Incorrect name format in: " + spritesheetName, cols[0]);
-
-                if (state != prevState)
-                {
-                    if (prevState != AnimationState.NONE)
-                        animationCollection.Add(prevState, animation);
-                    prevState = state;
-                    animation = new Animation();
-                }
 
                 Rectangle rectangle;
 
@@ -58,7 +58,7 @@ namespace CyberCommando.Animations
                     int.Parse(cols[3]),
                     int.Parse(cols[4]));
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new ArgumentException("Inccorect rectangle format in: " + spritesheetName, cols[0]);
                 }
@@ -76,7 +76,9 @@ namespace CyberCommando.Animations
                 animation.AddFrame(rectangle, TimeSpan.FromSeconds(duration));
             }
 
+            animationCollection.Add(state, animation);
+
             return animationCollection;
-        }
+        } 
     }
 }
