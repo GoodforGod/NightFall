@@ -8,6 +8,10 @@ using Microsoft.Xna.Framework;
 
 namespace CyberCommando.Animations
 {
+    /// <summary>
+    /// Represents frame in animations <see cref="Animation"/> 
+    /// Stores rectangle of the texture/sprite and frame duration in animation
+    /// </summary>
     class Frame
     {
         public Rectangle Rectangle { get; set; }

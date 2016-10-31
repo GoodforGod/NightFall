@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Animations
 {
+    /// <summary>
+    /// Indicates current animation state
+    /// </summary> 
     public enum AnimationState
     {
         NONE,
@@ -20,19 +23,42 @@ namespace CyberCommando.Animations
         FIRE
     }
 
+    /// <summary>
+    /// Class stores all frames <see cref="Frame"/> for the specific animation, is used for entity
+    /// </summary>
+    /// <remarks>
+    /// TimeSpan for animation duration <see cref="Duration"/> 
+    /// TimeSpan for time elapsed into animation <see cref="TimeIntoAnimation"/>
+    /// List of Frames in animation <see cref="Frame"/>, 
+    /// SpriteEffects for animation <see cref="Effect"/>
+    /// Current rectangle of the animation frame <see cref="CurrentRectangle"/>
+    /// Method to add animations <see cref="AddFrame(Rectangle, TimeSpan)"/>
+    /// </remarks>
     class Animation
     {
+        /// <summary>
+        /// List of Frames in animation <see cref="Frame"/>
+        /// </summary>
         public List<Frame> FrameList { get; private set; }
 
+        /// <summary>
+        ///  TimeSpan for time elapsed into animation
+        /// </summary>
         public TimeSpan TimeIntoAnimation { get; set; }
         public DateTime SingleAnimStartTime { get; set; }
 
         public bool SingleAnimFlag { get; set; }
+        /// <summary>
+        /// SpriteEffects for animation
+        /// </summary>
         public SpriteEffects Effect { get; set; }
 
         public Animation() { FrameList = new List<Frame>(); }
         public Animation(SpriteEffects effect) { FrameList = new List<Frame>(); Effect = effect; }
 
+        /// <summary>
+        /// Represents the total duration of the animation in TotalSeconds
+        /// </summary>
         public TimeSpan Duration
         {
             get
@@ -44,12 +70,15 @@ namespace CyberCommando.Animations
             }
         }
 
+        /// <summary>
+        /// Uses <see cref="TimeIntoAnimation"/> to go through all frames and get the Rectangle of the current frame
+        /// </summary>
         public Rectangle CurrentRectangle
         {
             get
             {
                 Frame currentFrame = null;
-                TimeSpan accumulatedTime = new TimeSpan();
+                var accumulatedTime = new TimeSpan();
 
                 foreach (var frame in FrameList)
                 {
@@ -70,6 +99,10 @@ namespace CyberCommando.Animations
             }
         }
 
+
+        /// <summary>
+        /// Gets rectangle of the sprite, and the duration of the frame, creates new frame in animation
+        /// </summary>
         public void AddFrame(Rectangle rectangle, TimeSpan duration)
         {
             FrameList.Add(new Frame()

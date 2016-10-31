@@ -11,6 +11,9 @@ using CyberCommando.Services;
 
 namespace CyberCommando.Entities
 {
+    /// <summary>
+    /// Represent level states coresponding to textures of this level
+    /// </summary>
     public enum LevelState
     {
         MAIN,
@@ -18,14 +21,18 @@ namespace CyberCommando.Entities
         RANDOM
     }
 
+    /// <summary>
+    /// Represents whole level with all layers in it
+    /// </summary>
     class Level
     {
-        public Dictionary<LevelState, Texture2D> Textures;
-        private List<Layer> Layers;
-        private Rectangle Limits = new Rectangle(0, 0, 3200, 860);
+        public Dictionary<LevelState, Texture2D> Textures { get; set; }
+        private List<Layer> Layers { get; set; }
+        public Rectangle Limits { get; set; }
 
         public Level(string levelName, LayerLoader loader)
         {
+            Limits = new Rectangle(0, 0, 3200, 860);
             var TextureAndLayers = loader.LoadAll(levelName);
             Textures = TextureAndLayers.Item1;
             Layers = TextureAndLayers.Item2;

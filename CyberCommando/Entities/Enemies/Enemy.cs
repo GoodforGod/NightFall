@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Entities.Enemies
 {
+    /// <summary>
+    /// Represents Enemy entity in the game
+    /// </summary>
     class Enemy : Entity
     {
         public Enemy(World world) : base(world)

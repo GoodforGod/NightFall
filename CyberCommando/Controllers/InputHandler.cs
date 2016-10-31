@@ -23,11 +23,19 @@ namespace CyberCommando.Controllers
         Fire = Keys.Space
     }
 
+    /// <summary>
+    /// Stores methods to handle user input
+    /// </summary>
     internal class InputHandler
     {
         private CharStateHandler CharHandler = new CharStateHandler();
 
-        public void HandleEntityInput(Character entity, GameTime gameTime)
+        /// <summary>
+        /// Handle all keyboard input and handle Character state
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="gameTime"></param>
+        public void HandleKeyboardInput(Character entity, GameTime gameTime)
         {
             KeyboardState currState = Keyboard.GetState();
 
@@ -55,7 +63,14 @@ namespace CyberCommando.Controllers
             CharHandler.HandlePosition(entity, gameTime);
         }
 
-        public double HandleArmInput(Character entity)
+        /// <summary>
+        /// Handle mouse input, changes entity direction and projectile spawn
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>
+        /// Angle between mouse and Character, so that character arm could be drawn correctly
+        /// </returns>
+        public double HandleMouseInput(Character entity)
         {
             MouseState state = Mouse.GetState();
 
@@ -65,6 +80,7 @@ namespace CyberCommando.Controllers
             if (state.X < entity.DrawPosition.X)
                 entity.Direction = SpriteEffects.FlipHorizontally;
             else entity.Direction = SpriteEffects.None;
+
             if (entity.Direction == SpriteEffects.None)
                 return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;
             else return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;

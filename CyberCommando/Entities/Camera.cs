@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Entities
 {
+    /// <summary>
+    /// Represents world camera 
+    /// </summary>
     class Camera
     {
         public Vector2 Origin { get; set; }
@@ -16,6 +19,9 @@ namespace CyberCommando.Entities
 
         public float RotationAngle { get; set; }
 
+        /// <summary>
+        /// Camera zoom value
+        /// </summary>
         private float _Zoom;
         public float Zoom
         {
@@ -28,6 +34,9 @@ namespace CyberCommando.Entities
             }
         }
 
+        /// <summary>
+        /// Camera limit on scrolling
+        /// </summary>
         private Rectangle _Limits;
         public Rectangle Limits
         {
@@ -52,6 +61,9 @@ namespace CyberCommando.Entities
             }
         }
 
+        /// <summary>
+        /// Camera's current inworld position
+        /// </summary>
         private Vector2 _Position;
         public Vector2 Position
         {
@@ -78,6 +90,10 @@ namespace CyberCommando.Entities
             Position = Vector2.Zero;
         }
 
+        /// <summary>
+        /// Set camera position to look at specific position
+        /// </summary>
+        /// <param name="position"></param>
         public void LookAt(Vector2 position)
         {
             Position = position - new Vector2(viewPort.Width * 0.5f, 
@@ -95,12 +111,17 @@ namespace CyberCommando.Entities
         public void Move(Vector2 position) { Position += position; }
 
         /*
-         * to cahnge coordinate system when you zoom in the camera.
-         * in the function “get_transformation”, change:
+         * to change coordinate system when you zoom in the camera.
+         * in the function “GetViewMatrixn”, change:
          * “new Vector3(-Position.X, -Position.Y, 0))”
          * to “new Vector3(-Position.X * Zoom, -Position.Y * Zoom, 0))”
          */
 
+         /// <summary>
+         /// Calculate camera inworld matrix
+         /// </summary>
+         /// <param name="parallax"></param>
+         /// <returns></returns>
         public Matrix GetViewMatrix(Vector2 parallax)
         {
             // Thanks to o KB o for this solution

@@ -11,7 +11,7 @@ namespace CyberCommando.Engine
 {
     public partial class QuadRenderComponent : DrawableGameComponent
     {
-        VertexPositionTexture[] verts = null;
+        VertexPositionTexture[] Vertexs = null;
         short[] ib = null;
 
         // Constructor
@@ -23,7 +23,7 @@ namespace CyberCommando.Engine
 
         protected override void LoadContent()
         {
-            verts = new VertexPositionTexture[]
+            Vertexs = new VertexPositionTexture[]
             {
                 new VertexPositionTexture(
                     new Vector3(0,0,0),
@@ -52,20 +52,19 @@ namespace CyberCommando.Engine
 
         public void Render(Vector2 v1, Vector2 v2)
         {
-            verts[0].Position.X = v2.X;
-            verts[0].Position.Y = v1.Y;
+            Vertexs[0].Position.X = v2.X;
+            Vertexs[0].Position.Y = v1.Y;
 
-            verts[1].Position.X = v1.X;
-            verts[1].Position.Y = v1.Y;
+            Vertexs[1].Position.X = v1.X;
+            Vertexs[1].Position.Y = v1.Y;
 
-            verts[2].Position.X = v1.X;
-            verts[2].Position.Y = v2.Y;
+            Vertexs[2].Position.X = v1.X;
+            Vertexs[2].Position.Y = v2.Y;
 
-            verts[3].Position.X = v2.X;
-            verts[3].Position.Y = v2.Y;
+            Vertexs[3].Position.X = v2.X;
+            Vertexs[3].Position.Y = v2.Y;
 
-            GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionTexture>(PrimitiveType.TriangleList, verts, 0, 4, ib, 0, 2);
+            GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionTexture>(PrimitiveType.TriangleList, Vertexs, 0, 4, ib, 0, 2);
         }
-
     }
 }

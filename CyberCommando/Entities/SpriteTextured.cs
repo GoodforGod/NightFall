@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Entities
 {
+    /// <summary>
+    /// Textured sprite, representing texture/sprite rectangle and it possition in the world, its texture/sprite
+    /// </summary
     class SpriteTextured : Sprite
     {
         public Texture2D Texture { get; set; }

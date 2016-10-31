@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Services
 {
+    /// <summary>
+    /// Manage all game audio
+    /// </summary>
     class AudioManager
     {
 

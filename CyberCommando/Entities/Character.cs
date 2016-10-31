@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 using CyberCommando.Animations;
 using CyberCommando.Entities.Weapons;
+using CyberCommando.Engine;
 
 namespace CyberCommando.Entities
 {
@@ -25,7 +26,7 @@ namespace CyberCommando.Entities
         private Vector2 ArmOffesetRight = new Vector2(14, 25);
         private Vector2 ArmPosition = new Vector2();
         private AnimationManager<AnimationState> AniManager;
-        private Sprite Gun;
+        //private Sprite Gun;
 
         public Character(World world) : base(world)
         {
@@ -72,7 +73,7 @@ namespace CyberCommando.Entities
 
         }
 
-        public override void CorrectDrawPosition()
+        public override Vector2 CorrectDrawPosition()
         {
             if (WorldPosition.X > world.FrameWidth / 2 && WorldPosition.X < 3200 - world.FrameWidth)
                 DrawPosition.X = world.FrameWidth / 2;
@@ -82,30 +83,56 @@ namespace CyberCommando.Entities
 
             DrawPosition.Y = WorldPosition.Y;
 
-            ArmAngle = (float)handler.HandleArmInput(this);
+            ArmAngle = (float)handler.HandleMouseInput(this);
             if (Direction == SpriteEffects.None)
                 ArmPosition = DrawPosition + ArmOffesetRight;
             else ArmPosition = DrawPosition + ArmOffesetLeft;
+
+            return new Vector2(DrawPosition.X, DrawPosition.Y);
         }
 
         public override void Update(GameTime gameTime)
         {
             AniManager.UpdateCycleAnim(AniState, gameTime);
-            handler.HandleEntityInput(this, gameTime);
+            handler.HandleKeyboardInput(this, gameTime);
 
             CorrectDrawPosition();
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch batcher)
         {
+            batcher.Draw(SpriteSheet,
+                           DrawPosition,
+                           AniManager.CurrentAnimation.CurrentRectangle,
+                           Color.White,
+                           Angle,
+                           new Vector2(1, 1),
+                           Scale,
+                           Direction,
+                           .0f);
+
+            if (AniManager.CurrentAnimation != AniManager.Animations[AnimationState.JUMP])
+                batcher.Draw(SpriteSheet,
+                                ArmPosition,
+                                AniManager.Animations[AnimationState.FIRE].CurrentRectangle,
+                                Color.White,
+                                ArmAngle,
+                                new Vector2(1, 1),
+                                Scale,
+                                Direction,
+                                .0f);
+        }
+
+        public override void Draw(GameTime gameTime, SpriteBatch batcher, Light lightArea, Color color)
+        {
             /*
             gun.Draw(gameTime, batcher);
             */
 
             batcher.Draw(SpriteSheet,
-                            DrawPosition, 
-                            AniManager.CurrentAnimation.CurrentRectangle, 
-                            Color.White, 
+                            lightArea.ToRelativePosition(DrawPosition), 
+                            AniManager.CurrentAnimation.CurrentRectangle,
+                            color, 
                             Angle, 
                             new Vector2(1,1), 
                             Scale, 
@@ -114,9 +141,9 @@ namespace CyberCommando.Entities
 
             if (AniManager.CurrentAnimation != AniManager.Animations[AnimationState.JUMP])
                 batcher.Draw(SpriteSheet,
-                                ArmPosition,
+                                lightArea.ToRelativePosition(ArmPosition),
                                 AniManager.Animations[AnimationState.FIRE].CurrentRectangle,
-                                Color.White,
+                                color,
                                 ArmAngle,
                                 new Vector2(1, 1),
                                 Scale,

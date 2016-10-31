@@ -8,9 +8,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 using CyberCommando.Controllers;
 using CyberCommando.Animations;
+using CyberCommando.Engine;
 
 namespace CyberCommando.Entities
 {
+    /// <summary>
+    /// Indicating entity current game state
+    /// </summary>
     public enum EntityState
     {
         NONE,
@@ -21,20 +25,41 @@ namespace CyberCommando.Entities
         INVISIBLE
     }
 
-    public class Entity : IEntity
+    /// <summary>
+    /// Represents a simple ingame entity
+    /// </summary>
+    class Entity : IEntity
     {
+        /// <summary>
+        /// World where entity is living <see cref="World"/>
+        /// </summary>
         public World world { get; }
 
         internal InputHandler handler { get; set; } 
 
+        /// <summary>
+        /// Stores entity sprite
+        /// </summary>
         protected Texture2D SpriteSheet;
 
+        /// <summary>
+        /// Entity position to draw on screen
+        /// </summary>
         public Vector2 DrawPosition;
+        /// <summary>
+        /// Entity position in the world
+        /// </summary>
         public Vector2 WorldPosition;
+        /// <summary>
+        /// Current velocity vector
+        /// </summary>
         public Vector2 VelocityCurrent;
         public virtual float VelocityLimit { get { return 290f; } }
         public virtual float VelocityInc { get { return 15f; } }
 
+        /// <summary>
+        /// Entity direction it is moving or facing
+        /// </summary>
         public SpriteEffects Direction { get; set; }
         public float Angle { get; set; }
         public float Scale { get; set; }
@@ -43,7 +68,10 @@ namespace CyberCommando.Entities
         public AnimationState AniState { get; set; }
         public EntityState EntState { get; set; }
 
-        public BoundingBox boundingBox { get; set; }
+        /// <summary>
+        /// Entity rigbody, to check collision
+        /// </summary>
+        public BoundingBox BoundingBox { get; set; }
 
         public Entity(World world)
         {
@@ -53,16 +81,34 @@ namespace CyberCommando.Entities
             Scale = 1f;
             EntState = EntityState.PASSIVE;
         }
-
+        /// <summary>
+        /// Returns the same entity
+        /// </summary>
+        /// <returns></returns>
         public virtual Entity Clone() { return this; } 
 
+        /// <summary>
+        /// Check is the entity on screen of out of it
+        /// </summary>
+        /// <returns></returns>
         public virtual bool IsOnScreen() { return false; }
 
+        /// <summary>
+        /// Check is the entity on the ground
+        /// </summary>
+        /// <returns></returns>
         public virtual bool IsGrounded() { return false; }
 
-        public virtual int GetGround() { return world.WorldOffset; }
+        /// <summary>
+        /// Returns worlds ground position
+        /// </summary>
+        /// <returns></returns>
+        public virtual int GetGround() { return world.FrameHeight - world.WorldOffset; }
 
-        public virtual void CorrectDrawPosition() { }
+        /// <summary>
+        /// Calculates entity drawable position on the screen
+        /// </summary>
+        public virtual Vector2 CorrectDrawPosition() { return Vector2.Zero; }
 
         public virtual void Damage(Entity attacker, int damage) { }
 
@@ -73,16 +119,17 @@ namespace CyberCommando.Entities
         public virtual void Update(GameTime gameTime) { }
 
         public virtual void Draw(GameTime gameTime, SpriteBatch batcher) { }
+
+        public virtual void Draw(GameTime gameTime, SpriteBatch batcher, Light lightArea, Color color) { }
     }
 
     interface IEntity
     {
-        /// <param name="attacker">attack entity</param>
+        /// <param name="entity">attack entity</param>
         /// <param name="damage">damage amount</param>
-        void Damage(Entity attacker, int damage);
+        void Damage(Entity entity, int damage);
 
-        /// <param name="attacker">attack entity</param>
-        /// <param name="damage">damage amount</param>
+        /// <param name="other">entity to collide with</param>
         void Touch(Entity other);
 
         /// <param name="killer">entity killer</param>
@@ -92,7 +139,7 @@ namespace CyberCommando.Entities
         void Update(GameTime gameTime);
 
         /// <param name="gameTime">time ellapsed</param>
-        /// <param name="spriteBatch">batcher</param>
+        /// <param name="batcher">batcher</param>
         void Draw(GameTime gameTime, SpriteBatch batcher);
     }
 }

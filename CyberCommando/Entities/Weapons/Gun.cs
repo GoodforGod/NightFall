@@ -11,8 +11,13 @@ using CyberCommando.Animations;
 
 namespace CyberCommando.Entities.Weapons
 {
+
+    /// <summary>
+    /// All possible guns and projectiles in the game
+    /// </summary>
     public enum GunState
     {
+        NONE,
         LASER_BULLET,
         LASER_IDLE,
         LASER_FIRE,
@@ -30,6 +35,9 @@ namespace CyberCommando.Entities.Weapons
         MINIGUN_FIRE,
     }
 
+    /// <summary>
+    /// Represents gun entity in game (not quite implemented yet)
+    /// </summary>
     class Gun 
     {
         private readonly string SpriteSheetName = "gun-sprite-2";

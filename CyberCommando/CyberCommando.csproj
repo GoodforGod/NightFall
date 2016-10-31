@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animations\Animation.cs" />
-    <Compile Include="Animations\AnimationLoader.cs" />
+    <Compile Include="Services\AnimationLoader.cs" />
     <Compile Include="Animations\Frame.cs" />
     <Compile Include="Animations\AnimationManager.cs" />
     <Compile Include="Engine\Light.cs" />

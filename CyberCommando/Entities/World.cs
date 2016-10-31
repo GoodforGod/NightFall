@@ -6,16 +6,20 @@ using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 using CyberCommando.Controllers;
 using CyberCommando.Animations;
 using CyberCommando.Services;
 using CyberCommando.Entities.Weapons;
-using Microsoft.Xna.Framework.Input;
+using CyberCommando.Engine;
 
 namespace CyberCommando.Entities
 {
-    public class World
+    /// <summary>
+    /// Represents ingame world
+    /// </summary>
+    class World
     {
         public readonly Game Game;
 
@@ -27,12 +31,21 @@ namespace CyberCommando.Entities
         public readonly float Gravity = 9.8f;
         public int WorldOffset = 20;
 
+        /// <summary>
+        /// All live entities in the world
+        /// </summary>
         List<Entity> Entities = new List<Entity>();
+        /// <summary>
+        /// Entities whome will be killed
+        /// </summary>
         List<Entity> EntitiesToKill = new List<Entity>();
+        /// <summary>
+        /// Entities whome will be spawn in game
+        /// </summary>
         List<Tuple<string, Vector2, float>> EntitiesToAdd = new List<Tuple<string, Vector2, float>>();
 
         Level Level;
-        Character Player;
+        public Character Player { get; private set; }
 
         internal ServiceLocator Services { get; }
 
@@ -47,15 +60,9 @@ namespace CyberCommando.Entities
             Level = new Level(level_1, Services.LayLoader);
         }
 
-        public virtual void Initialize()
-        {
-            Player = (Character) Spawn(typeof(Character).FullName);
-        }
+        public virtual void Initialize() { Player = (Character) Spawn(typeof(Character).FullName); }
 
-        public virtual Entity Spawn(string className)
-        {
-            return Spawn(className, Vector2.Zero);
-        }
+        public virtual Entity Spawn(string className) { return Spawn(className, Vector2.Zero); }
 
         public virtual Entity Spawn(string className, Vector2 position)
         {
@@ -95,29 +102,36 @@ namespace CyberCommando.Entities
         {
             MouseState state = Mouse.GetState();
 
+            // Spawn all entities in the list
             foreach (var entity in EntitiesToAdd)
             {
                 var ent = Spawn(entity.Item1, entity.Item2, entity.Item3);
-                ent.VelocityCurrent = new Vector2(state.X - ent.WorldPosition.X, state.Y - ent.WorldPosition.Y);
+                if(ent is Projectile)
+                    ent.VelocityCurrent = new Vector2(state.X - ent.WorldPosition.X, 
+                                                        state.Y - ent.WorldPosition.Y);
             }
 
+            // Wipe list
             EntitiesToAdd.Clear();
 
+            // Updates all entities in world
             foreach (var entity in Entities)
             {
                 entity.Update(gameTime);
             }
 
+            // Move camera position
             Services.Camera.LookAt(Player.WorldPosition);
             Level.LayersLookAt(Player.WorldPosition);
 
+            // Collide all entities
             foreach (var a in Entities)
             {
                 foreach (var b in Entities)
                 {
                     if (!ReferenceEquals(a, b))
                     {
-                        if (a.boundingBox.Intersects(b.boundingBox))
+                        if (a.BoundingBox.Intersects(b.BoundingBox))
                         {
                             a.Touch(b);
                         }
@@ -131,19 +145,35 @@ namespace CyberCommando.Entities
         
         public virtual void Kill(Entity entity) { EntitiesToKill.Add(entity); }
 
-        public virtual void Draw(GameTime gameTime, SpriteBatch batcher)
+        public virtual void DrawLevel(GameTime gameTime, SpriteBatch batcher)
         {
-            //spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend,
-
             Level.Draw(batcher);
+        }
 
+        public virtual void DrawEntities(GameTime gameTime, SpriteBatch batcher)
+        {
             batcher.Begin(SpriteSortMode.Deferred,
-                            null, null, null, null, null,
+                            BlendState.AlphaBlend, 
+                            null, null, null, null,
                             Services.Camera.GetViewMatrix(new Vector2(0.9f)));
 
             foreach (var entity in Entities)
             {
                 entity.Draw(gameTime, batcher);
+            }
+
+            batcher.End();
+        }
+
+        public virtual void DrawEntitiesShadowCasters(GameTime gameTime, SpriteBatch batcher, Light lightArea, Color color)
+        {
+            batcher.Begin(SpriteSortMode.Deferred,
+                                null, null, null, null, null,
+                                Services.Camera.GetViewMatrix(new Vector2(0.9f)));
+
+            foreach (var entity in Entities)
+            {
+                entity.Draw(gameTime, batcher, lightArea, color);
             }
 
             batcher.End();

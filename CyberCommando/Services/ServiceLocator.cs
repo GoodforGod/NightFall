@@ -14,6 +14,9 @@ using CyberCommando.Controllers;
 
 namespace CyberCommando.Services
 {
+    /// <summary>
+    /// Helps other ingame entities to use other services
+    /// </summary>
     class ServiceLocator
     {
         public Camera Camera { get; private set; }

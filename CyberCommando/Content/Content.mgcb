@@ -49,3 +49,15 @@
 /processorParam:TextureFormat=Color
 /build:gun-sprite-2.png
 
+#begin reductionEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:reductionEffect.fx
+
+#begin resolveShadowsEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:resolveShadowsEffect.fx
+

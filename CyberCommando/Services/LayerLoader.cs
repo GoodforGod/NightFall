@@ -13,6 +13,9 @@ using CyberCommando.Entities;
 
 namespace CyberCommando.Services
 {
+    /// <summary>
+    /// Contain methods to load level
+    /// </summary>
     class LayerLoader
     {
         private ContentManager Content { get; }
@@ -26,6 +29,15 @@ namespace CyberCommando.Services
             this.Content = content;
         }
 
+        /// <summary>
+        /// Loads all level components
+        /// </summary>
+        /// <param name="layerName">
+        /// Name of the level
+        /// </param>
+        /// <returns>
+        /// All textures assosiated with level and list of layers
+        /// </returns>
         public Tuple<Dictionary<LevelState, Texture2D>, List<Layer>> LoadAll(string layerName)
         {
             var layers = new List<Layer>();

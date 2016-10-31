@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Entities
 {
+    /// <summary>
+    /// Represents a layer in world, displayed via camera
+    /// </summary>
     class Layer
     {
         public LevelState State { get; set; }
@@ -34,9 +37,13 @@ namespace CyberCommando.Entities
 
         public void Draw(SpriteBatch batcher)
         {
-            batcher.Begin(SpriteSortMode.Deferred, 
-                null, null, null, null, null, 
-                camera.GetViewMatrix(Parallax));
+            batcher.Begin(SpriteSortMode.Deferred,
+                            BlendState.Opaque,
+                            SamplerState.LinearWrap,
+                            DepthStencilState.Default,
+                            RasterizerState.CullNone, 
+                            null,
+                            camera.GetViewMatrix(Parallax));
 
             foreach (var sprite in LayerSprites)
             {

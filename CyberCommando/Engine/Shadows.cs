@@ -10,7 +10,10 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Engine
 {
-    enum ShadowmapSize
+    /// <summary>
+    /// Sizes of the shadow map
+    /// </summary>
+    enum ShadowMapSize
     {
         Size128 = 6,
         Size256 = 7,
@@ -18,72 +21,76 @@ namespace CyberCommando.Engine
         Size1024 = 9,
     }
 
+    /// <summary>
+    /// Calculates shadowMap and apply effects (shaders)
+    /// </summary>
     class Shadows
     {
-        private GraphicsDevice graphicsDevice;
+        private GraphicsDevice graphicsDevice { get; set; }
 
-        private int reductionChainCount;
-        private int baseSize;
-        private int depthBufferSize;
+        private int ReductionChainCount;
+        private int BaseSize;
+        private int DepthBufferSize;
 
-        Effect resolveShadowsEffect;
-        Effect reductionEffect;
+        private Effect ResolveShadowsEffect { get; set; }
+        private Effect ReductionEffect { get; set; }
 
-        RenderTarget2D distortRT;
-        RenderTarget2D shadowMap;
-        RenderTarget2D shadowsRT;
-        RenderTarget2D processedShadowsRT;
+        private RenderTarget2D DistortRT { get; set; }
+        private RenderTarget2D ShadowMap { get; set; }
+        private RenderTarget2D ShadowsRT { get; set; }
+        private RenderTarget2D ProcessedShadowsRT { get; set; }
 
-        QuadRenderComponent quadRender;
-        RenderTarget2D distancesRT;
-        RenderTarget2D[] reductionRT;
+        private QuadRenderComponent QuadRender { get; set; }
+        private RenderTarget2D DistancesRT { get; set; }
+        private RenderTarget2D[] ReductionRT;
 
 
         /// <summary>
         /// Creates a new shadowmap resolver
         /// </summary>
-        /// <param name="graphicsDevice">The Graphics Device used by the XNA game</param>
+        /// <param name="graphicsDevice"></param>
         /// <param name="quadRender"></param>
-        /// <param name="baseSize">The size of the light regions </param>
-        public Shadows(GraphicsDevice graphicsDevice, QuadRenderComponent quadRender, ShadowmapSize maxShadowmapSize, ShadowmapSize maxDepthBufferSize)
+        /// <param name="baseSize">
+        /// The size of the light regions 
+        /// </param>
+        public Shadows(GraphicsDevice graphicsDevice, QuadRenderComponent quadRender, ShadowMapSize maxShadowmapSize, ShadowMapSize maxDepthBufferSize)
         {
             this.graphicsDevice = graphicsDevice;
-            this.quadRender = quadRender;
+            this.QuadRender = quadRender;
 
-            reductionChainCount = (int)maxShadowmapSize;
-            baseSize = 2 << reductionChainCount;
-            depthBufferSize = 2 << (int)maxDepthBufferSize;
+            ReductionChainCount = (int)maxShadowmapSize;
+            BaseSize = 2 << ReductionChainCount;
+            DepthBufferSize = 2 << (int)maxDepthBufferSize;
         }
 
         public void LoadContent(ContentManager content)
         {
-            reductionEffect = content.Load<Effect>("reductionEffect");
-            resolveShadowsEffect = content.Load<Effect>("resolveShadowsEffect");
+            ReductionEffect = content.Load<Effect>("reductionEffect");
+            ResolveShadowsEffect = content.Load<Effect>("resolveShadowsEffect");
 
-            distortRT = new RenderTarget2D(graphicsDevice, baseSize, baseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
-            distancesRT = new RenderTarget2D(graphicsDevice, baseSize, baseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
-            shadowMap = new RenderTarget2D(graphicsDevice, 2, baseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
-            reductionRT = new RenderTarget2D[reductionChainCount];
-            for (int i = 0; i < reductionChainCount; i++)
+            DistortRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+            DistancesRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+            ShadowMap = new RenderTarget2D(graphicsDevice, 2, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+            ReductionRT = new RenderTarget2D[ReductionChainCount];
+            for (int i = 0; i < ReductionChainCount; i++)
             {
-                reductionRT[i] = new RenderTarget2D(graphicsDevice, 2 << i, baseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+                ReductionRT[i] = new RenderTarget2D(graphicsDevice, 2 << i, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
             }
 
-
-            shadowsRT = new RenderTarget2D(graphicsDevice, baseSize, baseSize);
-            processedShadowsRT = new RenderTarget2D(graphicsDevice, baseSize, baseSize);
+            ShadowsRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize);
+            ProcessedShadowsRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize);
         }
 
         public void ResolveShadows(Texture2D shadowCastersTexture, RenderTarget2D result, Vector2 lightPosition)
         {
             graphicsDevice.BlendState = BlendState.Opaque;
 
-            ExecuteTechnique(shadowCastersTexture, distancesRT, "ComputeDistances");
-            ExecuteTechnique(distancesRT, distortRT, "Distort");
-            ApplyHorizontalReduction(distortRT, shadowMap);
-            ExecuteTechnique(null, shadowsRT, "DrawShadows", shadowMap);
-            ExecuteTechnique(shadowsRT, processedShadowsRT, "BlurHorizontally");
-            ExecuteTechnique(processedShadowsRT, result, "BlurVerticallyAndAttenuate");
+            ExecuteTechnique(shadowCastersTexture, DistancesRT, "ComputeDistances");
+            ExecuteTechnique(DistancesRT, DistortRT, "Distort");
+            ApplyHorizontalReduction(DistortRT, ShadowMap);
+            ExecuteTechnique(null, ShadowsRT, "DrawShadows", ShadowMap);
+            ExecuteTechnique(ShadowsRT, ProcessedShadowsRT, "BlurHorizontally");
+            ExecuteTechnique(ProcessedShadowsRT, result, "BlurVerticallyAndAttenuate");
         }
 
         private void ExecuteTechnique(Texture2D source, RenderTarget2D destination, string techniqueName)
@@ -94,22 +101,22 @@ namespace CyberCommando.Engine
         private void ExecuteTechnique(Texture2D source, RenderTarget2D destination, string techniqueName, Texture2D shadowMap)
         {
             Vector2 renderTargetSize;
-            renderTargetSize = new Vector2((float)baseSize, (float)baseSize);
+            renderTargetSize = new Vector2((float)BaseSize, (float)BaseSize);
             graphicsDevice.SetRenderTarget(destination);
             graphicsDevice.Clear(Color.White);
-            resolveShadowsEffect.Parameters["renderTargetSize"].SetValue(renderTargetSize);
+            ResolveShadowsEffect.Parameters["renderTargetSize"].SetValue(renderTargetSize);
 
             if (source != null)
-                resolveShadowsEffect.Parameters["InputTexture"].SetValue(source);
+                ResolveShadowsEffect.Parameters["InputTexture"].SetValue(source);
             if (shadowMap != null)
-                resolveShadowsEffect.Parameters["ShadowMapTexture"].SetValue(shadowMap);
+                ResolveShadowsEffect.Parameters["ShadowMapTexture"].SetValue(shadowMap);
 
-            resolveShadowsEffect.CurrentTechnique = resolveShadowsEffect.Techniques[techniqueName];
+            ResolveShadowsEffect.CurrentTechnique = ResolveShadowsEffect.Techniques[techniqueName];
 
-            foreach (EffectPass pass in resolveShadowsEffect.CurrentTechnique.Passes)
+            foreach (EffectPass pass in ResolveShadowsEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                quadRender.Render(Vector2.One * -1, Vector2.One);
+                QuadRender.Render(Vector2.One * -1, Vector2.One);
             }
             graphicsDevice.SetRenderTarget(null);
         }
@@ -117,26 +124,26 @@ namespace CyberCommando.Engine
 
         private void ApplyHorizontalReduction(RenderTarget2D source, RenderTarget2D destination)
         {
-            int step = reductionChainCount - 1;
+            int step = ReductionChainCount - 1;
             RenderTarget2D s = source;
-            RenderTarget2D d = reductionRT[step];
-            reductionEffect.CurrentTechnique = reductionEffect.Techniques["HorizontalReduction"];
+            RenderTarget2D d = ReductionRT[step];
+            ReductionEffect.CurrentTechnique = ReductionEffect.Techniques["HorizontalReduction"];
 
             while (step >= 0)
             {
-                d = reductionRT[step];
+                d = ReductionRT[step];
 
                 graphicsDevice.SetRenderTarget(d);
                 graphicsDevice.Clear(Color.White);
 
-                reductionEffect.Parameters["SourceTexture"].SetValue(s);
+                ReductionEffect.Parameters["SourceTexture"].SetValue(s);
                 Vector2 textureDim = new Vector2(1.0f / (float)s.Width, 1.0f / (float)s.Height);
-                reductionEffect.Parameters["TextureDimensions"].SetValue(textureDim);
+                ReductionEffect.Parameters["TextureDimensions"].SetValue(textureDim);
 
-                foreach (EffectPass pass in reductionEffect.CurrentTechnique.Passes)
+                foreach (EffectPass pass in ReductionEffect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
-                    quadRender.Render(Vector2.One * -1, new Vector2(1, 1));
+                    QuadRender.Render(Vector2.One * -1, new Vector2(1, 1));
                 }
 
                 graphicsDevice.SetRenderTarget(null);
@@ -147,16 +154,16 @@ namespace CyberCommando.Engine
 
             //copy to destination
             graphicsDevice.SetRenderTarget(destination);
-            reductionEffect.CurrentTechnique = reductionEffect.Techniques["Copy"];
-            reductionEffect.Parameters["SourceTexture"].SetValue(d);
+            ReductionEffect.CurrentTechnique = ReductionEffect.Techniques["Copy"];
+            ReductionEffect.Parameters["SourceTexture"].SetValue(d);
 
-            foreach (EffectPass pass in reductionEffect.CurrentTechnique.Passes)
+            foreach (EffectPass pass in ReductionEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                quadRender.Render(Vector2.One * -1, new Vector2(1, 1));
+                QuadRender.Render(Vector2.One * -1, new Vector2(1, 1));
             }
 
-            reductionEffect.Parameters["SourceTexture"].SetValue(reductionRT[reductionChainCount - 1]);
+            ReductionEffect.Parameters["SourceTexture"].SetValue(ReductionRT[ReductionChainCount - 1]);
             graphicsDevice.SetRenderTarget(null);
         }
     }

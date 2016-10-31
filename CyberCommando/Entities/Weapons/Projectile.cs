@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace CyberCommando.Entities.Weapons
 {
+    /// <summary>
+    /// Represents projectile/bullet entity in the game
+    /// </summary>
     class Projectile : Entity
     {
         private Rectangle Source { get; set; }
