@@ -16,10 +16,7 @@ namespace CyberCommando.Engine
 
         // Constructor
         public QuadRenderComponent(Game game)
-            : base(game)
-        {
-
-        }
+            : base(game) { }
 
         protected override void LoadContent()
         {
@@ -44,11 +41,7 @@ namespace CyberCommando.Engine
             base.LoadContent();
         }
 
-
-        protected override void UnloadContent()
-        {
-            base.UnloadContent();
-        }
+        protected override void UnloadContent() { base.UnloadContent(); }
 
         public void Render(Vector2 v1, Vector2 v2)
         {

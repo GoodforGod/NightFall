@@ -2,12 +2,20 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using CyberCommando.Entities;
+using CyberCommando.Entities.Enviroment;
 using CyberCommando.Engine;
+
 using System.Collections.Generic;
 
 namespace CyberCommando
 {
+    public enum ScreenRes
+    {
+        R1280x720 = 80,
+        R1600x900 = 100,
+        R1920x1080 = 120,
+    }
+
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
@@ -17,39 +25,47 @@ namespace CyberCommando
         SpriteBatch batcher;
 
         World world;
+        Color ShadowColor = Color.Gray;
 
         Vector2 LightPos;
 
         Vector2 LightLeftLimit;
         Vector2 LightRightLimit;
 
+        bool ShadowEffect = false;
         QuadRenderComponent QuadRender;
-        Shadows ShadowMapRes;
-        List<Light> LevelLight = new List<Light>();
-        RenderTarget2D screenShadow;
+        bool BloomEffect = false;
+        BloomRenderComponent BloomRender;
 
-        const int WIDTH = 1366;
-        const int HEIGHT = 768;
-        const int LIGHT_COUNT = 9;
+        ShadowResolver ShadowRender;
+        List<LightSpot> LevelLight = new List<LightSpot>();
+
+        ScreenRes CurrentRes { get; set; }
+        
+        //int FrameWidth { get; set; }
+        //int FrameHeight { get; set; }
+        int LIGHT_COUNT = 9;
+
+        int LeftLimit { get; set; }
+        int RightLimit { get; set; }
+        int RightLightLimit { get; set; }
 
         public GameCore()
         {
-            // ~~~ UNCOMMENT For fullscreen mode~~~
+            // ~~~ UNCOMMENT For fullscreen mode ~~~
             //graphics.PreferMultiSampling = true;
             //graphics.IsFullScreen = true;
-
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = WIDTH;
-            graphics.PreferredBackBufferHeight = HEIGHT;
-            graphics.ApplyChanges();
 
-            IsMouseVisible = true;
-
-            Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - WIDTH / 2,
-                                GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - HEIGHT / 2);
+            this.IsFixedTimeStep = true;
+            this.IsMouseVisible = true;
 
             QuadRender = new QuadRenderComponent(this);
-            this.Components.Add(QuadRender);
+            BloomRender = new BloomRenderComponent(this);
+
+            //this.Components.Add(BloomRender);
+            //this.Components.Add(QuadRender);
+
             Content.RootDirectory = "Content";
         }
 
@@ -65,6 +81,26 @@ namespace CyberCommando
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="res"></param>
+        protected void Resize(ScreenRes res)
+        {
+            CurrentRes = res;
+
+            int width = 16 * (int)res;
+            int height = 9 * (int)res;
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
+            graphics.ApplyChanges();
+            Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - width / 2,
+                                         GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - height / 2);
+            world.UpdateResolution(width, height, res);
+            BloomRender.UpdateBatcher();
+            //BloomFront.UpdateBatcher();
+        }
+
+        /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
@@ -73,20 +109,38 @@ namespace CyberCommando
             // Create a new SpriteBatch, which can be used to draw textures.
             batcher = new SpriteBatch(GraphicsDevice);
 
-            world = new World(this, HEIGHT, WIDTH, GraphicsDevice.Viewport);
+            world = new World(this, GraphicsDevice.Viewport.Height, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport);
             world.Initialize();
 
-            ShadowMapRes = new Shadows(GraphicsDevice, QuadRender, ShadowMapSize.Size256, ShadowMapSize.Size1024);
-            ShadowMapRes.LoadContent(Content);
+            //Resize screen
+            Resize(ScreenRes.R1280x720);
 
+            LeftLimit = world.FrameWidth / 2;
+            RightLimit = world.LevelLimits.Width - world.FrameWidth / 2;
+            RightLightLimit = world.LevelLimits.Width - world.FrameWidth;
+
+            ShadowRender = new ShadowResolver(GraphicsDevice, 
+                                                QuadRender,
+                                                ShadowMapSize.Size256,
+                                                ShadowMapSize.Size256, 
+                                                ShadowColor);
+            ShadowRender.LoadContent(Content);
+            SpawnLight();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected void SpawnLight()
+        {
             for (int i = 0; i < LIGHT_COUNT; i++)
-                LevelLight.Add(new Light(GraphicsDevice, ShadowMapSize.Size512));
+                LevelLight.Add(new LightSpot(GraphicsDevice, ShadowMapSize.Size512));
 
             LightPos = new Vector2(150, 580);
 
             var rand = new System.Random();
 
-            foreach(var light in LevelLight)
+            foreach (var light in LevelLight)
             {
                 light.WorldPosition = LightPos;
                 LightPos.X += 420;
@@ -107,12 +161,8 @@ namespace CyberCommando
                 }
             }
 
-            LightLeftLimit = new Vector2(-LevelLight[0].LightAreaSize.X * 2, 0);
-            LightRightLimit = new Vector2(world.FrameWidth + LevelLight[0].LightAreaSize.X * 2, 0);
-
-            screenShadow = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-
-            // TODO: use this.Content to load your game content here
+            LightLeftLimit = new Vector2(-LevelLight[0].LightAreaSize.X, 0);
+            LightRightLimit = new Vector2(world.FrameWidth + LevelLight[0].LightAreaSize.X, 0);
         }
 
         /// <summary>
@@ -131,54 +181,21 @@ namespace CyberCommando
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             world.Update(gameTime);
-            // TODO: Add your update logic here
 
             base.Update(gameTime);
         }
 
         /// <summary>
-        /// This is called when the game should draw itself.
+        /// 
         /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
+        public void DrawLights(SpriteBatch batcher)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            foreach (var light in LevelLight)
-            {
-                if (world.Player.WorldPosition.X < world.FrameWidth / 2
-                    || world.Player.WorldPosition.X < world.Services.Camera.Limits.X - world.FrameWidth / 2)
-                    light.DrawPosition = light.WorldPosition;
-                else
-                //if (world.Player.WorldPosition.X > world.FrameWidth / 2 
-                //    || world.Player.WorldPosition.X > world.Services.Camera.Limits.X - world.FrameWidth/2)
-                    light.DrawPosition = new Vector2((light.WorldPosition.X
-                        - (world.Player.WorldPosition.X - world.FrameWidth / 2)),
-                                                   light.WorldPosition.Y);
-
-                //else light.DrawPosition = light.WorldPosition;
-
-                if (light.DrawPosition.X > LightRightLimit.X || light.DrawPosition.X < LightLeftLimit.X)
-                {
-                    light.IsOnScreen = false;
-                    continue;
-                }
-                else light.IsOnScreen = true;
-
-                light.BeginDrawingShadowCasters();
-                world.DrawEntitiesShadowCasters(gameTime, batcher, light, Color.Gray);
-                light.EndDrawingShadowCasters();
-                ShadowMapRes.ResolveShadows(light.RenderTarget, light.RenderTarget, light.DrawPosition);
-            }
-
-            GraphicsDevice.SetRenderTarget(screenShadow);
-            GraphicsDevice.Clear(Color.Gray);
-
             batcher.Begin(SpriteSortMode.Deferred,
                             BlendState.Additive,
                             null, null, null, null, null);
@@ -191,28 +208,81 @@ namespace CyberCommando
                                  light.DrawPosition - light.LightAreaSize * 0.5f,
                                  light.LightColor);
             }
-       
+
             batcher.End();
+        }
 
-            GraphicsDevice.SetRenderTarget(null);
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ResolveLightShadowCasts(GameTime gameTime, SpriteBatch batcher)
+        {
+            var playerLeft = world.Player.WorldPosition.X - LeftLimit;
 
-            GraphicsDevice.Clear(Color.Black);
+            foreach (var light in LevelLight)
+            {
+                if (world.Player.WorldPosition.X < LeftLimit)
+                    light.DrawPosition = light.WorldPosition;
+                else if (world.Player.WorldPosition.X > RightLimit)
+                    light.DrawPosition = new Vector2(light.WorldPosition.X - RightLightLimit, light.WorldPosition.Y);
+                else
+                    light.DrawPosition = new Vector2((light.WorldPosition.X - playerLeft), light.WorldPosition.Y);
 
-            // Level draw
-            world.DrawLevel(gameTime, batcher);
+                if (light.DrawPosition.X > LightRightLimit.X || light.DrawPosition.X < LightLeftLimit.X)
+                {
+                    light.IsOnScreen = false;
+                    continue;
+                }
+                else light.IsOnScreen = true;
 
-            BlendState blendState = new BlendState();
-            blendState.ColorSourceBlend = Blend.DestinationColor;
-            blendState.ColorDestinationBlend = Blend.SourceColor;
+                light.BeginDrawingShadowCasters();
+                world.DrawEntitiesShadowCasters(gameTime, batcher, light, Color.Black);
+                light.EndDrawingShadowCasters();
+                ShadowRender.ResolveShadows(light.RenderTarget, light.RenderTarget, light.DrawPosition);
+            }
+        }
 
-            batcher.Begin(SpriteSortMode.Immediate, blendState);
-            batcher.Draw(screenShadow, Vector2.Zero, Color.White);
-            batcher.End();
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // Draw all entities
-            world.DrawEntities(gameTime, batcher);
+            // Resolve shadow map
+            if (ShadowEffect)
+            {
+                ResolveLightShadowCasts(gameTime, batcher);
+                ShadowRender.BeginDraw(GraphicsDevice);
+            }
+            DrawLights(batcher);
+            if (ShadowEffect)
+                ShadowRender.EndDraw(GraphicsDevice);
+
+            // Draw Bloom Effect
+            if (BloomEffect)
+                BloomRender.BeginDraw();
+            world.DrawLevelBackground(gameTime, batcher);
+            if (BloomEffect)
+            {
+                BloomRender.DrawBloom();
+                BloomRender.EndDraw();
+                BloomRender.DisplayBloomTarget();
+            }
+
+            // Display Frontlevel and Entitites
+            world.DrawLevelFrontground(gameTime, batcher);
+            world.DrawLevelEntities(gameTime, batcher);
+
+            // Display Shadow Map
+            if (ShadowEffect)
+                ShadowRender.DisplayShadowCast(batcher);
 
             base.Draw(gameTime);
+            
+            // DrawCharacter without effects
+            world.DrawCharacter(gameTime, batcher);
         }
     }
 }

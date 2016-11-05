@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace CyberCommando.Entities
+namespace CyberCommando.Entities.Utils
 {
     /// <summary>
     /// Represents world camera 
@@ -15,7 +15,7 @@ namespace CyberCommando.Entities
     class Camera
     {
         public Vector2 Origin { get; set; }
-        private Viewport viewPort; 
+        public Viewport viewport { get; set; }
 
         public float RotationAngle { get; set; }
 
@@ -50,8 +50,8 @@ namespace CyberCommando.Entities
                     {
                         X = value.X,
                         Y = value.Y,
-                        Width = System.Math.Max(viewPort.Width, value.Width),
-                        Height = System.Math.Max(viewPort.Height, value.Height)
+                        Width = System.Math.Max(viewport.Width, value.Width),
+                        Height = System.Math.Max(viewport.Height, value.Height)
                     };
 
                     // Validate camera position with new limit
@@ -74,15 +74,15 @@ namespace CyberCommando.Entities
                 // If there's a limit set and the camera is not transformed clamp position to limits
                 if (_Limits != null && Zoom == 1.0f && RotationAngle == 0.0f)
                 {
-                    _Position = new Vector2(MathHelper.Clamp(_Position.X, Limits.X, Limits.X + Limits.Width - viewPort.Width),
-                                            MathHelper.Clamp(_Position.Y, Limits.Y, Limits.Y + Limits.Height - viewPort.Height));
+                    _Position = new Vector2(MathHelper.Clamp(_Position.X, Limits.X, Limits.X + Limits.Width - viewport.Width),
+                                            MathHelper.Clamp(_Position.Y, Limits.Y, Limits.Y + Limits.Height - viewport.Height));
                 }
             }
         }
 
         public Camera(Viewport viewPort)
         {
-            this.viewPort = viewPort;
+            this.viewport = viewPort;
             Origin = new Vector2(viewPort.Width * 0.5f, 
                                  viewPort.Height * 0.5f);
             Zoom = 1.0f;
@@ -96,8 +96,8 @@ namespace CyberCommando.Entities
         /// <param name="position"></param>
         public void LookAt(Vector2 position)
         {
-            Position = position - new Vector2(viewPort.Width * 0.5f, 
-                                              viewPort.Height * 0.5f);
+            Position = position - new Vector2(viewport.Width * 0.5f, 
+                                              viewport.Height * 0.5f);
         }
 
         public void Move(Vector2 position, bool respectRotation = false)

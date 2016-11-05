@@ -11,7 +11,7 @@ using CyberCommando.Animations;
 using CyberCommando.Services;
 using CyberCommando.Entities.Weapons;
 
-namespace CyberCommando.Entities
+namespace CyberCommando.Entities.Utils
 {
     /// <summary>
     /// Animated sprite, representing texture/sprite rectangle and it possition in the world, its texture/sprite and animations

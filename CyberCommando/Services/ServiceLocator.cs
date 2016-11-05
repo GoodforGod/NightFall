@@ -8,8 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 
-using CyberCommando.Entities;
-using CyberCommando.Animations;
+using CyberCommando.Entities.Utils;
 using CyberCommando.Controllers;
 
 namespace CyberCommando.Services

@@ -24,7 +24,7 @@ namespace CyberCommando.Engine
     /// <summary>
     /// Calculates shadowMap and apply effects (shaders)
     /// </summary>
-    class Shadows
+    class ShadowResolver
     {
         private GraphicsDevice graphicsDevice { get; set; }
 
@@ -35,32 +35,38 @@ namespace CyberCommando.Engine
         private Effect ResolveShadowsEffect { get; set; }
         private Effect ReductionEffect { get; set; }
 
+        public Color color { get; set; }
+
         private RenderTarget2D DistortRT { get; set; }
-        private RenderTarget2D ShadowMap { get; set; }
+        private RenderTarget2D SMap { get; set; }
         private RenderTarget2D ShadowsRT { get; set; }
         private RenderTarget2D ProcessedShadowsRT { get; set; }
+        private RenderTarget2D ScreenShadow { get; set; }
 
         private QuadRenderComponent QuadRender { get; set; }
         private RenderTarget2D DistancesRT { get; set; }
         private RenderTarget2D[] ReductionRT;
 
-
         /// <summary>
         /// Creates a new shadowmap resolver
         /// </summary>
-        /// <param name="graphicsDevice"></param>
+        /// <param name="graphdev"></param>
         /// <param name="quadRender"></param>
         /// <param name="baseSize">
         /// The size of the light regions 
         /// </param>
-        public Shadows(GraphicsDevice graphicsDevice, QuadRenderComponent quadRender, ShadowMapSize maxShadowmapSize, ShadowMapSize maxDepthBufferSize)
+        public ShadowResolver(GraphicsDevice graphdev, QuadRenderComponent quadRender,
+                            ShadowMapSize maxShadowmapSize, ShadowMapSize maxDepthBufferSize, Color color)
         {
-            this.graphicsDevice = graphicsDevice;
+            this.graphicsDevice = graphdev;
             this.QuadRender = quadRender;
+
+            this.color = color;
 
             ReductionChainCount = (int)maxShadowmapSize;
             BaseSize = 2 << ReductionChainCount;
             DepthBufferSize = 2 << (int)maxDepthBufferSize;
+            ScreenShadow = new RenderTarget2D(graphdev, graphdev.Viewport.Width, graphdev.Viewport.Height);
         }
 
         public void LoadContent(ContentManager content)
@@ -68,17 +74,62 @@ namespace CyberCommando.Engine
             ReductionEffect = content.Load<Effect>("reductionEffect");
             ResolveShadowsEffect = content.Load<Effect>("resolveShadowsEffect");
 
-            DistortRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
-            DistancesRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
-            ShadowMap = new RenderTarget2D(graphicsDevice, 2, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+            DistortRT = new RenderTarget2D(graphicsDevice, 
+                                                BaseSize,
+                                                BaseSize, 
+                                                false, 
+                                                SurfaceFormat.HalfVector2, 
+                                                DepthFormat.None);
+            DistancesRT = new RenderTarget2D(graphicsDevice, 
+                                                BaseSize, 
+                                                BaseSize,
+                                                false, 
+                                                SurfaceFormat.HalfVector2,
+                                                DepthFormat.None);
+            SMap = new RenderTarget2D(graphicsDevice, 
+                                                2, 
+                                                BaseSize,
+                                                false, 
+                                                SurfaceFormat.HalfVector2, 
+                                                DepthFormat.None);
+
             ReductionRT = new RenderTarget2D[ReductionChainCount];
+
             for (int i = 0; i < ReductionChainCount; i++)
             {
-                ReductionRT[i] = new RenderTarget2D(graphicsDevice, 2 << i, BaseSize, false, SurfaceFormat.HalfVector2, DepthFormat.None);
+                ReductionRT[i] = new RenderTarget2D(graphicsDevice, 
+                                                    2 << i, 
+                                                    BaseSize, 
+                                                    false, 
+                                                    SurfaceFormat.HalfVector2, 
+                                                    DepthFormat.None);
             }
 
             ShadowsRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize);
             ProcessedShadowsRT = new RenderTarget2D(graphicsDevice, BaseSize, BaseSize);
+        }
+
+        public void BeginDraw(GraphicsDevice graphdev)
+        {
+            graphdev.SetRenderTarget(ScreenShadow);
+            graphdev.Clear(color);
+        }
+
+        public void EndDraw(GraphicsDevice graphdev)
+        {
+            graphdev.SetRenderTarget(null);
+            graphdev.Clear(color);
+        }
+
+        public void DisplayShadowCast(SpriteBatch batcher)
+        {
+            BlendState blendState = new BlendState();
+            blendState.ColorSourceBlend = Blend.DestinationColor;
+            blendState.ColorDestinationBlend = Blend.SourceColor;
+
+            batcher.Begin(SpriteSortMode.Deferred, blendState);
+            batcher.Draw(ScreenShadow, Vector2.Zero, Color.White);
+            batcher.End();
         }
 
         public void ResolveShadows(Texture2D shadowCastersTexture, RenderTarget2D result, Vector2 lightPosition)
@@ -87,8 +138,8 @@ namespace CyberCommando.Engine
 
             ExecuteTechnique(shadowCastersTexture, DistancesRT, "ComputeDistances");
             ExecuteTechnique(DistancesRT, DistortRT, "Distort");
-            ApplyHorizontalReduction(DistortRT, ShadowMap);
-            ExecuteTechnique(null, ShadowsRT, "DrawShadows", ShadowMap);
+            ApplyHorizontalReduction(DistortRT, SMap);
+            ExecuteTechnique(null, ShadowsRT, "DrawShadows", SMap);
             ExecuteTechnique(ShadowsRT, ProcessedShadowsRT, "BlurHorizontally");
             ExecuteTechnique(ProcessedShadowsRT, result, "BlurVerticallyAndAttenuate");
         }
@@ -120,7 +171,6 @@ namespace CyberCommando.Engine
             }
             graphicsDevice.SetRenderTarget(null);
         }
-
 
         private void ApplyHorizontalReduction(RenderTarget2D source, RenderTarget2D destination)
         {

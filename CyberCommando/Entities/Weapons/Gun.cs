@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+using CyberCommando.Entities.Enviroment;
 using CyberCommando.Animations;
 
 namespace CyberCommando.Entities.Weapons

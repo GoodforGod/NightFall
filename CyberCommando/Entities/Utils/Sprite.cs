@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework;
 
-namespace CyberCommando.Entities
+namespace CyberCommando.Entities.Utils
 {
     /// <summary>
     /// Simple sprite, representing texture/sprite rectangle and it possition in the world
@@ -36,7 +36,7 @@ namespace CyberCommando.Entities
 
         public Sprite(Rectangle source, Vector2 position, float scale) : this(source, position)
         {
-            scale = this.Scale;
+            this.Scale = scale;
         }
     }
 }

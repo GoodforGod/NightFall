@@ -18,8 +18,6 @@ namespace CyberCommando.Controllers
     /// </summary>
     class EntityStateHandler
     {
-        public EntityStateHandler() { }
-
         public virtual void MoveRight(Entity entity)
         {
             //entity.Direction = SpriteEffects.None;

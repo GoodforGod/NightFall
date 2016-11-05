@@ -30,6 +30,8 @@ namespace CyberCommando.Controllers
     {
         private CharStateHandler CharHandler = new CharStateHandler();
 
+        private DateTime Cooldown = DateTime.Now;
+
         /// <summary>
         /// Handle all keyboard input and handle Character state
         /// </summary>
@@ -74,16 +76,17 @@ namespace CyberCommando.Controllers
         {
             MouseState state = Mouse.GetState();
 
-            if (state.LeftButton == ButtonState.Pressed)
-                entity.world.AddToSpawnQueue(typeof(Projectile).FullName, entity.DrawPosition, entity.ArmAngle);
+            if (state.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
+            {
+                Cooldown = DateTime.Now;
+                entity.world.AddToSpawnQueue(typeof(Projectile).FullName, entity.WorldPosition, entity.ArmAngle);
+            }
 
             if (state.X < entity.DrawPosition.X)
                 entity.Direction = SpriteEffects.FlipHorizontally;
             else entity.Direction = SpriteEffects.None;
 
-            if (entity.Direction == SpriteEffects.None)
-                return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;
-            else return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;
+            return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;
         }
     }
 }

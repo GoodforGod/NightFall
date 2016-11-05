@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace CyberCommando.Entities
+namespace CyberCommando.Entities.Utils
 {
     /// <summary>
     /// Textured sprite, representing texture/sprite rectangle and it possition in the world, its texture/sprite

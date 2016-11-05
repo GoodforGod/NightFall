@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using CyberCommando.Entities.Enviroment;
+
 namespace CyberCommando.Entities.Weapons
 {
     /// <summary>
@@ -24,7 +26,7 @@ namespace CyberCommando.Entities.Weapons
             this.SpriteSheet = texture;
             this.Source = source;
             this.VelocityCurrent = new Vector2(5f, 5f);
-            Scale = 0.4f;
+            Scale = ResScale = 0.3f;
         }
 
         public override Entity Clone()
@@ -34,7 +36,10 @@ namespace CyberCommando.Entities.Weapons
 
         public override bool IsOnScreen()
         {
-            if (WorldPosition.X < 3200 && WorldPosition.X > -200 && WorldPosition.Y < 900 && WorldPosition.Y > -200)
+            if (WorldPosition.X < world.LevelLimits.Width 
+                    && WorldPosition.X > world.LevelLimits.X - 200 
+                    && WorldPosition.Y < world.LevelLimits.Height 
+                    && WorldPosition.Y > world.LevelLimits.Y - 200)
                 return true;
             else
                 return false;
@@ -42,20 +47,11 @@ namespace CyberCommando.Entities.Weapons
 
         public override bool IsGrounded() { return false; }
 
-        public override void Damage(Entity attacker, int damage)
-        {
+        public override void Damage(Entity attacker, int damage) { }
 
-        }
+        public override void Kill(Entity killer) { base.Kill(this); }
 
-        public override void Kill(Entity killer)
-        {
-            base.Kill(this);
-        }
-
-        public override void Touch(Entity other)
-        {
-
-        }
+        public override void Touch(Entity other) { } 
 
         public override void Update(GameTime gameTime)
         {
@@ -70,10 +66,10 @@ namespace CyberCommando.Entities.Weapons
             batcher.Draw(SpriteSheet,
                                WorldPosition,
                                Source,
-                               Color.White,
+                               Color.White * 0.8f,
                                Angle,
                                new Vector2(1, 1),
-                               Scale,
+                               ResScale,
                                Direction,
                                .0f);
         }

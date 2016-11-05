@@ -39,15 +39,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Animations\Animation.cs" />
+    <Compile Include="Engine\BloomRenderComponent.cs" />
+    <Compile Include="Engine\BloomParams.cs" />
     <Compile Include="Services\AnimationLoader.cs" />
     <Compile Include="Animations\Frame.cs" />
     <Compile Include="Animations\AnimationManager.cs" />
-    <Compile Include="Engine\Light.cs" />
+    <Compile Include="Engine\LightSpot.cs" />
     <Compile Include="Engine\QuadRenderComponent.cs" />
-    <Compile Include="Engine\Shadows.cs" />
-    <Compile Include="Entities\SpriteTextured.cs" />
-    <Compile Include="Entities\SpriteAnimated.cs" />
-    <Compile Include="Entities\Sprite.cs" />
+    <Compile Include="Engine\ShadowResolver.cs" />
+    <Compile Include="Entities\Utils\SpriteTextured.cs" />
+    <Compile Include="Entities\Utils\SpriteAnimated.cs" />
+    <Compile Include="Entities\Utils\Sprite.cs" />
     <Compile Include="Entities\Weapons\Gun.cs" />
     <Compile Include="Services\LayerLoader.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />
@@ -55,15 +57,15 @@
     <Compile Include="Controllers\Commands\EntityCommands.cs" />
     <Compile Include="Controllers\EnemyStateHandler.cs" />
     <Compile Include="Controllers\InputHandler.cs" />
-    <Compile Include="Entities\Camera.cs" />
+    <Compile Include="Entities\Utils\Camera.cs" />
     <Compile Include="Entities\Character.cs" />
     <Compile Include="Entities\Enemies\Enemy.cs" />
     <Compile Include="Entities\Entity.cs" />
     <Compile Include="Controllers\EntityStateHandler.cs" />
-    <Compile Include="Entities\Layer.cs" />
-    <Compile Include="Entities\Level.cs" />
+    <Compile Include="Entities\Enviroment\Layer.cs" />
+    <Compile Include="Entities\Enviroment\Level.cs" />
     <Compile Include="Entities\Weapons\Projectile.cs" />
-    <Compile Include="Entities\World.cs" />
+    <Compile Include="Entities\Enviroment\World.cs" />
     <Compile Include="GameCore.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using CyberCommando.Controllers;
 using CyberCommando.Animations;
 using CyberCommando.Engine;
+using CyberCommando.Entities.Enviroment;
 
 namespace CyberCommando.Entities
 {
@@ -63,6 +64,7 @@ namespace CyberCommando.Entities
         public SpriteEffects Direction { get; set; }
         public float Angle { get; set; }
         public float Scale { get; set; }
+        public float ResScale { get; set; }
         public virtual int Health { get; set; }
 
         public AnimationState AniState { get; set; }
@@ -78,7 +80,7 @@ namespace CyberCommando.Entities
             this.world = world;
             Direction = SpriteEffects.None;
             Angle = 0f;
-            Scale = 1f;
+            Scale = ResScale = 1f;
             EntState = EntityState.PASSIVE;
         }
         /// <summary>
@@ -108,7 +110,7 @@ namespace CyberCommando.Entities
         /// <summary>
         /// Calculates entity drawable position on the screen
         /// </summary>
-        public virtual Vector2 CorrectDrawPosition() { return Vector2.Zero; }
+        public virtual void CorrectDrawPosition() {  }
 
         public virtual void Damage(Entity attacker, int damage) { }
 
@@ -120,7 +122,13 @@ namespace CyberCommando.Entities
 
         public virtual void Draw(GameTime gameTime, SpriteBatch batcher) { }
 
-        public virtual void Draw(GameTime gameTime, SpriteBatch batcher, Light lightArea, Color color) { }
+        /// <summary>
+        /// Draw entity relatively to light spot, to draw shadow map for shader
+        /// </summary>
+        public virtual void DrawRelativelyToLightSpot(GameTime gameTime, 
+                                                        SpriteBatch batcher, 
+                                                        LightSpot lightArea,
+                                                        Color color) { }
     }
 
     interface IEntity
