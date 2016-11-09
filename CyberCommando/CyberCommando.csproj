@@ -41,7 +41,13 @@
     <Compile Include="Animations\Animation.cs" />
     <Compile Include="Engine\BloomRenderComponent.cs" />
     <Compile Include="Engine\BloomParams.cs" />
-    <Compile Include="Services\AnimationLoader.cs" />
+    <Compile Include="Entities\Enviroment\LightingBranch.cs" />
+    <Compile Include="Entities\Enviroment\LightingBolt.cs" />
+    <Compile Include="Entities\Enviroment\SegmentLine.cs" />
+    <Compile Include="Services\Utils\GameScreen.cs" />
+    <Compile Include="Services\Utils\MenuScreen.cs" />
+    <Compile Include="Services\Utils\OptionScreen.cs" />
+    <Compile Include="Services\Utils\Screen.cs" />
     <Compile Include="Animations\Frame.cs" />
     <Compile Include="Animations\AnimationManager.cs" />
     <Compile Include="Engine\LightSpot.cs" />
@@ -51,7 +57,7 @@
     <Compile Include="Entities\Utils\SpriteAnimated.cs" />
     <Compile Include="Entities\Utils\Sprite.cs" />
     <Compile Include="Entities\Weapons\Gun.cs" />
-    <Compile Include="Services\LayerLoader.cs" />
+    <Compile Include="Services\LoadManager.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />
     <Compile Include="Controllers\Commands\Command.cs" />
     <Compile Include="Controllers\Commands\EntityCommands.cs" />
@@ -70,7 +76,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AudioManager.cs" />
+    <Compile Include="Services\ScreenManager.cs" />
     <Compile Include="Services\ServiceLocator.cs" />
+    <Compile Include="Services\PipelineManager.cs" />
+    <Compile Include="Services\Utils\TitleScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="OpenTK">

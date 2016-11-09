@@ -28,6 +28,20 @@ namespace CyberCommando.Controllers
     /// </summary>
     internal class InputHandler
     {
+        private static InputHandler _Instance;
+        public static InputHandler Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                    _Instance = new InputHandler();
+                return _Instance;
+
+            }
+        }
+
+        private InputHandler() { }
+
         private CharStateHandler CharHandler = new CharStateHandler();
 
         private DateTime Cooldown = DateTime.Now;
@@ -79,14 +93,14 @@ namespace CyberCommando.Controllers
             if (state.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
             {
                 Cooldown = DateTime.Now;
-                entity.world.AddToSpawnQueue(typeof(Projectile).FullName, entity.WorldPosition, entity.ArmAngle);
+                entity.CoreWorld.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.ArmAngle);
             }
 
-            if (state.X < entity.DrawPosition.X)
+            if (state.X < entity.DPosition.X)
                 entity.Direction = SpriteEffects.FlipHorizontally;
             else entity.Direction = SpriteEffects.None;
 
-            return Math.Atan2(state.Y - entity.DrawPosition.Y, state.X - entity.DrawPosition.X) - Math.PI / 2;
+            return Math.Atan2(state.Y - entity.DPosition.Y, state.X - entity.DPosition.X) - Math.PI / 2;
         }
     }
 }

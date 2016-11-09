@@ -28,20 +28,25 @@ namespace CyberCommando.Entities.Enviroment
             ResScale = 1f;
             this.Camera = camera;
             this.LayerSprites = layerRects;
+            this.State = state;
             this.Parallax = Vector2.One;
         }
 
-        public Layer(Camera camera, List<Sprite> layerRects, Vector2 parallax, LevelState state)
+        public Layer(Camera camera, List<Sprite> layerRects, Vector2 parallax, LevelState state) 
+                                                                            : this(camera, layerRects, state)
         {
-            this.Camera = camera;
-            this.LayerSprites = layerRects;
-            this.State = state;
             this.Parallax = parallax;
         }
 
         private bool IsOnScreen(Vector2 pos_c, Vector2 pos_w)
         {
             return false;
+        }
+
+        public void UpdateScale(float scale)
+        {
+            foreach (var sprite in LayerSprites)
+                sprite.ResScale = sprite.Scale * scale;
         }
 
         public void Draw(SpriteBatch batcher, Vector2 pos)
@@ -62,15 +67,12 @@ namespace CyberCommando.Entities.Enviroment
                                     Color.Gray,
                                     .0f,
                                     Vector2.One,
-                                    sprite.Scale * ResScale,
+                                    sprite.ResScale,
                                     SpriteEffects.None,
                                     1.0f);
             }
         }
 
-        public void EndDraw(SpriteBatch batcher)
-        {
-            batcher.End();
-        }
+        public void EndDraw(SpriteBatch batcher) { batcher.End(); }
     }
 }

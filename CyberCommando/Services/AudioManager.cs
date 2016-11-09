@@ -11,6 +11,17 @@ namespace CyberCommando.Services
     /// </summary>
     class AudioManager
     {
+        private static AudioManager _Instance;
+        public static AudioManager Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                    _Instance = new AudioManager();
+                return _Instance;
+            }
+        }
 
+        private AudioManager() { }
     }
 }

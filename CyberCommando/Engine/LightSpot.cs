@@ -14,30 +14,39 @@ namespace CyberCommando.Engine
     /// </summary>
     class LightSpot
     {
-        private GraphicsDevice graphicsDevice;
+        private GraphicsDevice GraphDev;
 
         public RenderTarget2D RenderTarget { get; private set; }
-        public Vector2 WorldPosition { get; set; }
-        public Vector2 DrawPosition { get; set; }
-        public Vector2 LightAreaSize { get; set; }
+        public Vector2 WPosition { get; set; }
+        public Vector2 DPosition { get; set; }
+        public Vector2 LAreaSize { get; set; }
         public Rectangle DrawSource { get; set; }
-        public Color LightColor { get; set; }
+        public Color LColor { get; set; }
         public bool IsOnScreen { get; set; }
 
-        public LightSpot(GraphicsDevice graphicsDevice, ShadowMapSize size)
+        public LightSpot(GraphicsDevice graphdev, ShadowMapSize size)
         {
             int baseSize = 2 << (int)size;
-            LightAreaSize = new Vector2(baseSize);
-            RenderTarget = new RenderTarget2D(graphicsDevice, baseSize, baseSize);
-            this.graphicsDevice = graphicsDevice;
+            this.LAreaSize = new Vector2(baseSize);
+            this.RenderTarget = new RenderTarget2D(graphdev, baseSize, baseSize);
+            this.LColor = Color.White;
+            this.GraphDev = graphdev;
         }
+
+        public LightSpot(GraphicsDevice graphdev, ShadowMapSize size, Vector2 pos) 
+                                                                : this(graphdev, size)
+        { this.WPosition = pos; }
+
+        public LightSpot(GraphicsDevice graphdev, ShadowMapSize size, Vector2 pos, Color color) 
+                                                                    : this (graphdev, size, pos)
+        { this.LColor = color; }
 
         /// <summary>
         /// Calculates light spot center accourding to the world
         /// </summary>
         public Vector2 ToRelativePosition(Vector2 worldPosition)
         {
-            return worldPosition - (DrawPosition - LightAreaSize * 0.5f);
+            return worldPosition - (DPosition - LAreaSize * 0.5f);
         }
 
         /// <summary>
@@ -45,8 +54,8 @@ namespace CyberCommando.Engine
         /// </summary>
         public void BeginDrawingShadowCasters()
         {
-            graphicsDevice.SetRenderTarget(RenderTarget);
-            graphicsDevice.Clear(Color.Transparent);
+            GraphDev.SetRenderTarget(RenderTarget);
+            GraphDev.Clear(Color.Transparent);
         }
 
         /// <summary>
@@ -54,7 +63,7 @@ namespace CyberCommando.Engine
         /// </summary>
         public void EndDrawingShadowCasters()
         {
-            graphicsDevice.SetRenderTarget(null);
+            GraphDev.SetRenderTarget(null);
         }
     }
 }

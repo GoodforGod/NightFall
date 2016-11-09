@@ -21,25 +21,25 @@ namespace CyberCommando.Entities.Weapons
         public Projectile(World world, Vector2 position, GunState state, Texture2D texture, Rectangle source) 
             : base(world)
         {
-            this.WorldPosition = position;
+            this.WPosition = position;
             this.State = state;
             this.SpriteSheet = texture;
             this.Source = source;
-            this.VelocityCurrent = new Vector2(5f, 5f);
+            this.CVelocity = new Vector2(5f, 5f);
             Scale = ResScale = 0.3f;
         }
 
         public override Entity Clone()
         {
-            return new Projectile(world, WorldPosition, State, SpriteSheet, Source);
+            return new Projectile(CoreWorld, WPosition, State, SpriteSheet, Source);
         }
 
         public override bool IsOnScreen()
         {
-            if (WorldPosition.X < world.LevelLimits.Width 
-                    && WorldPosition.X > world.LevelLimits.X - 200 
-                    && WorldPosition.Y < world.LevelLimits.Height 
-                    && WorldPosition.Y > world.LevelLimits.Y - 200)
+            if (WPosition.X < CoreWorld.LevelLimits.Width 
+                    && WPosition.X > CoreWorld.LevelLimits.X - 200 
+                    && WPosition.Y < CoreWorld.LevelLimits.Height 
+                    && WPosition.Y > CoreWorld.LevelLimits.Y - 200)
                 return true;
             else
                 return false;
@@ -55,7 +55,7 @@ namespace CyberCommando.Entities.Weapons
 
         public override void Update(GameTime gameTime)
         {
-            WorldPosition += VelocityCurrent * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            WPosition += CVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (!this.IsOnScreen())
                 this.Kill(this);
@@ -64,7 +64,7 @@ namespace CyberCommando.Entities.Weapons
         public override void Draw(GameTime gameTime, SpriteBatch batcher)
         {
             batcher.Draw(SpriteSheet,
-                               WorldPosition,
+                               WPosition,
                                Source,
                                Color.White * 0.8f,
                                Angle,

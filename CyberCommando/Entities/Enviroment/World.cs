@@ -19,12 +19,12 @@ namespace CyberCommando.Entities.Enviroment
     /// </summary>
     class World
     {
-        public readonly Game Game;
+        public readonly Game CoreGame;
 
         public int FrameWidth { get; set; }
         public int FrameHeight { get; set; }
 
-        private readonly static string level_one_name = "cybertown-1";
+        private readonly string level_one_name = "cybertown";
 
         public readonly float Gravity = 9.8f;
         public readonly int WorldOffset = 20;
@@ -47,21 +47,24 @@ namespace CyberCommando.Entities.Enviroment
 
         Level Level;
         internal Rectangle LevelLimits { get; private set; }
+        internal Rectangle LevelLimitsOrigin { get; private set; }
         internal Character Player { get; private set; }
         internal ServiceLocator Services { get; }
+        public ResolutionState ResolutionCurr { get; private set; }
 
         public World(Game game, int height, int width, Viewport viewport)
         {
-            this.Game = game;
+            this.CoreGame = game;
 
             ResScale = 1f;
             FrameWidth = width;
             FrameHeight = height;
 
-            Services = new ServiceLocator(game.Content, viewport, FrameWidth, FrameHeight);
+            ServiceLocator.Instance.Initialize(game.Content, game.GraphicsDevice, width, height);
+            Services = ServiceLocator.Instance;
 
-            Level = new Level(level_one_name, Services.LayLoader);
-            LevelLimits = Level.Limits;
+            Level = new Level(Services.PLManager.NLevel_1, Services.LManager);
+            LevelLimits = LevelLimitsOrigin = Level.Limits;
             Services.Camera.Limits = LevelLimits;
         }
 
@@ -72,10 +75,10 @@ namespace CyberCommando.Entities.Enviroment
         {
             var prms = new object[] { this };
             if (className == typeof(Projectile).FullName)
-                prms = new object[] { this, position, GunState.LASER_BULLET, Game.Content.Load<Texture2D>("gun-sprite-2"), new Rectangle(652, 102, 100, 184) };
+                prms = new object[] { this, position, GunState.LASER_BULLET, Services.PLManager.SGun, new Rectangle(652, 102, 100, 184) };
             var entity = (Entity)Activator.CreateInstance(Type.GetType(className), prms);
-            entity.WorldPosition = position;
-            entity.handler = Services.IOHandler;
+            entity.WPosition = position;
+            entity.Handler = Services.IOHandler;
             Entities.Add(entity);
             return entity;
         }
@@ -89,7 +92,7 @@ namespace CyberCommando.Entities.Enviroment
         {
             var entity = Spawn(className, position);
             entity.Angle = angle;
-            entity.VelocityCurrent = velocity;
+            entity.CVelocity = velocity;
             return entity; 
         }
 
@@ -115,13 +118,13 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public void UpdateResolution(int width, int height, ScreenRes res)
+        public void UpdateResolution(int width, int height, ResolutionState res)
         {
-            switch (res)
+            switch (ResolutionCurr = res)
             {
-                case ScreenRes.R1280x720: ResScale = 1; break;
-                case ScreenRes.R1600x900: ResScale = 1.25f; break;
-                case ScreenRes.R1920x1080: ResScale = 1.5f; break;
+                case ResolutionState.R1280x720: ResScale = 1; break;
+                case ResolutionState.R1600x900: ResScale = 1.25f; break;
+                case ResolutionState.R1920x1080: ResScale = 1.5f; break;
             }
 
             foreach (var entity in Entities)
@@ -130,12 +133,14 @@ namespace CyberCommando.Entities.Enviroment
 
             FrameWidth = width;
             FrameHeight = height;
-            Services.Camera.Origin = new Vector2(FrameWidth * 0.5f, FrameHeight * 0.5f);
-            Services.Camera.viewport = Game.GraphicsDevice.Viewport;
-            Level.LayersUpdateCameras(new Vector2(FrameWidth, FrameHeight), Game.GraphicsDevice.Viewport);
+            var frameW = width * 0.5f;
+            var frameH = height * 0.5f;
+            Services.Camera.Origin = new Vector2(frameW, frameH);
+            Services.Camera.viewport = CoreGame.GraphicsDevice.Viewport;
+            Level.LayersUpdateCameras(new Vector2(frameW, frameH), CoreGame.GraphicsDevice.Viewport);
         }
 
-        public virtual void Update(GameTime gameTime)
+        public void Spawner()
         {
             MouseState state = Mouse.GetState();
 
@@ -143,13 +148,19 @@ namespace CyberCommando.Entities.Enviroment
             foreach (var entity in EntitiesToAdd)
             {
                 var ent = Spawn(entity.Item1, entity.Item2, entity.Item3, entity.Item4);
-                if(ent is Projectile)
-                    ent.VelocityCurrent = new Vector2(state.X - Player.DrawPosition.X, 
-                                                        state.Y - Player.DrawPosition.Y);
+                if (ent is Projectile)
+                    ent.CVelocity = new Vector2(state.X - Player.DPosition.X,
+                                                        state.Y - Player.DPosition.Y);
             }
             // Wipe list
             EntitiesToAdd.Clear();
+        }
 
+        public virtual void Update(GameTime gameTime)
+        {
+            // Check for the need in spawner
+            if (EntitiesToAdd.Count != 0)
+                Spawner();
             // Updates all entities in world
             foreach (var entity in Entities)
                 entity.Update(gameTime);
@@ -157,8 +168,9 @@ namespace CyberCommando.Entities.Enviroment
             CamInput();
 
             // Move camera position
-            Services.Camera.LookAt(Player.WorldPosition);
-            Level.LayersLookAt(Player.WorldPosition);
+            Services.Camera.LookAt(Player.WPosition);
+            Level.LayersLookAt(Player.WPosition);
+            Level.LayersUpdate((int)Player.WPosition.X, FrameWidth / 2 + FrameWidth / (int)ResolutionCurr);
 
             // Collide all entities
             foreach (var a in Entities)
@@ -211,7 +223,7 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         public virtual void DrawLevelBackground(GameTime gameTime, SpriteBatch batcher)
         {
-            Level.DrawBackground(batcher, Player.WorldPosition);
+            Level.DrawBackground(batcher, Player.WPosition);
         }
 
         /// <summary>
@@ -219,7 +231,7 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         public virtual void DrawLevelFrontground(GameTime gameTime, SpriteBatch batcher)
         {
-            Level.DrawFrontground(batcher, Player.WorldPosition);
+            Level.DrawFrontground(batcher, Player.WPosition);
         }
 
         /// <summary>
@@ -243,11 +255,20 @@ namespace CyberCommando.Entities.Enviroment
         {
             batcher.Begin(SpriteSortMode.Deferred,
                                 null, null, null, null, null,
-                                Services.Camera.GetViewMatrix(new Vector2(0.9f)));
+                                Services.Camera.GetViewMatrix(Vector2.One));
 
             Player.Draw(gameTime, batcher);
 
             batcher.End();
+        }
+       
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<LightSpot> GetLevelLights()
+        {
+            return Level.Lights;
         }
 
         /// <summary>
@@ -261,7 +282,7 @@ namespace CyberCommando.Entities.Enviroment
 
             batcher.Begin(SpriteSortMode.Deferred,
                                 null, null, null, null, null,
-                                Services.Camera.GetViewMatrix(new Vector2(0.9f)));
+                                Services.Camera.GetViewMatrix(Vector2.One));
 
             foreach (var entity in Entities)
             {

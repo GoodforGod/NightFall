@@ -34,29 +34,31 @@ namespace CyberCommando.Entities
         /// <summary>
         /// World where entity is living <see cref="World"/>
         /// </summary>
-        public World world { get; }
+        public World CoreWorld { get; }
 
-        internal InputHandler handler { get; set; } 
+        internal InputHandler Handler { get; set; } 
 
         /// <summary>
         /// Stores entity sprite
         /// </summary>
         protected Texture2D SpriteSheet;
 
+        public Vector2 SpriteOffset { get; internal set; }
+
         /// <summary>
         /// Entity position to draw on screen
         /// </summary>
-        public Vector2 DrawPosition;
+        public Vector2 DPosition;
         /// <summary>
         /// Entity position in the world
         /// </summary>
-        public Vector2 WorldPosition;
+        public Vector2 WPosition;
         /// <summary>
         /// Current velocity vector
         /// </summary>
-        public Vector2 VelocityCurrent;
-        public virtual float VelocityLimit { get { return 290f; } }
-        public virtual float VelocityInc { get { return 15f; } }
+        public Vector2 CVelocity;
+        public virtual float LVelocity { get { return 290f; } }
+        public virtual float IVelocity { get { return 15f; } }
 
         /// <summary>
         /// Entity direction it is moving or facing
@@ -77,7 +79,7 @@ namespace CyberCommando.Entities
 
         public Entity(World world)
         {
-            this.world = world;
+            this.CoreWorld = world;
             Direction = SpriteEffects.None;
             Angle = 0f;
             Scale = ResScale = 1f;
@@ -105,7 +107,7 @@ namespace CyberCommando.Entities
         /// Returns worlds ground position
         /// </summary>
         /// <returns></returns>
-        public virtual int GetGround() { return world.FrameHeight - world.WorldOffset; }
+        public virtual int GetGround() { return CoreWorld.FrameHeight - CoreWorld.WorldOffset; }
 
         /// <summary>
         /// Calculates entity drawable position on the screen
@@ -114,7 +116,7 @@ namespace CyberCommando.Entities
 
         public virtual void Damage(Entity attacker, int damage) { }
 
-        public virtual void Kill(Entity killer) { world.Kill(this); }
+        public virtual void Kill(Entity killer) { CoreWorld.Kill(this); }
 
         public virtual void Touch(Entity other) { }
 

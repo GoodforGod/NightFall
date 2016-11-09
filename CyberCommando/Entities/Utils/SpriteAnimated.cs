@@ -37,7 +37,7 @@ namespace CyberCommando.Entities.Utils
         public SpriteAnimated(Rectangle source, Vector2 position, float angle, Texture2D texture)
             : base(source, position, angle, texture) { AniManager = new AnimationManager<TEnum>(); }
 
-        public void LoadAnimations(AnimationLoader loader, string spriteSheetName)
+        public void LoadAnimations(LoadManager loader, string spriteSheetName)
         {
             AniManager.LoadAnimations(loader, spriteSheetName);
         }

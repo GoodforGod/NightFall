@@ -16,12 +16,13 @@ namespace CyberCommando.Entities.Utils
         public Rectangle Source { get; set; }
         public Vector2 Position { get; set; }
         public float Scale { get; set; }
-
+        public float ResScale { get; set; }
         public Sprite()
         {
             this.Source = new Rectangle(1, 1, 1, 1);
             this.Position = Vector2.One;
             this.Scale = 1.0f;
+            this.ResScale = 1.0f;
         }
 
         public Sprite(Rectangle source) : this ()

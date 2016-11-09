@@ -22,7 +22,7 @@ namespace CyberCommando.Entities.Enemies
 
         public override Entity Clone()
         {
-            return new Enemy(world);
+            return new Enemy(CoreWorld);
         }
 
         public override bool IsOnScreen() { return false; }

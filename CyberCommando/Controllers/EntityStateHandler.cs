@@ -21,22 +21,22 @@ namespace CyberCommando.Controllers
         public virtual void MoveRight(Entity entity)
         {
             //entity.Direction = SpriteEffects.None;
-            if (entity.VelocityCurrent.X < entity.VelocityLimit)
-                entity.VelocityCurrent.X += entity.VelocityInc;
+            if (entity.CVelocity.X < entity.LVelocity)
+                entity.CVelocity.X += entity.IVelocity;
             entity.AniState = AnimationState.WALK;
         }
 
         public virtual void MoveLeft(Entity entity)
         {
             //entity.Direction = SpriteEffects.FlipHorizontally;
-            if (entity.VelocityCurrent.X > -entity.VelocityLimit)
-                entity.VelocityCurrent.X -= entity.VelocityInc;
+            if (entity.CVelocity.X > -entity.LVelocity)
+                entity.CVelocity.X -= entity.IVelocity;
             entity.AniState = AnimationState.WALK;
         }
 
         public virtual void Jump(Entity entity)
         {
-            entity.VelocityCurrent.Y = -entity.VelocityInc * 20; 
+            entity.CVelocity.Y = -entity.IVelocity * 20; 
             entity.AniState = AnimationState.JUMP;
         }
 
@@ -59,26 +59,33 @@ namespace CyberCommando.Controllers
             if (entity.AniState == AnimationState.WALK)
                 return;
 
-            if (entity.VelocityCurrent.X > 0)
-                entity.VelocityCurrent.X -= entity.VelocityInc;
-            else if(entity.VelocityCurrent.X < 0)
-                entity.VelocityCurrent.X += entity.VelocityInc;
+            if (entity.CVelocity.X > 0)
+                entity.CVelocity.X -= entity.IVelocity;
+            else if(entity.CVelocity.X < 0)
+                entity.CVelocity.X += entity.IVelocity;
         }
 
         /// <summary>
-        /// Changes entity position <see cref="Entity.WorldPosition"/> via velocity <see cref="Entity.VelocityCurrent"/>
+        /// Changes entity position <see cref="Entity.WPosition"/> via velocity <see cref="Entity.CVelocity"/>
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="gameTime"></param>
         public virtual void HandlePosition(Entity entity, GameTime gameTime)
         {
-            entity.WorldPosition.X += entity.VelocityCurrent.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            entity.WorldPosition.Y += entity.VelocityCurrent.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            entity.WPosition.X += entity.CVelocity.X * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            entity.WPosition.Y += entity.CVelocity.Y * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // Check if we are not falling under the world limit on axis Y
             // Double check cause we could fall
-            if (entity.WorldPosition.Y > entity.GetGround())
-                entity.WorldPosition.Y = entity.GetGround();
+            if (entity.WPosition.Y > entity.GetGround())
+                entity.WPosition.Y = entity.GetGround();
+
+            if (!entity.IsOnScreen())
+            {
+                if (entity.WPosition.X < 0)
+                    entity.WPosition.X = 0;
+                else entity.WPosition.X = entity.CoreWorld.LevelLimits.Width - entity.SpriteOffset.X;
+            }
         }
 
         /// <summary>
@@ -90,7 +97,7 @@ namespace CyberCommando.Controllers
             if (entity.IsGrounded())
                 return;
             entity.AniState = AnimationState.JUMP;
-            entity.VelocityCurrent.Y += entity.world.Gravity;
+            entity.CVelocity.Y += entity.CoreWorld.Gravity;
         }
     }
 }

@@ -54,8 +54,8 @@ namespace CyberCommando.Entities.Weapons
         public Gun(World world) 
         {
             AniManager = new AnimationManager<GunState>();
-            SpriteSheet = world.Game.Content.Load<Texture2D>(SpriteSheetName);
-            AniManager.LoadAnimations(world.Services.AniLoader, SpriteSheetName);
+            SpriteSheet = world.CoreGame.Content.Load<Texture2D>(SpriteSheetName);
+            AniManager.LoadAnimations(world.Services.LManager, SpriteSheetName);
         }
 
         public void Fire(Vector2 vector)

@@ -42,9 +42,9 @@ namespace CyberCommando.Animations
         /// <param name="spritesheetName">
         /// Name of the texture/sprite for the animations
         /// </param>
-        public void LoadAnimations(AnimationLoader loader, string spritesheetName)
+        public void LoadAnimations(LoadManager loader, string spritesheetName)
         {
-            Animations = loader.LoadAll<TEnum>(spritesheetName);
+            Animations = loader.LoadAnimations<TEnum>(spritesheetName);
             if (Animations == null || Animations.Count == 0)
                 throw new NullReferenceException("Animations is null or empty, check animation files for: " + spritesheetName);
         }
