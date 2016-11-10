@@ -25,37 +25,6 @@ namespace CyberCommando
         GraphicsDeviceManager graphics;
         SpriteBatch CoreBatcher;
 
-        /*
-
-        World world;
-        Color ShadowColor = Color.Gray;
-
-        Vector2 LightPos;
-
-        Vector2 LightLeftLimit;
-        Vector2 LightRightLimit;
-
-        bool ShadowEffect = false;
-        QuadRenderComponent QuadRender;
-        bool BloomEffect = false;
-        BloomRenderComponent BloomRender;
-
-        ShadowResolver ShadowRender;
-        List<LightSpot> LevelLight = new List<LightSpot>();
-
-        ResolutionState CurrentRes { get; set; }
-
-        ScreenManager SManager;
-
-        //int FrameWidth { get; set; }
-        //int FrameHeight { get; set; }
-        int LIGHT_COUNT = 9;
-
-        int LeftLimit { get; set; }
-        int RightLimit { get; set; }
-        int RightLightLimit { get; set; }
-
-        */
         ResolutionState ResolutionCurrent { get; set; }
         ScreenManager SManager;
 
@@ -70,13 +39,7 @@ namespace CyberCommando
 
             //this.IsFixedTimeStep = true;
             this.IsMouseVisible = true;
-            /*
-            QuadRender = new QuadRenderComponent(this);
-            BloomRender = new BloomRenderComponent(this);
-
-            this.Components.Add(BloomRender);
-            this.Components.Add(QuadRender);
-            */
+           
             Content.RootDirectory = "Content";
         }
 
@@ -111,10 +74,6 @@ namespace CyberCommando
 
             CoreBatcher = new SpriteBatch(GraphicsDevice);
             SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
-            /*
-            world.UpdateResolution(width, height, res);
-            BloomRender.UpdateBatcher();
-            */
         }
 
         /// <summary>
@@ -125,69 +84,13 @@ namespace CyberCommando
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             CoreBatcher = new SpriteBatch(GraphicsDevice);
-            /*
-            world = new World(this, GraphicsDevice.Viewport.Height, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport);
-            world.Initialize();
-            
-            //Resize screen
-            */
+
             Resize(ResolutionState.R1280x720);
 
             SManager.UpdateGameObject(this);
             SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
             SManager.LoadContent(Content);
-
-            /*
-            LeftLimit = world.FrameWidth / 2;
-            RightLimit = world.LevelLimits.Width - world.FrameWidth / 2;
-            RightLightLimit = world.LevelLimits.Width - world.FrameWidth;
-
-            ShadowRender = new ShadowResolver(GraphicsDevice, 
-                                                QuadRender,
-                                                ShadowMapSize.Size256,
-                                                ShadowMapSize.Size256, 
-                                                ShadowColor);
-            ShadowRender.LoadContent(Content);
-            SpawnLight();
-            */
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        //protected void SpawnLight()
-        //{
-        //    for (int i = 0; i < LIGHT_COUNT; i++)
-        //        LevelLight.Add(new LightSpot(GraphicsDevice, ShadowMapSize.Size512));
-
-        //    LightPos = new Vector2(150, 580);
-
-        //    var rand = new System.Random();
-
-        //    foreach (var light in LevelLight)
-        //    {
-        //        light.WorldPosition = LightPos;
-        //        LightPos.X += 420;
-
-        //        switch (rand.Next(0, 9))
-        //        {
-        //            case 0: light.LightColor = Color.Tomato; break;
-        //            case 1: light.LightColor = Color.LightPink; break;
-        //            case 2: light.LightColor = Color.LightGreen; break;
-        //            case 3: light.LightColor = Color.LightGoldenrodYellow; break;
-        //            case 4: light.LightColor = Color.Blue; break;
-        //            case 5: light.LightColor = Color.White; break;
-        //            case 6: light.LightColor = Color.MediumPurple; break;
-        //            case 7: light.LightColor = Color.SeaGreen; break;
-        //            case 8: light.LightColor = Color.Orange; break;
-        //            case 9: light.LightColor = Color.LightCyan; break;
-        //            default: light.LightColor = Color.LightGreen; break;
-        //        }
-        //    }
-
-        //    LightLeftLimit = new Vector2(-LevelLight[0].LightAreaSize.X, 0);
-        //    LightRightLimit = new Vector2(world.FrameWidth + LevelLight[0].LightAreaSize.X, 0);
-        //}
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -196,6 +99,7 @@ namespace CyberCommando
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
+            SManager.UnloadContent();
         }
 
         /// <summary>
@@ -208,61 +112,15 @@ namespace CyberCommando
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            SManager.Update(gameTime);
-            /*
-            world.Update(gameTime);
-            */
-            base.Update(gameTime);
-        }
-
-        /* public void DrawLights(SpriteBatch batcher)
-        {
-            batcher.Begin(SpriteSortMode.Deferred,
-                            BlendState.Additive,
-                            null, null, null, null, null);
-            // world.Services.Camera.GetViewMatrix(new Vector2(0.9f))
-
-            foreach (var light in LevelLight)
             {
-                if (light.IsOnScreen)
-                    batcher.Draw(light.RenderTarget,
-                                 light.DrawPosition - light.LightAreaSize * 0.5f,
-                                 light.LightColor);
+                UnloadContent();
+                Exit();
             }
 
-            batcher.End();
+            SManager.Update(gameTime);
+           
+            base.Update(gameTime);
         }
-*/
-
-        /* public void ResolveLightShadowCasts(GameTime gameTime, SpriteBatch batcher)
-                {
-                    var playerLeft = world.Player.WorldPosition.X - LeftLimit;
-
-                    foreach (var light in LevelLight)
-                    {
-                        if (world.Player.WorldPosition.X < LeftLimit)
-                            light.DrawPosition = light.WorldPosition;
-                        else if (world.Player.WorldPosition.X > RightLimit)
-                            light.DrawPosition = new Vector2(light.WorldPosition.X - RightLightLimit, light.WorldPosition.Y);
-                        else
-                            light.DrawPosition = new Vector2((light.WorldPosition.X - playerLeft), light.WorldPosition.Y);
-
-                        if (light.DrawPosition.X > LightRightLimit.X || light.DrawPosition.X < LightLeftLimit.X)
-                        {
-                            light.IsOnScreen = false;
-                            continue;
-                        }
-                        else light.IsOnScreen = true;
-
-                        light.BeginDrawingShadowCasters();
-                        world.DrawEntitiesShadowCasters(gameTime, batcher, light, Color.Black);
-                        light.EndDrawingShadowCasters();
-                        ShadowRender.ResolveShadows(light.RenderTarget, light.RenderTarget, light.DrawPosition);
-                    }
-                }
-                */
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -271,43 +129,6 @@ namespace CyberCommando
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            /*
-            // Resolve shadow map
-            if (ShadowEffect)
-            {
-                ResolveLightShadowCasts(gameTime, batcher);
-                ShadowRender.BeginDraw(GraphicsDevice);
-                DrawLights(batcher);
-                ShadowRender.EndDraw(GraphicsDevice);
-            }
-            // Draw Bloom Effect
-            if (BloomEffect)
-                BloomRender.BeginDraw();
-
-            // Draw Level background layers
-            world.DrawLevelBackground(gameTime, batcher);
-
-            if (BloomEffect)
-            {
-                BloomRender.DrawBloom();
-                BloomRender.EndDraw();
-                BloomRender.DisplayBloomTarget();
-            }
-
-            // Display Frontlevel layers and Entitites
-            world.DrawLevelFrontground(gameTime, batcher);
-            world.DrawLevelEntities(gameTime, batcher);
-
-            // Display Shadow Map
-            if (ShadowEffect)
-                ShadowRender.DisplayShadowCast(batcher);
-
-            base.Draw(gameTime);
-            
-            // DrawCharacter without effects cause all effects already accured
-            world.DrawCharacter(gameTime, batcher);
-            */
 
             SManager.Draw(CoreBatcher, gameTime);
 

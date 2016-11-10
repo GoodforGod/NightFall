@@ -10,6 +10,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CyberCommando.Services.Utils
 {
+    public enum MenuState
+    {
+
+    }
+
     /// <summary>
     /// 
     /// </summary>

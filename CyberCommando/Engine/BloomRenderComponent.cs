@@ -53,11 +53,6 @@ namespace CyberCommando.Engine
             Settings = BloomParams.PresetSettings[setup];
         }
 
-        /*
-        public void UpdateBatcher()
-        {
-        }
-        */
 
         public void BeginDraw()
         {

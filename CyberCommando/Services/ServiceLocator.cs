@@ -25,6 +25,7 @@ namespace CyberCommando.Services
         internal InputHandler IOHandler { get; private set; }
         internal AudioManager AUManager { get; private set; }
         internal PipelineManager PLManager { get; private set; }
+        internal LevelManager LVLManager { get; private set; }
 
         private static ServiceLocator _Instance;
         public static ServiceLocator Instance
@@ -49,6 +50,8 @@ namespace CyberCommando.Services
             IOHandler = InputHandler.Instance;
             PLManager = PipelineManager.Instance;
             PLManager.Initialize(content);
+            LVLManager = LevelManager.Instance;
+            LVLManager.Initialize();
 
             Camera = new Camera(GraphDev.Viewport);
             Camera.Position = new Vector2(0f, frameWidth / 2);

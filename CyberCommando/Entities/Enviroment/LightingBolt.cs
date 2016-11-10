@@ -20,6 +20,11 @@ namespace CyberCommando.Entities.Enviroment
         public float FadeOutRate { get; set; }
         public Color Tint { get; set; }
 
+        public Vector2 LBPosition { get; set; }
+
+        public bool IsRendered { get; private set; }
+        private RenderTarget2D LBRenderTarget;
+        public Texture2D LBRender { get; private set; }
         Texture2D Sprite;
 
         static Random rand = new Random();
@@ -30,7 +35,7 @@ namespace CyberCommando.Entities.Enviroment
         public LightningBolt(Vector2 source, Vector2 dest, Color color, Texture2D sprite)
         {
             this.Sprite = sprite;
-            Segments = CreateBolt(source, dest, 2);
+            Segments = CreateBolt(LBPosition = source, dest, 2);
 
             Tint = color;
             Alpha = 1f;
@@ -38,13 +43,37 @@ namespace CyberCommando.Entities.Enviroment
             FadeOutRate = 0.03f;
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void FillRender(SpriteBatch batcher, GraphicsDevice graphdev)
+        {
+            PresentationParameters pp = graphdev.PresentationParameters;
+            LBRenderTarget = new RenderTarget2D(graphdev, 
+                pp.BackBufferWidth,
+                pp.BackBufferHeight, 
+                true,
+                graphdev.DisplayMode.Format, 
+                DepthFormat.Depth24);
+
+            Services.ServiceLocator.Instance.GraphDev.SetRenderTarget(LBRenderTarget);
+
+            Draw(batcher);
+
+            LBRender = (Texture2D)LBRenderTarget;
+            Services.ServiceLocator.Instance.GraphDev.SetRenderTarget(null);
+            IsRendered = true;
+        }
+
+        public void DrawRender(SpriteBatch batcher)
+        {
+            batcher.Draw(LBRender, LBPosition, Tint);
+        }
+
+        public void Draw(SpriteBatch batcher)
         {
             if (Alpha <= 0)
                 return;
 
             foreach (var segment in Segments)
-                segment.Draw(spriteBatch, Tint * (Alpha * AlphaMultiplier));
+                segment.Draw(batcher, Tint * (Alpha * AlphaMultiplier));
         }
 
         public virtual void Update() { Alpha -= FadeOutRate; }

@@ -89,7 +89,7 @@ namespace CyberCommando.Services.Utils
                             null, null, null, null, null);
             // world.Services.Camera.GetViewMatrix(new Vector2(0.9f))
 
-            foreach (var light in CoreWorld.GetLevelLights())
+            foreach (var light in CoreWorld.LevelLight)
             {
                 if (light.IsOnScreen)
                     batcher.Draw(light.RenderTarget,
@@ -107,7 +107,7 @@ namespace CyberCommando.Services.Utils
         {
             var playerLeft = CoreWorld.Player.WPosition.X - LeftLimit;
 
-            var lightOnLevel = CoreWorld.GetLevelLights();
+            var lightOnLevel = CoreWorld.LevelLight;
 
            var LightLeftLimit = new Vector2(-lightOnLevel[0].LAreaSize.X, 0);
            var LightRightLimit = new Vector2(CoreWorld.FrameWidth + lightOnLevel[0].LAreaSize.X, 0);

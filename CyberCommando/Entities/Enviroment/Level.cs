@@ -40,7 +40,9 @@ namespace CyberCommando.Entities.Enviroment
         private Texture2D LBranchSprite;
         private DateTime Begin;
 
-        public Level(string levelName, LoadManager loader)
+        public Level() { }
+
+        public void Initialize(string levelName, LoadManager loader)
         {
             var LoadedPack = loader.LoadLevel(levelName, ServiceLocator.Instance.GraphDev);
             Limits = LoadedPack.Item4;
@@ -105,7 +107,7 @@ namespace CyberCommando.Entities.Enviroment
 
         public void EndDrawFrontground(SpriteBatch bather) { Frontground.EndDraw(bather); }
 
-        public void DrawFrontground(SpriteBatch bather, Vector2 pos) { Frontground.Draw(bather, pos); }
+        public void DrawFrontground(SpriteBatch bather, Vector2 pos, Vector2 limits) { Frontground.Draw(bather, pos, limits); }
 
         public void DrawLighting(SpriteBatch batcher, Matrix layerCamMatrix)
         {

@@ -16,6 +16,9 @@ namespace CyberCommando.Entities.Enviroment
         public Vector2 End { get; private set; }
         private Vector2 direction;
 
+        public bool IsRendered { get; private set; }
+        private RenderTarget2D LBRenderTarget;
+        public Texture2D LBRender { get; private set; }
         Texture2D Sprite;
 
         static Random rand = new Random();
@@ -35,10 +38,30 @@ namespace CyberCommando.Entities.Enviroment
                 bolt.Update();
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void FillRender(SpriteBatch batcher, GraphicsDevice graphdev)
+        {
+            PresentationParameters pp = graphdev.PresentationParameters;
+            LBRenderTarget = new RenderTarget2D(graphdev,
+                pp.BackBufferWidth,
+                pp.BackBufferHeight,
+                true,
+                graphdev.DisplayMode.Format,
+                DepthFormat.Depth24);
+
+            foreach (var bolt in bolts)
+                bolt.FillRender(batcher, graphdev);
+        }
+
+        public void DrawRender(SpriteBatch batcher)
         {
             foreach (var bolt in bolts)
-                bolt.Draw(spriteBatch);
+                bolt.DrawRender(batcher);
+        }
+
+        public void Draw(SpriteBatch batcher)
+        {
+            foreach (var bolt in bolts)
+                bolt.Draw(batcher);
         }
 
         private void Create(Vector2 start, Vector2 end)

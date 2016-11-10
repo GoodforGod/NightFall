@@ -24,8 +24,6 @@ namespace CyberCommando.Entities.Enviroment
         public int FrameWidth { get; set; }
         public int FrameHeight { get; set; }
 
-        private readonly string level_one_name = "cybertown";
-
         public readonly float Gravity = 9.8f;
         public readonly int WorldOffset = 20;
         float CameraShadowEntityDepth = 1.05f;
@@ -45,12 +43,17 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         List<Tuple<string, Vector2, float, Vector2>> EntitiesToAdd = new List<Tuple<string, Vector2, float, Vector2>>();
 
+        LevelManager LVLManager;
         Level Level;
-        internal Rectangle LevelLimits { get; private set; }
-        internal Rectangle LevelLimitsOrigin { get; private set; }
+        internal Rectangle LevelLimits { get { return LVLManager.CurrentLimits; } }
+        //internal Rectangle LevelLimitsOrigin { get; private set; }
         internal Character Player { get; private set; }
         internal ServiceLocator Services { get; }
         public ResolutionState ResolutionCurr { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<LightSpot> LevelLight { get { return LVLManager.CurrentLights; } }
 
         public World(Game game, int height, int width, Viewport viewport)
         {
@@ -62,10 +65,10 @@ namespace CyberCommando.Entities.Enviroment
 
             ServiceLocator.Instance.Initialize(game.Content, game.GraphicsDevice, width, height);
             Services = ServiceLocator.Instance;
+            LVLManager = Services.LVLManager;
 
-            Level = new Level(Services.PLManager.NLevel_1, Services.LManager);
-            LevelLimits = LevelLimitsOrigin = Level.Limits;
-            Services.Camera.Limits = LevelLimits;
+            //Level = new Level(Services.PLManager.NLevel_1, Services.LManager);
+            Services.Camera.Limits = LVLManager.CurrentLimits;
         }
 
         public virtual void Initialize() { Player = (Character) Spawn(typeof(Character).FullName); }
@@ -116,8 +119,6 @@ namespace CyberCommando.Entities.Enviroment
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         public void UpdateResolution(int width, int height, ResolutionState res)
         {
             switch (ResolutionCurr = res)
@@ -129,7 +130,6 @@ namespace CyberCommando.Entities.Enviroment
 
             foreach (var entity in Entities)
                 entity.ResScale = ResScale * entity.Scale;
-            Level.LayersUpdateScale(ResScale);
 
             FrameWidth = width;
             FrameHeight = height;
@@ -137,7 +137,8 @@ namespace CyberCommando.Entities.Enviroment
             var frameH = height * 0.5f;
             Services.Camera.Origin = new Vector2(frameW, frameH);
             Services.Camera.viewport = CoreGame.GraphicsDevice.Viewport;
-            Level.LayersUpdateCameras(new Vector2(frameW, frameH), CoreGame.GraphicsDevice.Viewport);
+
+            LVLManager.UpdateScale(ResScale, new Vector2(frameW, frameH), CoreGame.GraphicsDevice.Viewport);
         }
 
         public void Spawner()
@@ -169,8 +170,8 @@ namespace CyberCommando.Entities.Enviroment
 
             // Move camera position
             Services.Camera.LookAt(Player.WPosition);
-            Level.LayersLookAt(Player.WPosition);
-            Level.LayersUpdate((int)Player.WPosition.X, FrameWidth / 2 + FrameWidth / (int)ResolutionCurr);
+
+            LVLManager.Update(Player.WPosition, (int)Player.WPosition.X, FrameWidth / 2 + FrameWidth / (int)ResolutionCurr);
 
             // Collide all entities
             foreach (var a in Entities)
@@ -215,7 +216,6 @@ namespace CyberCommando.Entities.Enviroment
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="entity"></param>
         public virtual void Kill(Entity entity) { EntitiesToKill.Add(entity); }
 
         /// <summary>
@@ -223,7 +223,8 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         public virtual void DrawLevelBackground(GameTime gameTime, SpriteBatch batcher)
         {
-            Level.DrawBackground(batcher, Player.WPosition);
+            //Level.DrawBackground(batcher, Player.WPosition);
+            LVLManager.DrawBack(batcher, Player.WPosition);
         }
 
         /// <summary>
@@ -231,7 +232,8 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         public virtual void DrawLevelFrontground(GameTime gameTime, SpriteBatch batcher)
         {
-            Level.DrawFrontground(batcher, Player.WPosition);
+            //Level.DrawFrontground(batcher, Player.WPosition);
+            LVLManager.DrawFront(batcher, Player.WPosition, new Vector2(FrameWidth, FrameHeight));
         }
 
         /// <summary>
@@ -245,7 +247,8 @@ namespace CyberCommando.Entities.Enviroment
                     entity.Draw(gameTime, batcher);
             }
 
-            Level.EndDrawFrontground(batcher);
+            //Level.EndDrawFrontground(batcher);
+            LVLManager.EndDrawFront(batcher);
         }
 
         /// <summary>
@@ -262,14 +265,6 @@ namespace CyberCommando.Entities.Enviroment
             batcher.End();
         }
        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public List<LightSpot> GetLevelLights()
-        {
-            return Level.Lights;
-        }
 
         /// <summary>
         /// 

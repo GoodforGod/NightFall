@@ -44,6 +44,7 @@
     <Compile Include="Entities\Enviroment\LightingBranch.cs" />
     <Compile Include="Entities\Enviroment\LightingBolt.cs" />
     <Compile Include="Entities\Enviroment\SegmentLine.cs" />
+    <Compile Include="Services\LevelManager.cs" />
     <Compile Include="Services\Utils\GameScreen.cs" />
     <Compile Include="Services\Utils\MenuScreen.cs" />
     <Compile Include="Services\Utils\OptionScreen.cs" />
