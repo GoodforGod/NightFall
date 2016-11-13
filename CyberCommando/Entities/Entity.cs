@@ -107,7 +107,7 @@ namespace CyberCommando.Entities
         /// Returns worlds ground position
         /// </summary>
         /// <returns></returns>
-        public virtual int GetGround() { return CoreWorld.FrameHeight - CoreWorld.WorldOffset; }
+        public virtual int GetGround() { return CoreWorld.FHeight - CoreWorld.WorldOffset; }
 
         /// <summary>
         /// Calculates entity drawable position on the screen

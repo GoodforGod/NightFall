@@ -20,16 +20,21 @@ namespace CyberCommando.Services.Utils
         protected GraphicsDevice GraphDev { get; set; }
         protected Game CoreGame { get; set; }
 
+        protected int FWidth { get; private set; }
+        protected int FHeight { get; private set; }
+        protected float SScale { get; private set; }
+
         public bool IsInitialized { get; private set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public virtual void Initialize(GraphicsDevice graphdev, Game game)
+        public virtual void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             this.GraphDev = graphdev;
             this.CoreGame = game;
             IsInitialized = true;
+            SScale = 1.0f;
         }
 
         /// <summary>
@@ -38,7 +43,18 @@ namespace CyberCommando.Services.Utils
         /// <param name="res"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public virtual void Resize(ResolutionState res, int width, int height) { }
+        public virtual void Resize(ResolutionState res, int width, int height)
+        {
+            switch (res)
+            {
+                case ResolutionState.R1280x720: SScale = 1; break;
+                case ResolutionState.R1600x900: SScale = 1.25f; break;
+                case ResolutionState.R1920x1080: SScale = 1.5f; break;
+            }
+
+            this.FWidth = width;
+            this.FHeight = height;
+        }
 
         /// <summary>
         /// 
@@ -62,6 +78,5 @@ namespace CyberCommando.Services.Utils
         /// 
         /// </summary>
         public virtual void Draw(SpriteBatch batcher, GameTime gameTime) { }
-        public virtual void Draw(SpriteBatch batcher) { }
     }
 }

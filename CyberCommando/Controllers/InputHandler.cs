@@ -49,27 +49,25 @@ namespace CyberCommando.Controllers
         /// <summary>
         /// Handle all keyboard input and handle Character state
         /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="gameTime"></param>
         public void HandleKeyboardInput(Character entity, GameTime gameTime)
         {
-            KeyboardState currState = Keyboard.GetState();
+            KeyboardState kState = Keyboard.GetState();
 
             entity.AniState = AnimationState.IDLE;
 
-            if(currState.IsKeyDown(Keys.A))
+            if(kState.IsKeyDown(Keys.A))
                 CharHandler.MoveLeft(entity);
 
-            if (currState.IsKeyDown(Keys.D))
+            if (kState.IsKeyDown(Keys.D))
                 CharHandler.MoveRight(entity);
 
-            if (currState.IsKeyDown(Keys.W))
+            if (kState.IsKeyDown(Keys.W))
                 CharHandler.Jump(entity);
 
-            if (currState.IsKeyDown(Keys.S))
+            if (kState.IsKeyDown(Keys.S))
                 CharHandler.Duck(entity);
 
-            if (currState.IsKeyDown(Keys.Space))
+            if (kState.IsKeyDown(Keys.Space))
                 CharHandler.Fire(entity);
 
             CharHandler.Gravity(entity);
@@ -82,25 +80,24 @@ namespace CyberCommando.Controllers
         /// <summary>
         /// Handle mouse input, changes entity direction and projectile spawn
         /// </summary>
-        /// <param name="entity"></param>
         /// <returns>
         /// Angle between mouse and Character, so that character arm could be drawn correctly
         /// </returns>
         public double HandleMouseInput(Character entity)
         {
-            MouseState state = Mouse.GetState();
+            MouseState mState = Mouse.GetState();
 
-            if (state.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
+            if (mState.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
             {
                 Cooldown = DateTime.Now;
                 entity.CoreWorld.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.ArmAngle);
             }
 
-            if (state.X < entity.DPosition.X)
+            if (mState.X < entity.DPosition.X)
                 entity.Direction = SpriteEffects.FlipHorizontally;
             else entity.Direction = SpriteEffects.None;
 
-            return Math.Atan2(state.Y - entity.DPosition.Y, state.X - entity.DPosition.X) - Math.PI / 2;
+            return Math.Atan2(mState.Y - entity.DPosition.Y, mState.X - entity.DPosition.X) - Math.PI / 2;
         }
     }
 }

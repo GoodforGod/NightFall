@@ -14,6 +14,7 @@ namespace CyberCommando.Services
 {
     public enum LevelNames
     {
+        MENU,
         PROLOG,
         CYBERTOWN
     }
@@ -34,25 +35,26 @@ namespace CyberCommando.Services
         public Level CurrentLevel { get; private set; }
         public Rectangle CurrentLimits { get { return CurrentLevel.Limits; } }
         public List<LightSpot> CurrentLights { get { return CurrentLevel.Lights; } }
+        public Dictionary<string, Rectangle> SSources { get; private set; }
 
         private ServiceLocator Services;
 
-        private readonly string[] Levels = { "prolog", "cybertown" };
+        private readonly string[] Levels = { "menu", "prolog", "cybertown" };
 
         private LevelManager() { Services = ServiceLocator.Instance; }
 
         public void Initialize()
         {
             CurrentLevel = new Level();
-            LoadLevel(LevelNames.CYBERTOWN);
+            SSources = new Dictionary<string, Rectangle>();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void LoadLevel(LevelNames level)
+        public void LoadLevel(LevelNames lvl)
         {
-            CurrentLevel.Initialize(Levels[(int)level], Services.LManager);
+            CurrentLevel.Initialize(Levels[(int)lvl], Services.LManager);
         }
 
         /// <summary>
@@ -66,26 +68,31 @@ namespace CyberCommando.Services
             CurrentLevel.LayersUpdateCameras(origin, viewport);
         }
 
-        public void Update(Vector2 position, int pos, int halfFrameW)
+        public void Update(Vector2 position, int pos, int FWidthHalf)
         {
             CurrentLevel.LayersLookAt(position);
-            CurrentLevel.LayersUpdate(pos, halfFrameW);
+            CurrentLevel.LayersUpdate(pos, FWidthHalf);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void DrawBack(SpriteBatch batcher, Vector2 position)
+        public void DrawBack(SpriteBatch batcher)
         {
-            CurrentLevel.DrawBackground(batcher, position);
+            CurrentLevel.DrawBackground(batcher);
         }
         
+        public void DrawBlur(SpriteBatch batcher, Vector2 limits)
+        {
+
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        public void DrawFront(SpriteBatch batcher, Vector2 position, Vector2 limits)
+        public void DrawFront(SpriteBatch batcher, Vector2 limits)
         {
-            CurrentLevel.DrawFrontground(batcher, position, limits);
+            CurrentLevel.DrawFrontground(batcher, limits);
         }
 
         /// <summary>

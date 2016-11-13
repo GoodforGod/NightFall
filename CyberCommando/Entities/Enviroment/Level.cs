@@ -20,9 +20,9 @@ namespace CyberCommando.Entities.Enviroment
     public enum LevelState
     {
         FRONT,
-        MIDDLE,
-        BACK,
         BACKGROUND,
+        BACK,
+        MIDDLE,
         BLURY
     }
 
@@ -31,10 +31,11 @@ namespace CyberCommando.Entities.Enviroment
     /// </summary>
     class Level
     {
-        private List<Layer> Layers { get; set; }
+        public List<Layer> Layers { get; private set; }
         public List<LightSpot> Lights { get; private set; }
         public Rectangle Limits { get; private set; }
         private Layer Frontground;
+        private Layer Blurground;
         private LightningBranch LBranch;
         private Random LRand;
         private Texture2D LBranchSprite;
@@ -55,20 +56,23 @@ namespace CyberCommando.Entities.Enviroment
                 layer.Camera.Limits = this.Limits;
                 if (layer.State == LevelState.FRONT)
                     Frontground = layer;
+                if (layer.State == LevelState.BLURY)
+                    Blurground = layer;
             }
+
             LBranchSprite = Layers[0].Texture;
             LBranch = new LightningBranch(new Vector2(100, Limits.Y), new Vector2(100, Limits.Height), LBranchSprite);
             Begin = DateTime.Now;
             LRand = new Random(Guid.NewGuid().GetHashCode());
         }
 
-        public void LayersUpdate(int pos, int halfFrameW)
+        public void LayersUpdate(int pos, int FWidthHalf)
         {
             var timenow = DateTime.Now;
 
             if ((timenow - Begin).TotalSeconds > 3)
             {
-                var randpos = LRand.Next(pos - halfFrameW , pos + halfFrameW);
+                var randpos = LRand.Next(pos - FWidthHalf , pos + FWidthHalf);
 
                 LBranch = new LightningBranch(new Vector2(randpos, Limits.Y), new Vector2(randpos, Limits.Height), LBranchSprite);
                 Begin = timenow;
@@ -101,13 +105,27 @@ namespace CyberCommando.Entities.Enviroment
 
         public void LayersUpdateScale(float scale)
         {
-            foreach (var layer in Layers)
-                layer.UpdateScale(scale);
+            if (Layers != null)
+                foreach (var layer in Layers)
+                    layer.UpdateScale(scale);
         }
 
-        public void EndDrawFrontground(SpriteBatch bather) { Frontground.EndDraw(bather); }
+        public void DrawFrontground(SpriteBatch batcher, Vector2 limits)
+        {
+            if (Frontground != null)
+                Frontground.Draw(batcher, limits);
+        }
 
-        public void DrawFrontground(SpriteBatch bather, Vector2 pos, Vector2 limits) { Frontground.Draw(bather, pos, limits); }
+        public void EndDrawFrontground(SpriteBatch bather)
+        {
+            if (Frontground != null)
+                Frontground.EndDraw(bather);
+        }
+
+        public void DrawBlurground(SpriteBatch batcher, Vector2 limits)
+        {
+            Blurground.Draw(batcher, limits);
+        }
 
         public void DrawLighting(SpriteBatch batcher, Matrix layerCamMatrix)
         {
@@ -119,14 +137,14 @@ namespace CyberCommando.Entities.Enviroment
             batcher.End();
         }
 
-        public void DrawBackground(SpriteBatch batcher, Vector2 pos)
+        public void DrawBackground(SpriteBatch batcher)
         {
             foreach (var layer in Layers)
                 if (layer.State != LevelState.FRONT)
                 {
-                    if (layer.State == LevelState.BACKGROUND && LBranch != null)
+                    if (layer.State == LevelState.BACK && LBranch != null)
                         DrawLighting(batcher, layer.Camera.GetViewMatrix(layer.Parallax));
-                    layer.Draw(batcher, pos);
+                    layer.Draw(batcher);
                     layer.EndDraw(batcher);
                 }
         }

@@ -31,9 +31,11 @@ namespace CyberCommando.Services
         protected ContentManager Content;
 
         GraphicsDevice GraphDev;
-        Game Core;
+        GameCore Core;
 
+        ResolutionState ResolutionCurrent;
         Screen CurrentScreen;
+        Dictionary<ScreenState, Screen> Screens = new Dictionary<ScreenState, Screen>();
 
         private static ScreenManager _Instance;
         public static ScreenManager Instance
@@ -46,19 +48,20 @@ namespace CyberCommando.Services
             }
         }
 
-        Dictionary<ScreenState, Screen> Screens = new Dictionary<ScreenState, Screen>();
-
         private ScreenManager() { }
 
-        public void SwitchScreen(ScreenState type)
+        public void Exit() { Core.NeedExit = true; }
+
+        public void SwitchScreen(ScreenState type, params object[] param)
         {
             CurrentScreen.UnloadContent();
             CurrentScreen = Screens[type];
 
             if (!CurrentScreen.IsInitialized)
-                CurrentScreen.Initialize(GraphDev, Core);
+                CurrentScreen.Initialize(GraphDev, Core, param);
 
             CurrentScreen.LoadContent(Content);
+            CurrentScreen.Resize(ResolutionCurrent, GraphDev.Viewport.Width, GraphDev.Viewport.Height);
         }
 
         /// <summary>
@@ -67,7 +70,7 @@ namespace CyberCommando.Services
         public void Initialize(GraphicsDevice graphdev, Game core)
         {
             this.GraphDev = graphdev;
-            this.Core = core;
+            this.Core = (GameCore)core;
 
             Screens.Add(ScreenState.Game, new GameScreen());
             Screens.Add(ScreenState.Menu, new MenuScreen());
@@ -80,13 +83,14 @@ namespace CyberCommando.Services
         public void UpdateResolution(GraphicsDevice graphdev, ResolutionState res)
         {
             this.GraphDev = graphdev;
+            this.ResolutionCurrent = res;
 
             foreach (var screen in Screens)
                 if (screen.Value.IsInitialized)
                     screen.Value.Resize(res, graphdev.Viewport.Width, graphdev.Viewport.Height);
         }
 
-        public void UpdateGameObject(Game game) { this.Core = game; }
+        //public void UpdateGameObject(Game game) { this.Core = (GameCore)game; }
 
         /// <summary>
         /// 
@@ -101,7 +105,12 @@ namespace CyberCommando.Services
         /// <summary>
         /// 
         /// </summary>
-        public void UnloadContent() { this.Content.Unload(); }
+        public void UnloadContent()
+        {
+            foreach (var screen in Screens)
+                screen.Value.UnloadContent();
+            this.Content.Unload();
+        }
 
         /// <summary>
         /// 

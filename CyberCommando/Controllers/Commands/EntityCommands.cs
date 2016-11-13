@@ -9,6 +9,9 @@ using Microsoft.Xna.Framework;
 
 namespace CyberCommando.Controllers.Commands
 {
+    /// <summary>
+    /// REDUNDANT
+    /// </summary>
     class DuckCommand : MoveCommand
     {
         public DuckCommand(Entity entity, Vector2 position) : base(entity, position)

@@ -1,10 +1,13 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using CyberCommando.Services;
 
 namespace CyberCommando.Entities.Enviroment
 {
@@ -40,8 +43,10 @@ namespace CyberCommando.Entities.Enviroment
             this.SPoint = spoint;
             this.EPoint = epoint;
             this.Thickness = thickness;
-            SEnding = new Rectangle(1159, 62, 64, 128);
-            SMiddle = new Rectangle(1157, 62, 1, 128);
+            this.SEnding = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineEnding];
+            this.SMiddle = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineMiddle]; 
+            //SEnding = new Rectangle(1159, 62, 64, 128);
+            //SMiddle = new Rectangle(1157, 62, 1, 128);
 
             tan = EPoint - SPoint;
             angle = (float)Math.Atan2(tan.Y, tan.X);

@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using CyberCommando.Animations;
+using CyberCommando.Services;
 using CyberCommando.Entities.Enviroment;
 using CyberCommando.Engine;
 
@@ -34,8 +35,8 @@ namespace CyberCommando.Entities
         {
             DPosition = new Vector2(1,1);
             AniManager = new AnimationManager<AnimationState>();
-            AniManager.LoadAnimations(world.Services.LManager, world.Services.PLManager.NPlayer);
-            SpriteSheet = world.Services.PLManager.SPlayer;
+            AniManager.LoadAnimations(ServiceLocator.Instance.LManager, ServiceLocator.Instance.PLManager.NPlayer);
+            SpriteSheet = ServiceLocator.Instance.PLManager.SPlayer;
             AniState = AnimationState.IDLE;
             EntState = EntityState.ACTIVE;
             AniManager.CurrentAnimation = AniManager.Animations[AnimationState.IDLE];
@@ -80,8 +81,8 @@ namespace CyberCommando.Entities
 
         public override void CorrectDrawPosition()
         {
-            RightLimit = CoreWorld.LevelLimits.Width - CoreWorld.FrameWidth / 2;
-            LeftLimit = CoreWorld.FrameWidth / 2;
+            RightLimit = CoreWorld.LevelLimits.Width - CoreWorld.FWidth / 2;
+            LeftLimit = CoreWorld.FWidth / 2;
 
             if (WPosition.X > LeftLimit && WPosition.X < RightLimit)
                 DPosition.X = LeftLimit;

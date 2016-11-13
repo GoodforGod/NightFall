@@ -70,6 +70,7 @@ namespace CyberCommando.Services
             string textureName = "";
             Texture2D texture = Content.Load<Texture2D>("q");
 
+            var colorLayer = Color.White;
             var parallax = new Vector2();
 
             var dataFile = Path.Combine(Content.RootDirectory, layerName + ".txt");
@@ -138,7 +139,7 @@ namespace CyberCommando.Services
                     {
                         var position = new Vector2();
                         var state = ShadowMapSize.Size256;
-                        var color = Color.White;
+                        var colorLight = Color.White;
 
                         if (!float.TryParse(cols[1], out position.X))
                             throw new ArgumentException("Incorrect position format in: " + layerName, cols[1]);
@@ -152,38 +153,73 @@ namespace CyberCommando.Services
 
                         switch (rand.Next(0, 9))
                         {
-                            case 0: color = Color.Tomato; break;
-                            case 1: color = Color.LightPink; break;
-                            case 2: color = Color.LightGreen; break;
-                            case 3: color = Color.LightGoldenrodYellow; break;
-                            case 4: color = Color.Blue; break;
-                            case 5: color = Color.White; break;
-                            case 6: color = Color.MediumPurple; break;
-                            case 7: color = Color.SeaGreen; break;
-                            case 8: color = Color.Orange; break;
-                            case 9: color = Color.LightCyan; break;
-                            default: color = Color.LightGreen; break;
+                            case 0: colorLight = Color.Tomato; break;
+                            case 1: colorLight = Color.LightPink; break;
+                            case 2: colorLight = Color.LightGreen; break;
+                            case 3: colorLight = Color.LightGoldenrodYellow; break;
+                            case 4: colorLight = Color.Blue; break;
+                            case 5: colorLight = Color.White; break;
+                            case 6: colorLight = Color.MediumPurple; break;
+                            case 7: colorLight = Color.SeaGreen; break;
+                            case 8: colorLight = Color.Orange; break;
+                            case 9: colorLight = Color.LightCyan; break;
+                            default: colorLight = Color.LightGreen; break;
                         }
 
-                        lights.Add(new LightSpot(graphdev, state, position, color));
+                        lights.Add(new LightSpot(graphdev, state, position, colorLight));
 
                         continue;
                     }
-                    else if (cols.Length == 3)
+                    else if (cols[0] == "*")
+                    {
+                        Rectangle rect;
+
+                        try
+                        {
+                            rect = new Rectangle(
+                            int.Parse(cols[2]),
+                            int.Parse(cols[3]),
+                            int.Parse(cols[4]),
+                            int.Parse(cols[5]));
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new ArgumentException("Inccorect rectangle special format in: " + layerName, cols[0]);
+                        }
+                        ServiceLocator.Instance.LVLManager.SSources.Add(cols[1], rect);
+
+                        continue;
+                    }
+                    else if (cols[0] == "+")
                     {
                         if (sprites != null && sprites.Count != 0)
-                            layers.Add(new Layer(camera, sprites, parallax, LayerState));
+                            layers.Add(new Layer(camera, sprites, LayerState, colorLayer, parallax));
 
                         var x = .0f;
                         var y = .0f;
 
-                        if (!Enum.TryParse(cols[0], true, out LayerState))
-                            throw new ArgumentException("Incorrect LayerState format in: " + layerName, cols[0]);
-                        if (!float.TryParse(cols[1], out x))
-                            throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[1]);
-                        if (!float.TryParse(cols[2], out y))
+                        if (!Enum.TryParse(cols[1], true, out LayerState))
+                            throw new ArgumentException("Incorrect LayerState format in: " + layerName, cols[1]);
+                        if (!float.TryParse(cols[2], out x))
                             throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[2]);
+                        if (!float.TryParse(cols[3], out y))
+                            throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[3]);
 
+                        var r = 255;
+                        var g = 255;
+                        var b = 255;
+                        var alpha = 1.0f;
+
+                        if (!int.TryParse(cols[4], out r))
+                            throw new ArgumentException("Incorrect color Red format in: " + layerName, cols[4]);
+                        if (!int.TryParse(cols[5], out g))
+                            throw new ArgumentException("Incorrect color Green format in: " + layerName, cols[5]);
+                        if (!int.TryParse(cols[6], out b))
+                            throw new ArgumentException("Incorrect color Blue format in: " + layerName, cols[6]);
+                        if (!float.TryParse(cols[7], out alpha))
+                            throw new ArgumentException("Incorrect color Alpha format in: " + layerName, cols[7]);
+
+                        colorLayer = new Color(new Color(r, g, b), alpha);
                         parallax = new Vector2(x, y);
                         sprites = new List<Sprite>();
                         continue;
@@ -250,7 +286,7 @@ namespace CyberCommando.Services
                     }
                 }
             }
-            layers.Add(new Layer(camera, sprites, parallax, LayerState));
+            layers.Add(new Layer(camera, sprites, LayerState, colorLayer, parallax));
             return new Tuple<Dictionary<LevelState, Texture2D>, List<Layer>, List<LightSpot>, Rectangle>(textures, layers, lights, limits);
         }
 

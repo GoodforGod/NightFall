@@ -18,10 +18,13 @@ namespace CyberCommando.Services.Utils
         SpriteFont Font;
         DateTime Begin;
         float scale;
+        string titles;
+        Vector2 origin;
+        Vector2 position;
         double time;
-        double startTime = 1.03;
+        double startTime = 4.03;
 
-        public override void Initialize(GraphicsDevice graphdev, Game game)
+        public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             base.Initialize(graphdev, game);
         }
@@ -29,9 +32,12 @@ namespace CyberCommando.Services.Utils
         public override void LoadContent(ContentManager content)
         {
             base.LoadContent(content);
-            Font = Content.Load<SpriteFont>("f-test");
+            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.NTitleFont);
             scale = 1.0f;
             Begin = DateTime.Now;
+            titles = "Titles\nStart in ";
+            origin = new Vector2(Font.MeasureString(titles).X / 2, Font.MeasureString(titles).Y);
+            position = new Vector2(GraphDev.Viewport.Width / 2, GraphDev.Viewport.Height / 2);
         }
 
         public override void UnloadContent()
@@ -41,10 +47,10 @@ namespace CyberCommando.Services.Utils
 
         public override void Update(GameTime gameTime)
         {
-            scale += 0.05f;
+            scale += 0.02f;
             time = (DateTime.Now - Begin).TotalSeconds;
             if (time > startTime)
-                ScreenManager.Instance.SwitchScreen(ScreenState.Game);
+                ScreenManager.Instance.SwitchScreen(ScreenState.Menu);
 
         }
 
@@ -52,12 +58,12 @@ namespace CyberCommando.Services.Utils
         {
             batcher.Begin();
             batcher.DrawString(Font,
-                                "Titles\nStart in " + (int)time, 
-                                new Vector2(100, 100), 
-                                Color.Green, 
+                                titles + (int)time, 
+                                position, 
+                                Color.Black, 
                                 .0f, 
-                                Vector2.One, 
-                                scale, 
+                                origin,
+                                scale * SScale, 
                                 SpriteEffects.None, 
                                 0.0f);
             batcher.End();

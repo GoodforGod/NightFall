@@ -21,13 +21,15 @@ namespace CyberCommando.Entities.Enviroment
         public Vector2 Parallax { get; set; }
         public List<Sprite> LayerSprites { get; private set; }
         public Camera Camera { get; private set; }
+        public Color LColor { get; set; }
         public float ResScale { get; set; }
         public bool IsFocusedDraw { get; set; }
 
-        public Layer(Camera camera, List<Sprite> layerRects, LevelState state)
+        public Layer(Camera camera, List<Sprite> layerRects, LevelState state, Color color)
         {
             ResScale = 1f;
             this.Camera = camera;
+            this.LColor = color;
             this.LayerSprites = layerRects;
             this.State = state;
             this.Parallax = Vector2.One;
@@ -35,8 +37,8 @@ namespace CyberCommando.Entities.Enviroment
                 IsFocusedDraw = true;
         }
 
-        public Layer(Camera camera, List<Sprite> layerRects, Vector2 parallax, LevelState state) 
-                                                                            : this(camera, layerRects, state)
+        public Layer(Camera camera, List<Sprite> layerRects, LevelState state, Color color, Vector2 parallax) 
+                                                                            : this(camera, layerRects, state, color)
         {
             this.Parallax = parallax;
         }
@@ -65,7 +67,7 @@ namespace CyberCommando.Entities.Enviroment
                         Camera.GetViewMatrix(Parallax));
         }
 
-        public void Draw(SpriteBatch batcher, Vector2 pos)
+        public void Draw(SpriteBatch batcher)
         {
             InitDraw(batcher);
 
@@ -74,7 +76,7 @@ namespace CyberCommando.Entities.Enviroment
                 batcher.Draw(Texture,
                                 sprite.Position,
                                 sprite.Source,
-                                Color.Gray,
+                                LColor,
                                 .0f,
                                 Vector2.One,
                                 sprite.ResScale,
@@ -83,20 +85,22 @@ namespace CyberCommando.Entities.Enviroment
             }
         }
 
-        public void Draw(SpriteBatch batcher, Vector2 pos, Vector2 limits)
+        public void Draw(SpriteBatch batcher, Vector2 limits)
         {
             InitDraw(batcher);
 
-            var limR = pos.X + limits.X;
-            var limL = pos.X - limits.X;
+            //var limR = position.X + limits.X;
+            //var limL = position.X - limits.X;
+            var limR = limits.X;
+            var limL = limits.Y;
 
             foreach (var sprite in LayerSprites)
             {
-                if (IsOnScreen(sprite.Position.X + sprite.Source.Width, sprite.Position.X, limL, limR));
+                if (IsOnScreen(sprite.Position.X + sprite.Source.Width, sprite.Position.X, limL, limR))
                     batcher.Draw(Texture,
                                     sprite.Position,
                                     sprite.Source,
-                                    Color.Gray,
+                                    LColor,
                                     .0f,
                                     Vector2.One,
                                     sprite.ResScale,

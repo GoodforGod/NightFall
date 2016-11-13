@@ -28,6 +28,9 @@ namespace CyberCommando
         ResolutionState ResolutionCurrent { get; set; }
         ScreenManager SManager;
 
+        public bool NeedExit { get; set; }
+        public bool NeedResize{ get; set; }
+
         public GameCore()
         {
             // ~~~ UNCOMMENT For fullscreen mode ~~~
@@ -60,7 +63,7 @@ namespace CyberCommando
         /// 
         /// </summary>
         /// <param name="res"></param>
-        protected void Resize(ResolutionState res)
+        public void Resize(ResolutionState res)
         {
             ResolutionCurrent = res;
 
@@ -72,6 +75,7 @@ namespace CyberCommando
             Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - width / 2,
                                          GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - height / 2);
 
+            ServiceLocator.Instance.Initialize(this.Content, this.GraphicsDevice, width, height);
             CoreBatcher = new SpriteBatch(GraphicsDevice);
             SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
         }
@@ -87,7 +91,7 @@ namespace CyberCommando
 
             Resize(ResolutionState.R1280x720);
 
-            SManager.UpdateGameObject(this);
+            //SManager.UpdateGameObject(this);
             SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
             SManager.LoadContent(Content);
         }
@@ -100,6 +104,7 @@ namespace CyberCommando
         {
             // TODO: Unload any non ContentManager content here
             SManager.UnloadContent();
+            Content.Unload();
         }
 
         /// <summary>
@@ -111,7 +116,7 @@ namespace CyberCommando
         {
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                || Keyboard.GetState().IsKeyDown(Keys.Escape) || NeedExit)
             {
                 UnloadContent();
                 Exit();

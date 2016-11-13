@@ -55,10 +55,26 @@ namespace CyberCommando.Services
             }
         }
 
+        private Texture2D _SMenu;
+        public Texture2D SMenu
+        {
+            get
+            {
+                if (_SMenu == null)
+                    return _SMenu = Content.Load<Texture2D>(NMenu);
+                else return _SMenu;
+            }
+        }
+
+        public readonly string RSegmentLineMiddle = "SegmentLineM";
+        public readonly string RSegmentLineEnding = "SegmentLineE";
+
         public readonly string NPlayer = "c-test";
         public readonly string NEnemy = "e-test";
         public readonly string NGun = "g-test";
+        public readonly string NMenu= "menu";
         public readonly string NLevel_1 = "cybertown";
+        public readonly string NTitleFont = "f-test";
         public readonly string NBloomExtract = "BloomExtract";
         public readonly string NBloomComdine = "BloomCombine";
         public readonly string NGaussBlur = "GaussianBlur";

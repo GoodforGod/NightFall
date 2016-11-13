@@ -30,9 +30,9 @@ namespace CyberCommando.Entities.Enviroment
         static Random rand = new Random();
 
         public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite)
-                        : this(source, dest, new Color(0.9f, 0.8f, 1f), sprite) { }
+                        : this(source, dest, sprite, new Color(0.9f, 0.8f, 1f)) { }
 
-        public LightningBolt(Vector2 source, Vector2 dest, Color color, Texture2D sprite)
+        public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite, Color color)
         {
             this.Sprite = sprite;
             Segments = CreateBolt(LBPosition = source, dest, 2);

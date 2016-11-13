@@ -15,7 +15,7 @@ namespace CyberCommando.Services.Utils
     /// </summary>
     class OptionScreen : Screen
     {
-        public override void Initialize(GraphicsDevice graphdev, Game game)
+        public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             base.Initialize(graphdev, game);
         }
@@ -30,7 +30,7 @@ namespace CyberCommando.Services.Utils
 
         }
 
-        public override void Draw(SpriteBatch batcher)
+        public override void Draw(SpriteBatch batcher, GameTime gameTime)
         {
 
         }

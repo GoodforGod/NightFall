@@ -9,6 +9,9 @@ using CyberCommando.Entities;
 
 namespace CyberCommando.Controllers.Commands
 {
+    /// <summary>
+    /// REDUNDANT
+    /// </summary>
     abstract class MoveCommand : Command
     {
         Vector2 Position; 

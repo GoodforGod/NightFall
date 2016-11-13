@@ -1,5 +1,5 @@
-// Pixel shader extracts the brighter areas of an image.
-// This is the first step in applying a bloom postprocess.
+// Pixel shader extracts the brighter areas of an image
+// This is the first step in applying a bloom postprocess
 
 sampler TextureSampler : register(s0);
 
