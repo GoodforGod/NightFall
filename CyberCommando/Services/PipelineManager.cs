@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 
 namespace CyberCommando.Services
@@ -15,77 +9,59 @@ namespace CyberCommando.Services
 
         private static PipelineManager _Instance;
         public static PipelineManager Instance
-        {
-            get
-            {
+        { get {
                 if (_Instance == null)
                     _Instance = new PipelineManager();
                 return _Instance;
-            }
-        }
+            } }
+
+        private Texture2D _SGun;
+        public Texture2D SGun
+        { get {
+                if (_SGun == null)
+                    _SGun = Content.Load<Texture2D>(NSGun);
+                return _SGun;
+            } }
 
         private Texture2D _SPlayer;
         public Texture2D SPlayer
-        {
-            get
-            {
+        { get {
                 if (_SPlayer == null)
-                    return _SPlayer = Content.Load<Texture2D>(NPlayer);
-                else return _SPlayer;
-            }
-        }
-        private Texture2D _SEnemy;
-        public Texture2D SEnemy
-        {
-            get
-            {
-                if (_SEnemy == null)
-                    return _SEnemy = Content.Load<Texture2D>(NEnemy);
-                else return _SEnemy;
-            }
-        }
-        private Texture2D _SGun;
-        public Texture2D SGun
-        {
-            get
-            {
-                if (_SGun == null)
-                    return _SGun = Content.Load<Texture2D>(NGun);
-                else return _SGun;
-            }
-        }
+                    _SPlayer = Content.Load<Texture2D>(NSPlayer);
+                return _SPlayer;
+            } }
 
-        private Texture2D _SMenu;
-        public Texture2D SMenu
-        {
-            get
-            {
-                if (_SMenu == null)
-                    return _SMenu = Content.Load<Texture2D>(NMenu);
-                else return _SMenu;
-            }
-        }
+        readonly static string ERoot = "Effects/";
+        readonly static string SRoot = "Sprites/";
+        readonly static string FRoot = "Fonts/";
+        readonly static string ARoot = "Audio/";
 
         public readonly string RSegmentLineMiddle = "SegmentLineM";
         public readonly string RSegmentLineEnding = "SegmentLineE";
 
-        public readonly string NPlayer = "c-test";
-        public readonly string NEnemy = "e-test";
-        public readonly string NGun = "g-test";
-        public readonly string NMenu= "menu";
-        public readonly string NLevel_1 = "cybertown";
-        public readonly string NTitleFont = "f-test";
-        public readonly string NBloomExtract = "BloomExtract";
-        public readonly string NBloomComdine = "BloomCombine";
-        public readonly string NGaussBlur = "GaussianBlur";
-        public readonly string NReduction = "reductionEffect";
-        public readonly string NShadowResolver = "resolveShadowsEffect";
+        public readonly string NSPlayer            = SRoot + "c-test";
+        public readonly string NSEnemy             = SRoot + "e-test";
+        public readonly string NSGun               = SRoot + "g-test";
+        public readonly string NSMenu              = SRoot + "menu";
+        public readonly string NFTitleFont         = FRoot + "f-test";
+        public readonly string NEBloomExtract      = ERoot + "BloomExtract";
+        public readonly string NEBloomComdine      = ERoot + "BloomCombine";
+        public readonly string NEGaussBlur         = ERoot + "GaussianBlur";
+        public readonly string NEShadowReduction         = ERoot + "reductionEffect";
+        public readonly string NEShadowResolver    = ERoot + "resolveShadowsEffect";
+
+        public readonly string[] NLevels = { "menu", "prolog", "cybertown", "nighttown" };
 
         private PipelineManager() { }
 
         public void Initialize(ContentManager content)
         {
-            this.Content = content;
+            this.Content = new ContentManager(content.ServiceProvider, content.RootDirectory);
+        }
+
+        public void Unload()
+        {
+            Content.Unload();
         }
 
         public Texture2D LoadT(string name)

@@ -14,8 +14,8 @@ namespace CyberCommando.Entities.Utils
     /// </summary
     class SpriteTextured : Sprite
     {
-        public Texture2D Texture { get; set; }
-        public float Angle { get; set; }
+        public Texture2D    Texture { get; set; }
+        public float        Angle   { get; set; }
 
         public SpriteTextured()
             : base() { this.Angle = .0f; }

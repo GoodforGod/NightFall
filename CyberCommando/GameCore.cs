@@ -29,7 +29,6 @@ namespace CyberCommando
         ScreenManager SManager;
 
         public bool NeedExit { get; set; }
-        public bool NeedResize{ get; set; }
 
         public GameCore()
         {
@@ -72,12 +71,15 @@ namespace CyberCommando
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
             graphics.ApplyChanges();
+            ServiceLocator.Instance.Initialize(this.Content, 
+                                                this.GraphicsDevice, 
+                                                graphics.PreferredBackBufferWidth,
+                                                graphics.PreferredBackBufferHeight);
+            SManager.UpdateResolution(ResolutionCurrent);
             Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - width / 2,
                                          GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - height / 2);
 
-            ServiceLocator.Instance.Initialize(this.Content, this.GraphicsDevice, width, height);
             CoreBatcher = new SpriteBatch(GraphicsDevice);
-            SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
         }
 
         /// <summary>
@@ -92,7 +94,7 @@ namespace CyberCommando
             Resize(ResolutionState.R1280x720);
 
             //SManager.UpdateGameObject(this);
-            SManager.UpdateResolution(GraphicsDevice, ResolutionCurrent);
+            SManager.UpdateResolution(ResolutionCurrent);
             SManager.LoadContent(Content);
         }
 
@@ -103,7 +105,7 @@ namespace CyberCommando
         protected override void UnloadContent()
         {
             // TODO: Unload any non ContentManager content here
-            SManager.UnloadContent();
+            ServiceLocator.Instance.Unload();
             Content.Unload();
         }
 
@@ -114,13 +116,9 @@ namespace CyberCommando
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
                 || Keyboard.GetState().IsKeyDown(Keys.Escape) || NeedExit)
-            {
-                UnloadContent();
                 Exit();
-            }
 
             SManager.Update(gameTime);
            

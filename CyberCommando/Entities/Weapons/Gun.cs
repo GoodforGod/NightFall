@@ -60,45 +60,17 @@ namespace CyberCommando.Entities.Weapons
 
         public void Fire(Vector2 vector)
         {
-            /*
-            var bullet = new Projectile(world, WorldPosition, Angle);
-            bullet.speed = vector;
-            bullets.Add(bullet);
-            */
+           
         }
 
         public void Update(GameTime gameTime)
         {
-            /*
-            MouseState state = Mouse.GetState();
-            if (state.LeftButton == ButtonState.Pressed)
-                Fire(new Vector2(state.X - WorldPosition.X, state.Y - WorldPosition.Y));
-            
-            foreach(var bullet in bullets)
-            {
-                bullet.Update(gameTime);
-                if (!bullet.IsOnScreen())
-                    bullet.Kill(bullet);
-            }
-            */
+           
         }
 
         public void Draw(GameTime gameTime, SpriteBatch batcher)
         {
-            /*
-            foreach(var bullet in bullets)
-            {
-                batcher.Draw(SpriteSheet,
-                                bullet.WorldPosition,
-                                AniManager.Animations[GunState.LASER_BULLET].CurrentRectangle,
-                                Color.White,
-                                bullet.Angle,
-                                new Vector2(1, 1),
-                                bullet.Scale,
-                                Direction,
-                                .0f);
-            }
-            */
+           
         }
     }
 }

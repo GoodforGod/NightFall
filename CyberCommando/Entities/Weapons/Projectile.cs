@@ -15,15 +15,15 @@ namespace CyberCommando.Entities.Weapons
     /// </summary>
     class Projectile : Entity
     {
-        private Rectangle Source { get; set; }
-        public GunState State { get; set; }
+        private Rectangle   Source { get; set; }
+        public GunState     State { get; set; }
 
         public Projectile(World world, Vector2 position, GunState state, Texture2D texture, Rectangle source) 
             : base(world)
         {
             this.WPosition = position;
             this.State = state;
-            this.SpriteSheet = texture;
+            this.Sprite = texture;
             this.Source = source;
             this.CVelocity = new Vector2(5f, 5f);
             Scale = ResScale = 0.3f;
@@ -31,21 +31,21 @@ namespace CyberCommando.Entities.Weapons
 
         public override Entity Clone()
         {
-            return new Projectile(CoreWorld, WPosition, State, SpriteSheet, Source);
+            return new Projectile(WCore, WPosition, State, Sprite, Source);
         }
 
         public override bool IsOnScreen()
         {
-            if (WPosition.X < CoreWorld.LevelLimits.Width 
-                    && WPosition.X > CoreWorld.LevelLimits.X - 200 
-                    && WPosition.Y < CoreWorld.LevelLimits.Height 
-                    && WPosition.Y > CoreWorld.LevelLimits.Y - 200)
+            if (WPosition.X < WCore.LevelLimits.Width 
+                    && WPosition.X > WCore.LevelLimits.X - 200 
+                    && WPosition.Y < WCore.LevelLimits.Height 
+                    && WPosition.Y > WCore.LevelLimits.Y - 200)
                 return true;
             else
                 return false;
         }
 
-        public override bool IsGrounded() { return false; }
+        public override bool CheckIfIsGrounded() { return false; }
 
         public override void Damage(Entity attacker, int damage) { }
 
@@ -63,7 +63,7 @@ namespace CyberCommando.Entities.Weapons
 
         public override void Draw(GameTime gameTime, SpriteBatch batcher)
         {
-            batcher.Draw(SpriteSheet,
+            batcher.Draw(Sprite,
                                WPosition,
                                Source,
                                Color.White * 0.8f,

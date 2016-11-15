@@ -16,48 +16,43 @@ namespace CyberCommando.Services.Utils
 {
     class GameScreen : Screen
     {
-        World CoreWorld;
-        Color ShadowColor = Color.Gray;
+        World                   WCore;
+        Color                   ShadowColor = Color.Gray;
 
-        bool ShadowEffect = true;
-        QuadRenderComponent QuadRender;
-        bool BloomEffect = true;
-        BloomRenderComponent BloomRender;
+        bool                    ShadowEffect = true;
+        QuadRenderComponent     SQuadRender;
+        bool                    BloomEffect = true;
+        BloomRenderComponent    BloomRender;
 
-        ShadowResolver ShadowRender;
+        ShadowResolver          ShadowRender;
 
-        ResolutionState ResolutionCurrent { get; set; }
-
-        int LeftLimit { get; set; }
-        int RightLimit { get; set; }
-        int RightLightLimit { get; set; }
+        int LLimit      { get; set; }
+        int RLimit      { get; set; }
+        int RLightLimit { get; set; }
 
         public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             base.Initialize(graphdev, game);
 
-            this.QuadRender = new QuadRenderComponent(CoreGame);
+            this.SQuadRender = new QuadRenderComponent(CoreGame);
             this.BloomRender = new BloomRenderComponent(CoreGame);
 
-            var lvl = LevelNames.CYBERTOWN;
+            var lvl = (LevelNames) param[0];
 
-            if (param.Length != 0)
-                if (!Enum.TryParse(param[0].ToString(), out lvl))
-                    throw new ArgumentException("wtf level you load bro");
             LevelManager.Instance.Initialize();
             LevelManager.Instance.LoadLevel(lvl);
 
-            this.CoreWorld = new World(CoreGame, GraphDev.Viewport.Height, GraphDev.Viewport.Width, GraphDev.Viewport);
-            this.CoreWorld.Initialize();
+            this.WCore = new World(CoreGame, GraphDev.Viewport.Height, GraphDev.Viewport.Width, GraphDev.Viewport);
+            this.WCore.Initialize();
         }
 
         public override void Resize(ResolutionState res, int width, int height)
         {
             base.Resize(res, width, height);
-            CoreWorld.UpdateResolution(width, height, res);
-            LeftLimit = CoreWorld.FWidth / 2;
-            RightLimit = CoreWorld.LevelLimits.Width - CoreWorld.FWidth / 2;
-            RightLightLimit = CoreWorld.LevelLimits.Width - CoreWorld.FWidth;
+            WCore.UpdateResolution(width, height, res);
+            LLimit = WCore.FWidth / 2;
+            RLimit = WCore.LevelLimits.Width - WCore.FWidth / 2;
+            RLightLimit = WCore.LevelLimits.Width - WCore.FWidth;
         }
 
         public override void LoadContent(ContentManager content)
@@ -65,13 +60,13 @@ namespace CyberCommando.Services.Utils
             base.LoadContent(content);
 
             CoreGame.Components.Add(BloomRender);
-            CoreGame.Components.Add(QuadRender);
+            CoreGame.Components.Add(SQuadRender);
 
             //Resize screen
             Resize(ResolutionState.R1280x720, GraphDev.Viewport.Width, GraphDev.Viewport.Height);
 
             ShadowRender = new ShadowResolver(GraphDev,
-                                                QuadRender,
+                                                SQuadRender,
                                                 ShadowMapSize.Size256,
                                                 ShadowMapSize.Size256,
                                                 ShadowColor);
@@ -85,7 +80,7 @@ namespace CyberCommando.Services.Utils
 
         public override void Update(GameTime gameTime)
         {
-            CoreWorld.Update(gameTime);
+            WCore.Update(gameTime);
         }
 
         /// <summary>
@@ -98,7 +93,7 @@ namespace CyberCommando.Services.Utils
                             null, null, null, null, null);
             // world.Services.Camera.GetViewMatrix(new Vector2(0.9f))
 
-            foreach (var light in CoreWorld.LevelLight)
+            foreach (var light in WCore.LevelLight)
             {
                 if (light.IsOnScreen)
                     batcher.Draw(light.RenderTarget,
@@ -114,19 +109,19 @@ namespace CyberCommando.Services.Utils
         /// </summary>
         public void ResolveLightShadowCasts(SpriteBatch batcher, GameTime gameTime)
         {
-            var playerLeft = CoreWorld.Player.WPosition.X - LeftLimit;
+            var playerLeft = WCore.Player.WPosition.X - LLimit;
 
-            var lightOnLevel = CoreWorld.LevelLight;
+            var lightOnLevel = WCore.LevelLight;
 
            var LightLeftLimit = new Vector2(-lightOnLevel[0].LAreaSize.X, 0);
-           var LightRightLimit = new Vector2(CoreWorld.FWidth + lightOnLevel[0].LAreaSize.X, 0);
+           var LightRightLimit = new Vector2(WCore.FWidth + lightOnLevel[0].LAreaSize.X, 0);
 
             foreach (var light in lightOnLevel)
             {
-                if (CoreWorld.Player.WPosition.X < LeftLimit)
+                if (WCore.Player.WPosition.X < LLimit)
                     light.DPosition = light.WPosition;
-                else if (CoreWorld.Player.WPosition.X > RightLimit)
-                    light.DPosition = new Vector2(light.WPosition.X - RightLightLimit, light.WPosition.Y);
+                else if (WCore.Player.WPosition.X > RLimit)
+                    light.DPosition = new Vector2(light.WPosition.X - RLightLimit, light.WPosition.Y);
                 else
                     light.DPosition = new Vector2((light.WPosition.X - playerLeft), light.WPosition.Y);
 
@@ -138,7 +133,7 @@ namespace CyberCommando.Services.Utils
                 else light.IsOnScreen = true;
 
                 light.BeginDrawingShadowCasters();
-                CoreWorld.DrawEntitiesShadowCasters(gameTime, batcher, light, Color.Black);
+                WCore.DrawEntitiesShadowCasters(gameTime, batcher, light, Color.Black);
                 light.EndDrawingShadowCasters();
                 ShadowRender.ResolveShadows(light.RenderTarget, light.RenderTarget, light.DPosition);
             }
@@ -150,16 +145,16 @@ namespace CyberCommando.Services.Utils
             if (ShadowEffect)
             {
                 ResolveLightShadowCasts(batcher, gameTime);
-                ShadowRender.BeginDraw(GraphDev);
+                ShadowRender.BeginDraw();
                 DrawLights(batcher);
-                ShadowRender.EndDraw(GraphDev);
+                ShadowRender.EndDraw();
             }
             // Draw Bloom Effect
             if (BloomEffect)
                 BloomRender.BeginDraw();
 
             // Draw Level background layers
-            CoreWorld.DrawLevelBackground(gameTime, batcher);
+            WCore.DrawLVLBack(gameTime, batcher);
 
             if (BloomEffect)
             {
@@ -169,17 +164,17 @@ namespace CyberCommando.Services.Utils
             }
 
             // Display Frontlevel layers and Entitites
-            CoreWorld.DrawLevelFrontground(gameTime, batcher);
-            CoreWorld.DrawLevelEntities(gameTime, batcher);
+            WCore.DrawLVLFront(gameTime, batcher);
+            WCore.DrawLVLEntities(gameTime, batcher);
 
             // Display Shadow Map
             if (ShadowEffect)
-                ShadowRender.DisplayShadowCast(batcher);
+                ShadowRender.DisplayShadowCast();
 
             //base.Draw(gameTime);
 
             // DrawCharacter without effects cause all effects already accured
-            CoreWorld.DrawCharacter(gameTime, batcher);
+            WCore.DrawCharacter(gameTime, batcher);
         }
     }
 }

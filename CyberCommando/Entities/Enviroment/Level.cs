@@ -17,13 +17,16 @@ namespace CyberCommando.Entities.Enviroment
     /// <summary>
     /// Represent level states coresponding to textures of this level
     /// </summary>
+    [Flags]
     public enum LevelState
     {
-        FRONT,
-        BACKGROUND,
-        BACK,
-        MIDDLE,
-        BLURY
+        NONE = 0,
+        BACKGROUND = 1,
+        BACK = 2,
+        MIDDLE = 4,
+        FRONT = 8,
+        BLURY = 16,
+        STATIC = 32
     }
 
     /// <summary>
@@ -31,39 +34,46 @@ namespace CyberCommando.Entities.Enviroment
     /// </summary>
     class Level
     {
-        public List<Layer> Layers { get; private set; }
-        public List<LightSpot> Lights { get; private set; }
-        public Rectangle Limits { get; private set; }
-        private Layer Frontground;
-        private Layer Blurground;
-        private LightningBranch LBranch;
-        private Random LRand;
-        private Texture2D LBranchSprite;
-        private DateTime Begin;
+        public Dictionary<LevelState, Layer> Layers { get; private set; }
+        public List<LightSpot>               Lights { get; private set; }
+        public Rectangle                     Limits { get; private set; }
+
+        LightningBranch LBranch;
+        Texture2D       LBranchSprite;
+        DateTime        Begin;
+        LevelState      LDrawEndState;
+
+        static Random   LRand = new Random(Guid.NewGuid().GetHashCode());
 
         public Level() { }
 
         public void Initialize(string levelName, LoadManager loader)
         {
             var LoadedPack = loader.LoadLevel(levelName, ServiceLocator.Instance.GraphDev);
-            Limits = LoadedPack.Item4;
-            Lights = LoadedPack.Item3;
-            Layers = LoadedPack.Item2;
+            this.Limits = LoadedPack.Item4;
+            this.Lights = LoadedPack.Item3;
+            this.Layers = LoadedPack.Item2;
 
             foreach (var layer in Layers)
             {
-                layer.Texture = LoadedPack.Item1[layer.State];
-                layer.Camera.Limits = this.Limits;
-                if (layer.State == LevelState.FRONT)
-                    Frontground = layer;
-                if (layer.State == LevelState.BLURY)
-                    Blurground = layer;
+                layer.Value.Texture = LoadedPack.Item1[layer.Value.State];
+                layer.Value.Camera.Limits = this.Limits;
             }
 
-            LBranchSprite = Layers[0].Texture;
-            LBranch = new LightningBranch(new Vector2(100, Limits.Y), new Vector2(100, Limits.Height), LBranchSprite);
-            Begin = DateTime.Now;
-            LRand = new Random(Guid.NewGuid().GetHashCode());
+            this.LBranchSprite = Layers[LevelState.BACKGROUND].Texture;
+            this.LBranch = new LightningBranch(new Vector2(100, Limits.Y), new Vector2(100, Limits.Height), LBranchSprite);
+            this.Begin = DateTime.Now;
+        }
+
+        public void Dispose()
+        {
+            foreach (var layer in Layers)
+                layer.Value.Dispose();
+
+            LBranchSprite.Dispose();
+            LBranch = null;
+            Layers.Clear();
+            Lights.Clear();
         }
 
         public void LayersUpdate(int pos, int FWidthHalf)
@@ -85,21 +95,21 @@ namespace CyberCommando.Entities.Enviroment
         public void LayersZoom(float zoom)
         {
             foreach (var layer in Layers)
-                layer.Camera.Zoom = zoom;
+                layer.Value.Camera.Zoom = zoom;
         }
 
         public void LayersLookAt(Vector2 position)
         {
             foreach (var layer in Layers)
-                layer.Camera.LookAt(position);
+                layer.Value.Camera.LookAt(position);
         }
 
         public void LayersUpdateCameras(Vector2 origin, Viewport viewport)
         {
             foreach (var layer in Layers)
             {
-                layer.Camera.Origin = origin;
-                layer.Camera.viewport = viewport;
+                layer.Value.Camera.Origin = origin;
+                layer.Value.Camera.viewport = viewport;
             }
         }
 
@@ -107,24 +117,31 @@ namespace CyberCommando.Entities.Enviroment
         {
             if (Layers != null)
                 foreach (var layer in Layers)
-                    layer.UpdateScale(scale);
+                    layer.Value.UpdateScale(scale);
         }
 
-        public void DrawFrontground(SpriteBatch batcher, Vector2 limits)
+        public void DrawSpecificLayer(SpriteBatch batcher, Vector2 limits, LevelState lStates, bool endBatcher)
         {
-            if (Frontground != null)
-                Frontground.Draw(batcher, limits);
+            foreach (LevelState state in Enum.GetValues(lStates.GetType()))
+            {
+                if (lStates.HasFlag(state) && state != LevelState.NONE)
+                {
+                    if (Layers[state] != null)
+                    {
+                        LDrawEndState = state;
+                        if (state == LevelState.BACK && LBranch != null)
+                            DrawLighting(batcher, Layers[state].Camera.GetViewMatrix(Layers[state].Parallax));
+                        Layers[state].Draw(batcher, limits);
+                    }
+                }
+                Layers[state].EndDraw(batcher);
+            }
         }
 
-        public void EndDrawFrontground(SpriteBatch bather)
+        public void EndDrawSpecificLayer(SpriteBatch bather)
         {
-            if (Frontground != null)
-                Frontground.EndDraw(bather);
-        }
-
-        public void DrawBlurground(SpriteBatch batcher, Vector2 limits)
-        {
-            Blurground.Draw(batcher, limits);
+            if (Layers[LDrawEndState] != null)
+                Layers[LDrawEndState].EndDraw(bather);
         }
 
         public void DrawLighting(SpriteBatch batcher, Matrix layerCamMatrix)
@@ -140,12 +157,12 @@ namespace CyberCommando.Entities.Enviroment
         public void DrawBackground(SpriteBatch batcher)
         {
             foreach (var layer in Layers)
-                if (layer.State != LevelState.FRONT)
+                if (layer.Value.State != LevelState.FRONT)
                 {
-                    if (layer.State == LevelState.BACK && LBranch != null)
-                        DrawLighting(batcher, layer.Camera.GetViewMatrix(layer.Parallax));
-                    layer.Draw(batcher);
-                    layer.EndDraw(batcher);
+                    if (layer.Value.State == LevelState.BACK && LBranch != null)
+                        DrawLighting(batcher, layer.Value.Camera.GetViewMatrix(layer.Value.Parallax));
+                    layer.Value.Draw(batcher);
+                    layer.Value.EndDraw(batcher);
                 }
         }
     }

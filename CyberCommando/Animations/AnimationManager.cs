@@ -13,10 +13,10 @@ using CyberCommando.Services;
 namespace CyberCommando.Animations
 {
     /// <summary>
-    /// Stores and manages all Animations for the specific entity object
+    /// Manages all Animations for the specific entity object (Generic class)
     /// </summary>
     /// <typeparam name="TEnum">
-    /// Represent flexible enum for animations states
+    /// Represent flexible enum for animations states (Generic method)
     /// (each animation type could have specific Enum State for it) like <see cref="AnimationState"/>
     /// </typeparam>
     class AnimationManager<TEnum>
@@ -26,10 +26,9 @@ namespace CyberCommando.Animations
         /// Collection where each state like <see cref="AnimationState"/> represents
         /// with the specific Animation for it <see cref="Animation"/>
         /// </summary>
-        public Dictionary<TEnum, Animation> Animations { get; private set; }
-        //public Texture2D Spritesheet;
-        public Animation CurrentAnimation { get; set; }
-        public SpriteEffects CurrentEffect { get; set; }
+        public Dictionary<TEnum, Animation> Animations          { get; private set; }
+        public Animation                    CurrentAnimation    { get; set; }
+        public SpriteEffects                CurrentEffect       { get; set; }
 
         public AnimationManager() { Animations = new Dictionary<TEnum, Animation>(); }
 
@@ -55,7 +54,6 @@ namespace CyberCommando.Animations
         /// <param name="state">
         /// Get the animation to update from <see cref="Animations"/> by this state (where state is the key)
         /// </param>
-        /// <param name="gameTime"></param>
         /// <returns>
         /// FALSE - means animation is ended
         /// TRUE - means aimation is still playing
@@ -92,7 +90,6 @@ namespace CyberCommando.Animations
         /// <param name="state">
         /// Get the animation to update from <see cref="Animations"/> by this state (where state is the key)
         /// </param>
-        /// <param name="gameTime"></param>
         public void UpdateCycleAnim(TEnum state, GameTime gameTime)
         {
             CurrentAnimation = Animations[state];

@@ -19,44 +19,52 @@ namespace CyberCommando.Entities.Enviroment
     /// </summary>
     class World
     {
-        public readonly Game CoreGame;
-        LevelManager LVLManager { get; }
-        ServiceLocator Services { get; }
+        public readonly Game    CoreGame;
+        LevelManager            LVLManager  { get; }
+        ServiceLocator          Services    { get; }
 
-        public int FWidth { get; set; }
-        public int FHeight { get; set; }
+        public int              FWidth   { get; set; }
+        public int              FHeight  { get; set; }
 
-        public readonly float Gravity = 9.8f;
-        public readonly int WorldOffset = 20;
-        float CameraShadowEntityDepth = 1.05f;
+        public readonly float   Gravity = 9.8f;
+        public readonly int     WorldOffset = 20;
+        float                   CameraShadowEntityDepth = 1.05f;
 
-        public float ResScale { get; private set; }
+        public float            ResScale { get; private set; }
+
+        /// <summary>
+        /// Platforms in the world
+        /// </summary>
+        List<Platform>  Platforms       = new List<Platform>();
 
         /// <summary>
         /// All live entities in the world
         /// </summary>
-        List<Entity> Entities = new List<Entity>();
+        List<Entity>    Entities        = new List<Entity>();
+
         /// <summary>
         /// Entities whome will be killed
         /// </summary>
-        List<Entity> EntitiesToKill = new List<Entity>();
+        List<Entity>    EntitiesToKill  = new List<Entity>();
+
+
         /// <summary>
         /// Entities whome will be spawn in game
         /// </summary>
         List<Tuple<string, Vector2, float, Vector2>> EntitiesToAdd = new List<Tuple<string, Vector2, float, Vector2>>();
 
-        internal Rectangle LevelLimits { get { return LVLManager.CurrentLimits; } }
-        public ResolutionState ResolutionCurrent { get; private set; }
+        /// <summary>
+        /// Collections of the lights in the world
+        /// </summary>
+        public List<LightSpot>  LevelLight          { get { return LVLManager.CLights; } }
+        internal Rectangle      LevelLimits         { get { return LVLManager.CLimits; } }
+        ResolutionState         CResolution   { get; set; }
 
         /// <summary>
-        /// 
+        /// Charater entity
         /// </summary>
         internal Character Player { get; private set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<LightSpot> LevelLight { get { return LVLManager.CurrentLights; } }
 
         public World(Game game, int height, int width, Viewport viewport)
         {
@@ -66,12 +74,13 @@ namespace CyberCommando.Entities.Enviroment
             FWidth = width;
             FHeight = height;
 
-            //ServiceLocator.Instance.Initialize(game.Content, game.GraphicsDevice, width, height);
             Services = ServiceLocator.Instance;
             LVLManager = Services.LVLManager;
 
-            //Level = new Level(Services.PLManager.NLevel_1, Services.LManager);
-            Services.Camera.Limits = LVLManager.CurrentLimits;
+            Services.Camera.Limits = LVLManager.CLimits;
+
+            Platforms = new List<Platform>();
+            Platforms.Add(new Platform(new Vector2(), LVLManager.CLevel.Layers[0].Texture, new Rectangle(1000, 750, 100, 40)));
         }
 
         public virtual void Initialize() { Player = (Character) Spawn(typeof(Character).FullName); }
@@ -120,11 +129,11 @@ namespace CyberCommando.Entities.Enviroment
         }
 
         /// <summary>
-        /// 
+        /// Update the resolution scale for all inworld entities/lvl/layers
         /// </summary>
         public void UpdateResolution(int width, int height, ResolutionState res)
         {
-            switch (ResolutionCurrent = res)
+            switch (CResolution = res)
             {
                 case ResolutionState.R1280x720: ResScale = 1; break;
                 case ResolutionState.R1600x900: ResScale = 1.25f; break;
@@ -165,16 +174,35 @@ namespace CyberCommando.Entities.Enviroment
             // Check for the need in spawner
             if (EntitiesToAdd.Count != 0)
                 Spawner();
+
             // Updates all entities in world
             foreach (var entity in Entities)
+            {
+                var oldEntityPosition = entity.WPosition;
                 entity.Update(gameTime);
+
+                if (entity.IsGrounded)
+                    continue;
+
+                foreach (var platform in Platforms)
+                {
+                    if (entity.BoundingBox.Intersects(platform.BoundingBox))
+                    {
+                        if(entity.BoundingBox.Bottom > platform.BoundingBox.Top)
+                        {
+                            entity.IsGrounded = true;
+                        }
+                    }
+                }
+            }
 
             CamInput();
 
             // Move camera position
             Services.Camera.LookAt(Player.WPosition);
 
-            LVLManager.Update(Player.WPosition, (int)Player.WPosition.X, FWidth / 2 + FWidth / (int)ResolutionCurrent);
+            /// Update lvl/Layers Cameras prespective
+            LVLManager.Update(Player.WPosition, (int)Player.WPosition.X, FWidth / 2 + FWidth / (int)CResolution);
 
             // Collide all entities
             foreach (var a in Entities)
@@ -190,7 +218,7 @@ namespace CyberCommando.Entities.Enviroment
                     }
                 }
             }
-            
+
             Entities.RemoveAll(e => EntitiesToKill.Contains(e));
             EntitiesToKill.Clear();
         }
@@ -202,46 +230,49 @@ namespace CyberCommando.Entities.Enviroment
             if (kstate.IsKeyDown(Keys.Y))
             {
                 Services.Camera.Zoom += 0.003f;
-                LVLManager.CurrentLevel.LayersZoom(Services.Camera.Zoom);
+                LVLManager.CLevel.LayersZoom(Services.Camera.Zoom);
             }
             if (kstate.IsKeyDown(Keys.U))
             {
                 Services.Camera.Zoom -= 0.003f;
-                LVLManager.CurrentLevel.LayersZoom(Services.Camera.Zoom);
+                LVLManager.CLevel.LayersZoom(Services.Camera.Zoom);
             }
             if (kstate.IsKeyDown(Keys.R))
             {
                 Services.Camera.Zoom = 1.0f;
-                LVLManager.CurrentLevel.LayersZoom(Services.Camera.Zoom);
+                LVLManager.CLevel.LayersZoom(Services.Camera.Zoom);
             }
         }
 
         /// <summary>
-        /// 
+        /// Kill entity in the world
         /// </summary>
         public virtual void Kill(Entity entity) { EntitiesToKill.Add(entity); }
 
         /// <summary>
-        /// 
+        /// Draw back and middle layers of the level
         /// </summary>
-        public virtual void DrawLevelBackground(GameTime gameTime, SpriteBatch batcher)
+        public virtual void DrawLVLBack(GameTime gameTime, SpriteBatch batcher)
         {
-            LVLManager.DrawBack(batcher);
+            LVLManager.DrawSpecific(batcher, 
+                                    new Vector2(Services.Camera.Position.X + FWidth, Services.Camera.Position.X), 
+                                    LevelState.BACKGROUND | LevelState.BACK | LevelState.MIDDLE, true);
         }
 
         /// <summary>
-        /// 
+        /// Draw front layers of the level
         /// </summary>
-        public virtual void DrawLevelFrontground(GameTime gameTime, SpriteBatch batcher)
+        public virtual void DrawLVLFront(GameTime gameTime, SpriteBatch batcher)
         {
-            LVLManager.DrawFront(batcher, new Vector2(Services.Camera.Position.X + FWidth, 
-                                                        Services.Camera.Position.X));
+            LVLManager.DrawSpecific(batcher, 
+                                    new Vector2(Services.Camera.Position.X + FWidth, Services.Camera.Position.X), 
+                                    LevelState.FRONT, true);
         }
 
         /// <summary>
-        /// 
+        /// Draw all entities (except player) in the world
         /// </summary>
-        public void DrawLevelEntities(GameTime gameTime, SpriteBatch batcher)
+        public void DrawLVLEntities(GameTime gameTime, SpriteBatch batcher)
         {
             foreach (var entity in Entities)
             {
@@ -253,7 +284,7 @@ namespace CyberCommando.Entities.Enviroment
         }
 
         /// <summary>
-        /// 
+        /// Draw Character in the world
         /// </summary>
         public virtual void DrawCharacter(GameTime gameTime, SpriteBatch batcher)
         {
@@ -268,7 +299,7 @@ namespace CyberCommando.Entities.Enviroment
        
 
         /// <summary>
-        /// 
+        /// Draw all shadows which entities casts amount the level
         /// </summary>
         /// <param name="lightArea"></param>
         /// <param name="color"></param>

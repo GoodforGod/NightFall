@@ -23,5 +23,7 @@ namespace CyberCommando.Services
         }
 
         private AudioManager() { }
+
+        public void Unload() { }
     }
 }

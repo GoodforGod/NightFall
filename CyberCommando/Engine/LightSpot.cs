@@ -14,15 +14,17 @@ namespace CyberCommando.Engine
     /// </summary>
     class LightSpot
     {
-        private GraphicsDevice GraphDev;
+        GraphicsDevice GraphDev;
 
         public RenderTarget2D RenderTarget { get; private set; }
-        public Vector2 WPosition { get; set; }
-        public Vector2 DPosition { get; set; }
-        public Vector2 LAreaSize { get; set; }
-        public Rectangle DrawSource { get; set; }
-        public Color LColor { get; set; }
-        public bool IsOnScreen { get; set; }
+
+        public Rectangle    DrawSource  { get; set; }
+        public Vector2      WPosition   { get; set; }
+        public Vector2      DPosition   { get; set; }
+        public Vector2      LAreaSize   { get; set; }
+        public Color        LColor      { get; set; }
+
+        public bool         IsOnScreen  { get; set; }
 
         public LightSpot(GraphicsDevice graphdev, ShadowMapSize size)
         {

@@ -12,9 +12,9 @@ namespace CyberCommando.Engine
     public partial class QuadRenderComponent : DrawableGameComponent
     {
         VertexPositionTexture[] Vertexs = null;
+
         short[] ib = null;
 
-        // Constructor
         public QuadRenderComponent(Game game)
             : base(game) { }
 

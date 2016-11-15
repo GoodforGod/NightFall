@@ -84,7 +84,7 @@ namespace CyberCommando.Controllers
             {
                 if (entity.WPosition.X < 0)
                     entity.WPosition.X = 0;
-                else entity.WPosition.X = entity.CoreWorld.LevelLimits.Width - entity.SpriteOffset.X;
+                else entity.WPosition.X = entity.WCore.LevelLimits.Width - entity.SOffset.X;
             }
         }
 
@@ -94,10 +94,10 @@ namespace CyberCommando.Controllers
         /// <param name="entity"></param>
         public virtual void Gravity(Entity entity)
         {
-            if (entity.IsGrounded())
+            if (entity.IsGrounded = entity.CheckIfIsGrounded())
                 return;
             entity.AniState = AnimationState.JUMP;
-            entity.CVelocity.Y += entity.CoreWorld.Gravity;
+            entity.CVelocity.Y += entity.WCore.Gravity;
         }
     }
 }

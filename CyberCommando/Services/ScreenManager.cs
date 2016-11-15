@@ -29,12 +29,12 @@ namespace CyberCommando.Services
    public class ScreenManager
     {
         protected ContentManager Content;
+        public ResolutionState ResolutionCurrent { get; set; }
 
-        GraphicsDevice GraphDev;
-        GameCore Core;
+        Screen          CurrentScreen;
+        GraphicsDevice  GraphDev;
+        GameCore        Core;
 
-        ResolutionState ResolutionCurrent;
-        Screen CurrentScreen;
         Dictionary<ScreenState, Screen> Screens = new Dictionary<ScreenState, Screen>();
 
         private static ScreenManager _Instance;
@@ -51,6 +51,8 @@ namespace CyberCommando.Services
         private ScreenManager() { }
 
         public void Exit() { Core.NeedExit = true; }
+
+        public void Resize(ResolutionState res) { Core.Resize(res); }
 
         public void SwitchScreen(ScreenState type, params object[] param)
         {
@@ -80,17 +82,14 @@ namespace CyberCommando.Services
             CurrentScreen = Screens[ScreenState.Titles];
         }
 
-        public void UpdateResolution(GraphicsDevice graphdev, ResolutionState res)
+        public void UpdateResolution(ResolutionState res)
         {
-            this.GraphDev = graphdev;
             this.ResolutionCurrent = res;
 
             foreach (var screen in Screens)
                 if (screen.Value.IsInitialized)
-                    screen.Value.Resize(res, graphdev.Viewport.Width, graphdev.Viewport.Height);
+                    screen.Value.Resize(res, GraphDev.Viewport.Width, GraphDev.Viewport.Height);
         }
-
-        //public void UpdateGameObject(Game game) { this.Core = (GameCore)game; }
 
         /// <summary>
         /// 

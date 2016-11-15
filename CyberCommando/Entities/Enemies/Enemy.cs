@@ -22,12 +22,12 @@ namespace CyberCommando.Entities.Enemies
 
         public override Entity Clone()
         {
-            return new Enemy(CoreWorld);
+            return new Enemy(WCore);
         }
 
         public override bool IsOnScreen() { return false; }
 
-        public override bool IsGrounded() { return false; }
+        public override bool CheckIfIsGrounded() { return false; }
 
         public override void Damage(Entity attacker, int damage)
         {

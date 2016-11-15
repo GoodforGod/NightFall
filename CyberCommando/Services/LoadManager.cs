@@ -33,14 +33,14 @@ namespace CyberCommando.Services
             }
         }
 
-        private ContentManager Content { get; set; }
-        private Camera camera { get; set; }
+        ContentManager  Content { get; set; }
+        Camera          Cam { get; set; }
 
         private LoadManager() { }
 
         public void Initialize(ContentManager content, Viewport viewport)
         {
-            this.camera = new Camera(viewport);
+            this.Cam = new Camera(viewport);
             this.Content = content;
         }
 
@@ -54,23 +54,23 @@ namespace CyberCommando.Services
         /// All textures assosiated with level and list of layers
         /// </returns>
         public Tuple<Dictionary<LevelState, Texture2D>, 
-                        List<Layer>, 
+                        Dictionary<LevelState, Layer>, 
                         List<LightSpot>, 
                         Rectangle> LoadLevel(string layerName, GraphicsDevice graphdev)
         {
-            LevelState TextureState;
-            LevelState LayerState = LevelState.BACK;
+            LevelState tState;
+            LevelState lState = LevelState.NONE;
             Rectangle limits = new Rectangle(0, 0, 1280, 720);
 
             var lights = new List<LightSpot>();
-            var layers = new List<Layer>();
+            var layers = new Dictionary<LevelState, Layer>();
             var textures = new Dictionary<LevelState, Texture2D>();
             var sprites = new List<Sprite>();
 
             string textureName = "";
             Texture2D texture = Content.Load<Texture2D>("q");
 
-            var colorLayer = Color.White;
+            var LColor = Color.White;
             var parallax = new Vector2();
 
             var dataFile = Path.Combine(Content.RootDirectory, layerName + ".txt");
@@ -95,7 +95,7 @@ namespace CyberCommando.Services
 
                     if (cols[0] == "!")
                     {
-                        if (!Enum.TryParse(cols[1], true, out TextureState))
+                        if (!Enum.TryParse(cols[1], true, out tState))
                             throw new ArgumentException("Incorrect TextureState format in: " + layerName, cols[0]);
                         for (int i = 1; i < cols.Length - 1; i++)
                         {
@@ -104,7 +104,7 @@ namespace CyberCommando.Services
                                 textureName = cols[i + 1];
                                 texture = Content.Load<Texture2D>(cols[i + 1]);
                             }
-                            textures.Add(TextureState, texture);
+                            textures.Add(tState, texture);
                         }
 
                         continue;
@@ -193,12 +193,12 @@ namespace CyberCommando.Services
                     else if (cols[0] == "+")
                     {
                         if (sprites != null && sprites.Count != 0)
-                            layers.Add(new Layer(camera, sprites, LayerState, colorLayer, parallax));
+                            layers.Add(lState, new Layer(Cam, sprites, lState, LColor, parallax));
 
                         var x = .0f;
                         var y = .0f;
 
-                        if (!Enum.TryParse(cols[1], true, out LayerState))
+                        if (!Enum.TryParse(cols[1], true, out lState))
                             throw new ArgumentException("Incorrect LayerState format in: " + layerName, cols[1]);
                         if (!float.TryParse(cols[2], out x))
                             throw new ArgumentException("Incorrect parallax format in: " + layerName, cols[2]);
@@ -219,7 +219,7 @@ namespace CyberCommando.Services
                         if (!float.TryParse(cols[7], out alpha))
                             throw new ArgumentException("Incorrect color Alpha format in: " + layerName, cols[7]);
 
-                        colorLayer = new Color(new Color(r, g, b), alpha);
+                        LColor = new Color(new Color(r, g, b), alpha);
                         parallax = new Vector2(x, y);
                         sprites = new List<Sprite>();
                         continue;
@@ -286,21 +286,26 @@ namespace CyberCommando.Services
                     }
                 }
             }
-            layers.Add(new Layer(camera, sprites, LayerState, colorLayer, parallax));
-            return new Tuple<Dictionary<LevelState, Texture2D>, List<Layer>, List<LightSpot>, Rectangle>(textures, layers, lights, limits);
+            layers.Add(lState, new Layer(Cam, sprites, lState, LColor, parallax));
+            return new Tuple<Dictionary<LevelState, Texture2D>, Dictionary<LevelState, Layer>, List<LightSpot>, Rectangle>(textures, layers, lights, limits);
         }
 
-        public float GetRandomCoordinate()
+        public LevelNames LoadLevelName()
+        {
+            return LevelNames.CYBERTOWN;
+        }
+
+        private float GetRandomCoordinate()
         {
             return 1;
         }
 
-        public float GetRandomCoordinate(int limit)
+        private float GetRandomCoordinate(int limit)
         {
             return 1;
         }
 
-        public float GetRandomCoordinate(int minimal, int limit)
+        private float GetRandomCoordinate(int minimal, int limit)
         {
             return 1;
         }

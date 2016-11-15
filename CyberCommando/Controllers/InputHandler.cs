@@ -36,7 +36,6 @@ namespace CyberCommando.Controllers
                 if (_Instance == null)
                     _Instance = new InputHandler();
                 return _Instance;
-
             }
         }
 
@@ -44,7 +43,7 @@ namespace CyberCommando.Controllers
 
         private CharStateHandler CharHandler = new CharStateHandler();
 
-        private DateTime Cooldown = DateTime.Now;
+        private DateTime         Cooldown    = DateTime.Now;
 
         /// <summary>
         /// Handle all keyboard input and handle Character state
@@ -90,7 +89,7 @@ namespace CyberCommando.Controllers
             if (mState.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
             {
                 Cooldown = DateTime.Now;
-                entity.CoreWorld.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.ArmAngle);
+                entity.WCore.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.ArmAngle);
             }
 
             if (mState.X < entity.DPosition.X)

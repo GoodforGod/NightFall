@@ -14,10 +14,10 @@ namespace CyberCommando.Entities.Utils
     /// </summary>
     class Camera
     {
-        public Vector2 Origin { get; set; }
-        public Viewport viewport { get; set; }
+        public Vector2  Origin      { get; set; }
+        public Viewport viewport    { get; set; }
 
-        public float RotationAngle { get; set; }
+        public float RotationAngle  { get; set; }
 
         /// <summary>
         /// Camera zoom value

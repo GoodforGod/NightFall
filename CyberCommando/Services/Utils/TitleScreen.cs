@@ -22,7 +22,7 @@ namespace CyberCommando.Services.Utils
         Vector2 origin;
         Vector2 position;
         double time;
-        double startTime = 4.03;
+        double startTime = 2.03;
 
         public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
@@ -32,7 +32,8 @@ namespace CyberCommando.Services.Utils
         public override void LoadContent(ContentManager content)
         {
             base.LoadContent(content);
-            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.NTitleFont);
+
+            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.N);
             scale = 1.0f;
             Begin = DateTime.Now;
             titles = "Titles\nStart in ";

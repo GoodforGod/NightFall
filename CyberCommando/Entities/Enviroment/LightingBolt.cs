@@ -11,36 +11,36 @@ namespace CyberCommando.Entities.Enviroment
     class LightningBolt
     {
         public List<SegmentLine> Segments = new List<SegmentLine>();
-        public Vector2 Start { get { return Segments[0].SPoint; } }
-        public Vector2 End { get { return Segments.Last().EPoint; } }
-        public bool IsComplete { get { return Alpha <= 0; } }
+        public Vector2  Start               { get { return Segments[0].SPoint; } }
+        public Vector2  End                 { get { return Segments.Last().EPoint; } }
 
-        public float Alpha { get; set; }
-        public float AlphaMultiplier { get; set; }
-        public float FadeOutRate { get; set; }
-        public Color Tint { get; set; }
+        public float    Alpha               { get; set; }
+        public float    AlphaMultiplier     { get; set; }
+        public float    FadeOutRate         { get; set; }
+        public Color    Tint                { get; set; }
 
-        public Vector2 LBPosition { get; set; }
+        public Vector2  LBPosition          { get; set; }
 
-        public bool IsRendered { get; private set; }
-        private RenderTarget2D LBRenderTarget;
-        public Texture2D LBRender { get; private set; }
+        public bool     IsComplete          { get { return Alpha <= 0; } }
+        public bool     IsRendered          { get; private set; }
+        public Texture2D LBRender           { get; private set; }
+        RenderTarget2D LBRenderTarget;
         Texture2D Sprite;
 
-        static Random rand = new Random();
+        static Random rand = new Random(Guid.NewGuid().GetHashCode());
 
         public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite)
                         : this(source, dest, sprite, new Color(0.9f, 0.8f, 1f)) { }
 
-        public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite, Color color)
+        public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite, Color tint)
         {
             this.Sprite = sprite;
             Segments = CreateBolt(LBPosition = source, dest, 2);
 
-            Tint = color;
-            Alpha = 1f;
-            AlphaMultiplier = 0.6f;
-            FadeOutRate = 0.03f;
+            this.Tint = tint;
+            this.Alpha = 1f;
+            this.AlphaMultiplier = 0.6f;
+            this.FadeOutRate = 0.03f;
         }
 
         public void FillRender(SpriteBatch batcher, GraphicsDevice graphdev)

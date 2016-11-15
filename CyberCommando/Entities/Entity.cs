@@ -16,14 +16,15 @@ namespace CyberCommando.Entities
     /// <summary>
     /// Indicating entity current game state
     /// </summary>
+    [Flags]
     public enum EntityState
     {
-        NONE,
-        ACTIVE,
-        PASSIVE,
-        DYING,
-        DEAD,
-        INVISIBLE
+        NONE = 0,
+        ACTIVE = 1,
+        PASSIVE = 2,
+        DYING = 4,
+        DEAD = 8,
+        INVISIBLE = 16
     }
 
     /// <summary>
@@ -34,16 +35,19 @@ namespace CyberCommando.Entities
         /// <summary>
         /// World where entity is living <see cref="World"/>
         /// </summary>
-        public World CoreWorld { get; }
+        public World WCore { get; }
 
         internal InputHandler Handler { get; set; } 
 
         /// <summary>
         /// Stores entity sprite
         /// </summary>
-        protected Texture2D SpriteSheet;
+        protected Texture2D Sprite;
 
-        public Vector2 SpriteOffset { get; internal set; }
+        /// <summary>
+        /// Sprite offset to correct draw
+        /// </summary>
+        public Vector2 SOffset { get; internal set; }
 
         /// <summary>
         /// Entity position to draw on screen
@@ -63,23 +67,25 @@ namespace CyberCommando.Entities
         /// <summary>
         /// Entity direction it is moving or facing
         /// </summary>
-        public SpriteEffects Direction { get; set; }
-        public float Angle { get; set; }
-        public float Scale { get; set; }
-        public float ResScale { get; set; }
-        public virtual int Health { get; set; }
+        public SpriteEffects    Direction { get; set; }
+        public AnimationState   AniState  { get; set; }
+        public EntityState      EntState  { get; set; }
 
-        public AnimationState AniState { get; set; }
-        public EntityState EntState { get; set; }
+        public float        Angle       { get; set; }
+        public float        Scale       { get; set; }
+        public float        ResScale    { get; set; }
+        public virtual int  Health      { get; set; }
+
+        public bool         IsGrounded  { get; set; }
 
         /// <summary>
         /// Entity rigbody, to check collision
         /// </summary>
-        public BoundingBox BoundingBox { get; set; }
+        public Rectangle    BoundingBox { get; set; }
 
         public Entity(World world)
         {
-            this.CoreWorld = world;
+            this.WCore = world;
             Direction = SpriteEffects.None;
             Angle = 0f;
             Scale = ResScale = 1f;
@@ -101,13 +107,13 @@ namespace CyberCommando.Entities
         /// Check is the entity on the ground
         /// </summary>
         /// <returns></returns>
-        public virtual bool IsGrounded() { return false; }
+        public virtual bool CheckIfIsGrounded() { return false; }
 
         /// <summary>
         /// Returns worlds ground position
         /// </summary>
         /// <returns></returns>
-        public virtual int GetGround() { return CoreWorld.FHeight - CoreWorld.WorldOffset; }
+        public virtual int GetGround() { return WCore.FHeight - WCore.WorldOffset; }
 
         /// <summary>
         /// Calculates entity drawable position on the screen
@@ -116,7 +122,7 @@ namespace CyberCommando.Entities
 
         public virtual void Damage(Entity attacker, int damage) { }
 
-        public virtual void Kill(Entity killer) { CoreWorld.Kill(this); }
+        public virtual void Kill(Entity killer) { WCore.Kill(this); }
 
         public virtual void Touch(Entity other) { }
 

@@ -20,6 +20,7 @@ namespace CyberCommando.Services.Utils
         protected GraphicsDevice GraphDev { get; set; }
         protected Game CoreGame { get; set; }
 
+        protected ResolutionState ResolutionCurrent { get; set; }
         protected int FWidth { get; private set; }
         protected int FHeight { get; private set; }
         protected float SScale { get; private set; }
@@ -45,7 +46,7 @@ namespace CyberCommando.Services.Utils
         /// <param name="height"></param>
         public virtual void Resize(ResolutionState res, int width, int height)
         {
-            switch (res)
+            switch (ResolutionCurrent = res)
             {
                 case ResolutionState.R1280x720: SScale = 1; break;
                 case ResolutionState.R1600x900: SScale = 1.25f; break;

@@ -21,6 +21,8 @@ namespace CyberCommando.Services
 
     class LevelManager
     {
+        ServiceLocator Services;
+
         private static LevelManager _Instance;
         public static LevelManager Instance
         {
@@ -32,20 +34,16 @@ namespace CyberCommando.Services
             }
         }
 
-        public Level CurrentLevel { get; private set; }
-        public Rectangle CurrentLimits { get { return CurrentLevel.Limits; } }
-        public List<LightSpot> CurrentLights { get { return CurrentLevel.Lights; } }
-        public Dictionary<string, Rectangle> SSources { get; private set; }
-
-        private ServiceLocator Services;
-
-        private readonly string[] Levels = { "menu", "prolog", "cybertown" };
+        public Level                            CLevel { get; private set; }
+        public Rectangle                        CLimits { get { return CLevel.Limits; } }
+        public List<LightSpot>                  CLights { get { return CLevel.Lights; } }
+        public Dictionary<string, Rectangle>    SSources { get; private set; }
 
         private LevelManager() { Services = ServiceLocator.Instance; }
 
         public void Initialize()
         {
-            CurrentLevel = new Level();
+            CLevel = new Level();
             SSources = new Dictionary<string, Rectangle>();
         }
 
@@ -54,7 +52,14 @@ namespace CyberCommando.Services
         /// </summary>
         public void LoadLevel(LevelNames lvl)
         {
-            CurrentLevel.Initialize(Levels[(int)lvl], Services.LManager);
+            CLevel.Initialize(Services.PLManager.NLevels[(int)lvl], Services.LManager);
+        }
+
+        public void Unload()
+        {
+            SSources.Clear();
+            CLights.Clear();
+            CLevel.Dispose();
         }
 
         /// <summary>
@@ -64,14 +69,14 @@ namespace CyberCommando.Services
 
         public void UpdateScale(float scale, Vector2 origin, Viewport viewport)
         {
-            CurrentLevel.LayersUpdateScale(scale);
-            CurrentLevel.LayersUpdateCameras(origin, viewport);
+            CLevel.LayersUpdateScale(scale);
+            CLevel.LayersUpdateCameras(origin, viewport);
         }
 
         public void Update(Vector2 position, int pos, int FWidthHalf)
         {
-            CurrentLevel.LayersLookAt(position);
-            CurrentLevel.LayersUpdate(pos, FWidthHalf);
+            CLevel.LayersLookAt(position);
+            CLevel.LayersUpdate(pos, FWidthHalf);
         }
 
         /// <summary>
@@ -79,20 +84,15 @@ namespace CyberCommando.Services
         /// </summary>
         public void DrawBack(SpriteBatch batcher)
         {
-            CurrentLevel.DrawBackground(batcher);
+            CLevel.DrawBackground(batcher);
         }
         
-        public void DrawBlur(SpriteBatch batcher, Vector2 limits)
-        {
-
-        }
-
         /// <summary>
         /// 
         /// </summary>
-        public void DrawFront(SpriteBatch batcher, Vector2 limits)
+        public void DrawSpecific(SpriteBatch batcher, Vector2 limits, LevelState state, bool endBatcher)
         {
-            CurrentLevel.DrawFrontground(batcher, limits);
+            CLevel.DrawSpecificLayer(batcher, limits, state, endBatcher);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace CyberCommando.Services
         /// </summary>
         public void EndDrawFront(SpriteBatch batcher)
         {
-            CurrentLevel.EndDrawFrontground(batcher);
+            CLevel.EndDrawSpecificLayer(batcher);
         }
     }
 }

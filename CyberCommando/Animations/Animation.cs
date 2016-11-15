@@ -12,15 +12,16 @@ namespace CyberCommando.Animations
     /// <summary>
     /// Indicates current animation state
     /// </summary> 
+    [Flags]
     public enum AnimationState
     {
-        NONE,
-        IDLE,
-        WALK,
-        JUMP,
-        FALL,
-        DUCK,
-        FIRE
+        NONE = 0,
+        IDLE = 1,
+        WALK = 2,
+        JUMP = 4,
+        FALL = 8,
+        DUCK = 16,
+        FIRE = 32
     }
 
     /// <summary>
@@ -39,22 +40,23 @@ namespace CyberCommando.Animations
         /// <summary>
         /// List of Frames in animation <see cref="Frame"/>
         /// </summary>
-        public List<Frame> FrameList { get; private set; }
+        public List<Frame> FrameList        { get; private set; }
 
         /// <summary>
         ///  TimeSpan for time elapsed into animation
         /// </summary>
-        public TimeSpan TimeIntoAnimation { get; set; }
+        public TimeSpan TimeIntoAnimation   { get; set; }
         public DateTime SingleAnimStartTime { get; set; }
 
-        public bool SingleAnimFlag { get; set; }
+        public bool     SingleAnimFlag      { get; set; }
         /// <summary>
         /// SpriteEffects for animation
         /// </summary>
-        public SpriteEffects Effect { get; set; }
+        public SpriteEffects Effect         { get; set; }
 
-        public Animation() { FrameList = new List<Frame>(); }
-        public Animation(SpriteEffects effect) { FrameList = new List<Frame>(); Effect = effect; }
+        // Constactors
+        public Animation()                              { FrameList = new List<Frame>(); }
+        public Animation(SpriteEffects effect) : this() { Effect = effect; }
 
         /// <summary>
         /// Represents the total duration of the animation in TotalSeconds

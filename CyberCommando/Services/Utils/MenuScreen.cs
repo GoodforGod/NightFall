@@ -9,14 +9,20 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using CyberCommando.Entities.Enviroment;
+
 namespace CyberCommando.Services.Utils
 {
     public enum MenuState
     {
+        MAIN,
         NEW_GAME,
         LOAD_GAME,
         OPTIONS,
-        EXIT
+        EXIT,
+        SOUND,
+        RESOLUTION,
+        BACK
     }
 
     /// <summary>
@@ -24,107 +30,159 @@ namespace CyberCommando.Services.Utils
     /// </summary>
     class MenuScreen : Screen
     {
-        private MenuState State { get; set; }
-        private ResolutionState ResolutionCurrent { get; set; }
+        LevelNames  LName { get; set; }
+        MenuState   MState { get; set; }
+        bool        IsSoundOn;
+        bool        Direction;
+        int         FWidthHalf;
 
-        private KeyboardState KState;
+        string MLable;
 
-        private Dictionary<MenuState, List<Vector2>> MenuVectors;
-        //private Texture2D Sprite;
-        private SpriteFont Font;
-        private bool Direction;
-
-        private string menuLable;
-        private string optText;
-
-        private Vector2 MCamPosition;
-        private LevelManager LVLManager;
+        KeyboardState   KState;
+        SpriteFont      Font;
+        Vector2         MCamPosition;
+        LevelManager    LVLManager;
 
         public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             base.Initialize(graphdev, game);
             Direction = false;
+            FWidthHalf = FWidth / 2;
             LVLManager = LevelManager.Instance;
             MCamPosition = new Vector2(GraphDev.Viewport.Width / 2, GraphDev.Viewport.Height / 2);
-            State = MenuState.NEW_GAME;
-            menuLable = State.ToString();
+            MState = MenuState.NEW_GAME;
+            MLable = MState.ToString();
+            LName = LevelNames.CYBERTOWN;
+        }
+
+        private void InitMenuArray()
+        {
+            /*
+            MArrays = new Dictionary<MenuState, int[,]>()
+            {
+                {MenuState.MAIN, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,1,1,0,1,0,0,1},
+                    {1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,0,1,1,0}} },
+                {MenuState.NEW_GAME, new int[,] {
+                    {1,1,1,0,1,0,0,0,0,1,0,0,1,0,0,1},
+                    {1,0,1,0,1,0,0,0,1,0,1,0,0,1,0,1},
+                    {1,1,1,0,1,0,0,0,1,1,1,0,0,0,1,0},
+                    {1,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0},
+                    {1,0,0,0,1,1,1,0,1,0,1,0,1,0,0,0}} },
+                {MenuState.LOAD_GAME, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+                {MenuState.OPTIONS, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+                {MenuState.EXIT, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+                {MenuState.SOUND, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+                {MenuState.RESOLUTION, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+                {MenuState.BACK, new int[,] {
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
+                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+
+            };
+            */
         }
 
         public override void LoadContent(ContentManager content)
         {
             base.LoadContent(content);
-            //Sprite = Content.Load<Texture2D>(ServiceLocator.Instance.PLManager.NMenu);
 
             LVLManager.Initialize();
             LVLManager.LoadLevel(LevelNames.MENU);
 
-            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.NTitleFont);
+            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.NFTitleFont);
+        }
 
-            MenuVectors = new Dictionary<MenuState, List<Vector2>>() {
-                { MenuState.NEW_GAME, new List<Vector2>()
-                {// M
-                    new Vector2(0, 0), new Vector2(0, 1), new Vector2(0,2), new Vector2(0,3), new Vector2(0,4),
-                new Vector2(1, 1),
-                 new Vector2(2, 0), new Vector2(2, 1), new Vector2(2,2), new Vector2(2,3), new Vector2(2,4),
-                 // E
-                  new Vector2(4, 0), new Vector2(4, 1), new Vector2(4,2), new Vector2(4,3), new Vector2(4,4),
-                new Vector2(5, 0), new Vector2(5, 2), new Vector2(5, 4),
-                new Vector2(6, 0), new Vector2(6, 2), new Vector2(6, 4),
-                 // N
-                  new Vector2(8, 0), new Vector2(8, 1), new Vector2(8,2), new Vector2(8,3), new Vector2(8,4),
-                new Vector2(9, 2),
-                new Vector2(10, 3),
-                 new Vector2(11, 0), new Vector2(11, 1), new Vector2(11,2), new Vector2(11,3), new Vector2(11,4),
-                    //U
-                  new Vector2(13, 0), new Vector2(13, 1), new Vector2(13,2), new Vector2(13,3), 
-                new Vector2(14, 4),
-                new Vector2(15, 4),
-                 new Vector2(16, 0), new Vector2(16, 1), new Vector2(16,2), new Vector2(16,3)
-                } },
-
-                { MenuState.LOAD_GAME, new List<Vector2>() {
-
-                } },
-
-                { MenuState.OPTIONS, new List<Vector2>() { } },
-
-                { MenuState.EXIT, new List<Vector2>() { }}
-            };
+        public override void UnloadContent()
+        {
+            base.UnloadContent();
         }
 
         public override void Resize(ResolutionState res, int width, int height)
         {
             base.Resize(res, width, height);
-
             LVLManager.UpdateScale(SScale, new Vector2(width, height), CoreGame.GraphicsDevice.Viewport);
         }
 
         private void ChangeState(bool up)
         {
-            switch (State)
+            switch (MState)
             {
                 case MenuState.NEW_GAME:
                     if (!up)
-                        State = MenuState.LOAD_GAME;
-                    else State = MenuState.EXIT;
+                        MState = MenuState.LOAD_GAME;
+                    else MState = MenuState.EXIT;
                     break;
                 case MenuState.LOAD_GAME:
                     if (!up)
-                        State = MenuState.OPTIONS;
-                    else State = MenuState.NEW_GAME;
+                        MState = MenuState.OPTIONS;
+                    else MState = MenuState.NEW_GAME;
                     break;
                 case MenuState.OPTIONS:
                     if (!up)
-                        State = MenuState.EXIT;
-                    else State = MenuState.LOAD_GAME;
+                        MState = MenuState.EXIT;
+                    else MState = MenuState.LOAD_GAME;
                     break;
                 case MenuState.EXIT:
                     if (!up)
-                        State = MenuState.NEW_GAME;
-                    else State = MenuState.OPTIONS;
+                        MState = MenuState.NEW_GAME;
+                    else MState = MenuState.OPTIONS;
+                    break;
+                case MenuState.SOUND:
+                    if (!up)
+                        MState = MenuState.RESOLUTION;
+                    else MState = MenuState.BACK;
+                    break;
+                case MenuState.RESOLUTION:
+                    if (!up)
+                        MState = MenuState.BACK;
+                    else MState = MenuState.SOUND;
+                    break;
+                case MenuState.BACK:
+                    if (!up)
+                        MState = MenuState.SOUND;
+                    else MState = MenuState.RESOLUTION;
                     break;
             }
-            menuLable = State.ToString();
+
+            MLable = MState.ToString();
+
+            switch (MState)
+            {
+                case MenuState.SOUND: MLable += " : " + IsSoundOn.ToString(); break;
+                case MenuState.RESOLUTION: MLable += " : " + ResolutionCurrent.ToString(); break;
+                default: break;
+            }
         }
 
         private void UpdateState()
@@ -144,48 +202,87 @@ namespace CyberCommando.Services.Utils
                 || (currentKState.IsKeyDown(Keys.Enter) && KState.IsKeyUp(Keys.Enter))
                 || (currentKState.IsKeyDown(Keys.Space) && KState.IsKeyUp(Keys.Space)))
             {
-                switch (State)
+                switch (MState)
                 {
                     case MenuState.NEW_GAME:
-                        ScreenManager.Instance.SwitchScreen(ScreenState.Game, "CYBERTOWN");
+                        ScreenManager.Instance.SwitchScreen(ScreenState.Game, LName);
                         break;
+
                     case MenuState.LOAD_GAME:
                         break;
+
                     case MenuState.OPTIONS:
+                        MState = MenuState.SOUND;
+                        MLable = MState.ToString() + " : " + IsSoundOn.ToString();
                         break;
+
                     case MenuState.EXIT:
                         ScreenManager.Instance.Exit();
                         break;
+
+                    case MenuState.SOUND:
+                        IsSoundOn = !IsSoundOn; 
+                        MLable = MState.ToString() + " : " + IsSoundOn.ToString();
+                        break;
+
+                    case MenuState.RESOLUTION:
+                        switch(ResolutionCurrent)
+                        {
+                            case ResolutionState.R1280x720: ResolutionCurrent = ResolutionState.R1600x900; break;
+                            case ResolutionState.R1600x900: ResolutionCurrent = ResolutionState.R1920x1080; break;
+                            case ResolutionState.R1920x1080: ResolutionCurrent = ResolutionState.R1280x720; break;
+                        }
+                        MLable = MState.ToString() + " : " + ResolutionCurrent.ToString();
+                        ScreenManager.Instance.Resize(ResolutionCurrent);
+                        break;
+
+                    case MenuState.BACK:
+                        MState = MenuState.OPTIONS;
+                        MLable = MState.ToString();
+                        break;
                 }
             }
-
             KState = currentKState;
         }
 
-        public override void Update(GameTime gameTime)
+        private void UpdateCamPosition()
         {
-            UpdateState();
             if (Direction)
             {
-                if (MCamPosition.X < FWidth / 2)
+                if (MCamPosition.X < FWidthHalf)
                     Direction = !Direction;
                 MCamPosition.X -= 0.9f;
             }
             else
             {
-                if (MCamPosition.X > FWidth / 1.5)
+                if (MCamPosition.X > FWidth)
                     Direction = !Direction;
                 MCamPosition.X += 0.9f;
             }
+        }
 
-            LVLManager.Update(MCamPosition, (int)MCamPosition.X, FWidth / 2);
+        public override void Update(GameTime gameTime)
+        {
+            UpdateState();
+
+            UpdateCamPosition();
+
+            LVLManager.Update(MCamPosition, (int)MCamPosition.X, FWidthHalf);
         }
 
         public override void Draw(SpriteBatch batcher, GameTime gameTime)
         {
-            LVLManager.DrawBack(batcher);
-            LVLManager.DrawFront(batcher, new Vector2(MCamPosition.X + FWidth / 2, MCamPosition.X - FWidth / 2));
-            batcher.DrawString(Font, menuLable, MCamPosition, Color.White);
+            LVLManager.DrawSpecific(batcher, 
+                                    new Vector2(MCamPosition.X + FWidthHalf, MCamPosition.X - FWidthHalf), 
+                                    LevelState.BACKGROUND | LevelState.BACK | LevelState.MIDDLE, 
+                                    true);
+            LVLManager.DrawSpecific(batcher, 
+                                    new Vector2(MCamPosition.X + FWidthHalf, MCamPosition.X - FWidthHalf), 
+                                    LevelState.FRONT, 
+                                    false);
+            batcher.Begin();
+            batcher.DrawString(Font, MLable, MCamPosition, Color.White);
+            batcher.End();
             LVLManager.EndDrawFront(batcher);
         }
     }

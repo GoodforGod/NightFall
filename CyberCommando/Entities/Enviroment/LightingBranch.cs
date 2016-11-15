@@ -10,31 +10,32 @@ namespace CyberCommando.Entities.Enviroment
 {
     class LightningBranch
     {
-        List<LightningBolt> bolts = new List<LightningBolt>();
+        List<LightningBolt> LBolts = new List<LightningBolt>();
 
-        public bool IsComplete { get { return bolts.Count == 0; } }
-        public Vector2 End { get; private set; }
-        private Vector2 direction;
+        public Vector2      End         { get; private set; }
+        private Vector2     Direction;
 
-        public bool IsRendered { get; private set; }
-        private RenderTarget2D LBRenderTarget;
-        public Texture2D LBRender { get; private set; }
+        public bool         IsRendered { get; private set; }
+        public bool         IsComplete { get { return LBolts.Count == 0; } }
+
+        public Texture2D    LBRender    { get; private set; }
+        RenderTarget2D      LBRenderTarget;
         Texture2D Sprite;
 
-        static Random rand = new Random();
+        static Random RandomGen = new Random(Guid.NewGuid().GetHashCode());
 
         public LightningBranch(Vector2 start, Vector2 end, Texture2D sprite)
         {
             this.Sprite = sprite;
-            End = end;
-            direction = Vector2.Normalize(end - start);
+            this.End = end;
+            this.Direction = Vector2.Normalize(end - start);
             Create(start, end);
         }
 
         public void Update()
         {
-            bolts = bolts.Where(x => !x.IsComplete).ToList();
-            foreach (var bolt in bolts)
+            LBolts = LBolts.Where(x => !x.IsComplete).ToList();
+            foreach (var bolt in LBolts)
                 bolt.Update();
         }
 
@@ -48,28 +49,28 @@ namespace CyberCommando.Entities.Enviroment
                 graphdev.DisplayMode.Format,
                 DepthFormat.Depth24);
 
-            foreach (var bolt in bolts)
+            foreach (var bolt in LBolts)
                 bolt.FillRender(batcher, graphdev);
         }
 
         public void DrawRender(SpriteBatch batcher)
         {
-            foreach (var bolt in bolts)
+            foreach (var bolt in LBolts)
                 bolt.DrawRender(batcher);
         }
 
         public void Draw(SpriteBatch batcher)
         {
-            foreach (var bolt in bolts)
+            foreach (var bolt in LBolts)
                 bolt.Draw(batcher);
         }
 
         private void Create(Vector2 start, Vector2 end)
         {
             var mainBolt = new LightningBolt(start, end, Sprite);
-            bolts.Add(mainBolt);
+            LBolts.Add(mainBolt);
 
-            int numBranches = rand.Next(3, 6);
+            int numBranches = RandomGen.Next(3, 6);
             Vector2 diff = end - start;
 
             // pick a bunch of random points between 0 and 1 and sort them
@@ -85,13 +86,13 @@ namespace CyberCommando.Entities.Enviroment
                 // rotate 30 degrees. Alternate between rotating left and right.
                 Quaternion rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathHelper.ToRadians(30 * ((i & 1) == 0 ? 1 : -1)));
                 Vector2 boltEnd = Vector2.Transform(diff * (1 - branchPoints[i]), rot) + boltStart;
-                bolts.Add(new LightningBolt(boltStart, boltEnd, Sprite));
+                LBolts.Add(new LightningBolt(boltStart, boltEnd, Sprite));
             }
         }
 
         static float Rand(float min, float max)
         {
-            return (float)rand.NextDouble() * (max - min) + min;
+            return (float)RandomGen.NextDouble() * (max - min) + min;
         }
     }
 }

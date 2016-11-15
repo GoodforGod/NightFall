@@ -13,28 +13,28 @@ namespace CyberCommando.Entities.Enviroment
 {
     public class SegmentLine
     {
-        public Vector2 SPoint { get; set; }
-        public Vector2 EPoint { get; set; }
-        public float Thickness { get; set; }
+        public Vector2          SPoint          { get; set; }
+        public Vector2          EPoint          { get; set; }
+        public float            Thickness       { get; set; }
 
-        public bool IsRendered { get; private set; }
+        public bool             IsRendered      { get; private set; }
 
-        private RenderTarget2D SRenderTarget;
-        public Texture2D SRender { get; private set; }
-
-        Vector2 tan;
-        float angle;
+        private RenderTarget2D  SRenderTarget;
+        public Texture2D        SRender         { get; private set; }
 
         const float ImageThickness = 8;
-        float thicknessScale;
+        float       ThicknessScale;
+        float       Angle;
 
-        Vector2 capOrigin;
-        Vector2 middleOrigin;
-        Vector2 middleScale;
+        Vector2     Tan;
 
-        Texture2D Sprite;
-        Rectangle SEnding;
-        Rectangle SMiddle;
+        Vector2     capOrigin;
+        Vector2     middleOrigin;
+        Vector2     middleScale;
+
+        Texture2D   Sprite;
+        Rectangle   SEnding;
+        Rectangle   SMiddle;
 
         public SegmentLine() { }
         public SegmentLine(Vector2 spoint, Vector2 epoint, Texture2D sprite, float thickness = 1)
@@ -45,17 +45,15 @@ namespace CyberCommando.Entities.Enviroment
             this.Thickness = thickness;
             this.SEnding = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineEnding];
             this.SMiddle = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineMiddle]; 
-            //SEnding = new Rectangle(1159, 62, 64, 128);
-            //SMiddle = new Rectangle(1157, 62, 1, 128);
 
-            tan = EPoint - SPoint;
-            angle = (float)Math.Atan2(tan.Y, tan.X);
+            Tan = EPoint - SPoint;
+            Angle = (float)Math.Atan2(Tan.Y, Tan.X);
 
-            thicknessScale = Thickness / ImageThickness;
+            ThicknessScale = Thickness / ImageThickness;
 
             capOrigin = new Vector2(SEnding.Width, SEnding.Height / 2f);
             middleOrigin = new Vector2(0, SMiddle.Height / 2f);
-            middleScale = new Vector2(tan.Length(), thicknessScale);
+            middleScale = new Vector2(Tan.Length(), ThicknessScale);
         }
 
         public void FillRender(SpriteBatch batcher, Color tint, GraphicsDevice graphdev)
@@ -83,9 +81,9 @@ namespace CyberCommando.Entities.Enviroment
 
         public void Draw(SpriteBatch batcher, Color tint)
         {
-            batcher.Draw(Sprite, SPoint, SMiddle, tint, angle, middleOrigin, middleScale, SpriteEffects.None, 0f);
-            batcher.Draw(Sprite, SPoint, SEnding, tint, angle, capOrigin, thicknessScale, SpriteEffects.None, 0f);
-            batcher.Draw(Sprite, EPoint, SEnding, tint, angle + MathHelper.Pi, capOrigin, thicknessScale, SpriteEffects.None, 0f);
+            batcher.Draw(Sprite, SPoint, SMiddle, tint, Angle, middleOrigin, middleScale, SpriteEffects.None, 0f);
+            batcher.Draw(Sprite, SPoint, SEnding, tint, Angle, capOrigin, ThicknessScale, SpriteEffects.None, 0f);
+            batcher.Draw(Sprite, EPoint, SEnding, tint, Angle + MathHelper.Pi, capOrigin, ThicknessScale, SpriteEffects.None, 0f);
         }
     }
 }

@@ -13,29 +13,34 @@ namespace CyberCommando.Entities.Utils
     /// </summary>
     class Sprite
     {
-        public Rectangle Source { get; set; }
-        public Vector2 Position { get; set; }
-        public float Scale { get; set; }
-        public float ResScale { get; set; }
+        public Rectangle Source     { get; set; }
+        public Vector2   Position   { get; set; }
+
+        public float    Scale   { get; set; }
+        public float    RScale  { get; set; }
+
         public Sprite()
         {
-            this.Source = new Rectangle(1, 1, 1, 1);
+            this.Source = Rectangle.Empty;
             this.Position = Vector2.One;
             this.Scale = 1.0f;
-            this.ResScale = 1.0f;
+            this.RScale = 1.0f;
         }
 
-        public Sprite(Rectangle source) : this ()
+        public Sprite(Rectangle source) 
+                                    : this ()
         {
             this.Source = source;
         }
 
-        public Sprite(Rectangle source, Vector2 position) : this (source)
+        public Sprite(Rectangle source, Vector2 position) 
+                                                : this (source)
         {
             this.Position = position;
         }
 
-        public Sprite(Rectangle source, Vector2 position, float scale) : this(source, position)
+        public Sprite(Rectangle source, Vector2 position, float scale) 
+                                                    : this(source, position)
         {
             this.Scale = scale;
         }

@@ -8,49 +8,51 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
+using CyberCommando.Services;
+
 namespace CyberCommando.Engine
 {
     class BloomRenderComponent : DrawableGameComponent
     {
-        Effect EBloomExtract;
-        Effect EBloomCombine;
-        Effect EGaussianBlur;
+        SpriteBatch     Batcher;
+        ContentManager  Content;
 
-        RenderTarget2D SceneRSource;
-        RenderTarget2D SceneRFinal;
-        RenderTarget2D RTarget1;
-        RenderTarget2D RTarget2;
+        Effect          EBloomExtract;
+        Effect          EBloomCombine;
+        Effect          EGaussianBlur;
 
-        Color SColor;
+        BloomParams     Settings;
 
-        // Choose what display settings the bloom should use.
-        BloomParams Settings;
+        RenderTarget2D  SceneRSource;
+        RenderTarget2D  SceneRFinal;
+        RenderTarget2D  RTarget1;
+        RenderTarget2D  RTarget2;
 
-        SpriteBatch Batcher;
+        public Color SColor { get; set; }
 
-        // Optionally displays one of the intermediate buffers used
-        // by the bloom postprocess, so you can see exactly what is
-        // being drawn into each rendertarget.
+        // displays one of the intermediate buffers used bloom post 
+        //to see what is being drawn into each rendertarget.
         public enum IntermediateBuffer
         {
-            PreBloom,
-            BlurredHorizontally,
-            BlurredBothWays,
-            FinalResult,
+            PreProcessBloom,
+            BHorizontally,
+            BVerticaly,
+            Final,
         }
 
-        public IntermediateBuffer ShowBuffer { get; set; }
+        public IntermediateBuffer IBuffer { get; set; }
 
         public BloomRenderComponent(Game game) : base(game)
         {
+            this.Content = game.Content;
             SColor = Color.Gray;
-            Settings = BloomParams.PresetSettings[0];
-            ShowBuffer = IntermediateBuffer.FinalResult;
+            Settings = BloomParams.BModes[BloomStates.SOFT];
+            IBuffer = IntermediateBuffer.Final;
         }
 
-        public void UpdateSettings(int setup)
+        public void ChangeMode(BloomStates state)
         {
-            Settings = BloomParams.PresetSettings[setup];
+            Settings = BloomParams.BModes[state];
         }
 
 
@@ -68,9 +70,9 @@ namespace CyberCommando.Engine
 
         protected override void LoadContent()
         {
-            EBloomExtract = Game.Content.Load<Effect>("BloomExtract");
-            EBloomCombine = Game.Content.Load<Effect>("BloomCombine");
-            EGaussianBlur = Game.Content.Load<Effect>("GaussianBlur");
+            EBloomExtract = Content.Load<Effect>(ServiceLocator.Instance.PLManager.NEBloomExtract);
+            EBloomCombine = Content.Load<Effect>(ServiceLocator.Instance.PLManager.NEBloomComdine);
+            EGaussianBlur = Content.Load<Effect>(ServiceLocator.Instance.PLManager.NEGaussBlur);
 
             Batcher = new SpriteBatch(GraphicsDevice);
 
@@ -80,32 +82,32 @@ namespace CyberCommando.Engine
             SurfaceFormat format = pp.BackBufferFormat;
 
             // source texture for rendering all bloom effect textures
-            SceneRSource = new RenderTarget2D(Game.GraphicsDevice,
-                                                            width,
-                                                            height,
-                                                            false,
-                                                            format,
-                                                            pp.DepthStencilFormat,
-                                                            pp.MultiSampleCount,
-                                                            RenderTargetUsage.DiscardContents);
+            SceneRSource = new RenderTarget2D(GraphicsDevice,
+                                                    width,
+                                                    height,
+                                                    false,
+                                                    format,
+                                                    pp.DepthStencilFormat,
+                                                    pp.MultiSampleCount,
+                                                    RenderTargetUsage.DiscardContents);
 
             // final texture for rendering all bloomed to the screen
-            SceneRFinal = new RenderTarget2D(Game.GraphicsDevice,
-                                                            width,
-                                                            height,
-                                                            false,
-                                                            format,
-                                                            pp.DepthStencilFormat,
-                                                            pp.MultiSampleCount,
-                                                            RenderTargetUsage.DiscardContents);
+            SceneRFinal = new RenderTarget2D(GraphicsDevice,
+                                                    width,
+                                                    height,
+                                                    false,
+                                                    format,
+                                                    pp.DepthStencilFormat,
+                                                    pp.MultiSampleCount,
+                                                    RenderTargetUsage.DiscardContents);
 
 
             // Half of screen due to blur (still lose quality) and performance
             width /= 2;
             height /= 2;
 
-            RTarget1 = new RenderTarget2D(Game.GraphicsDevice, width, height, false, format, DepthFormat.None);
-            RTarget2 = new RenderTarget2D(Game.GraphicsDevice, width, height, false, format, DepthFormat.None);
+            RTarget1 = new RenderTarget2D(GraphicsDevice, width, height, false, format, DepthFormat.None);
+            RTarget2 = new RenderTarget2D(GraphicsDevice, width, height, false, format, DepthFormat.None);
         }
 
         protected override void UnloadContent()
@@ -114,6 +116,7 @@ namespace CyberCommando.Engine
             SceneRSource.Dispose();
             RTarget1.Dispose();
             RTarget2.Dispose();
+            Content.Unload();
         }
 
         public void DisplayBloomTarget()
@@ -133,21 +136,21 @@ namespace CyberCommando.Engine
             EBloomExtract.Parameters["BloomThreshold"].SetValue(Settings.BloomThreshold);
 
             // Draw source scene to bloom it
-            DrawFullscreenQuad(SceneRSource, RTarget1,
+            DrawFullScreenQuadRender(SceneRSource, RTarget1,
                                EBloomExtract,
-                               IntermediateBuffer.PreBloom);
+                               IntermediateBuffer.PreProcessBloom);
 
             // using a shader to apply a horizontal gaussian blur filter.
-            SetBlurEffectParameters(1.0f / (float)RTarget1.Width, 0);
-            DrawFullscreenQuad(RTarget1, RTarget2,
+            CalcBlurParam(1.0f / (float)RTarget1.Width, 0);
+            DrawFullScreenQuadRender(RTarget1, RTarget2,
                                EGaussianBlur,
-                               IntermediateBuffer.BlurredHorizontally);
+                               IntermediateBuffer.BHorizontally);
 
             // using a shader to apply a vertical gaussian blur filter.
-            SetBlurEffectParameters(0, 1.0f / (float)RTarget1.Height);
-            DrawFullscreenQuad(RTarget2, RTarget1,
+            CalcBlurParam(0, 1.0f / (float)RTarget1.Height);
+            DrawFullScreenQuadRender(RTarget2, RTarget1,
                                EGaussianBlur,
-                               IntermediateBuffer.BlurredBothWays);
+                               IntermediateBuffer.BVerticaly);
 
             // shader that combines them to produce the final bloomed result.
             GraphicsDevice.SetRenderTarget(SceneRFinal);
@@ -162,25 +165,25 @@ namespace CyberCommando.Engine
             // Set source to apply all effects
             GraphicsDevice.Textures[1] = SceneRSource;
 
-            DrawFullscreenQuad(RTarget1,
+            DrawFullScreenQuadRender(RTarget1,
                                GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
                                EBloomCombine,
-                               IntermediateBuffer.FinalResult);
+                               IntermediateBuffer.Final);
         }
 
-        public void DrawFullscreenQuad(Texture2D texture, RenderTarget2D renderTarget, 
+        public void DrawFullScreenQuadRender(Texture2D texture, RenderTarget2D renderTarget, 
                                         Effect effect, IntermediateBuffer currentBuffer)
         {
             Game.GraphicsDevice.SetRenderTarget(renderTarget);
 
-            DrawFullscreenQuad(texture, renderTarget.Width, renderTarget.Height, effect, currentBuffer);
+            DrawFullScreenQuadRender(texture, renderTarget.Width, renderTarget.Height, effect, currentBuffer);
         }
 
-        void DrawFullscreenQuad(Texture2D texture, int width, int height, Effect effect, 
+        void DrawFullScreenQuadRender(Texture2D texture, int width, int height, Effect effect, 
                                     IntermediateBuffer currentBuffer)
         {
             // for intermidiate buffer options, still draw
-            if (ShowBuffer < currentBuffer)
+            if (IBuffer < currentBuffer)
                 effect = null;
 
             Batcher.Begin(SpriteSortMode.Deferred, 
@@ -191,7 +194,7 @@ namespace CyberCommando.Engine
             Batcher.End();
         }
 
-        void SetBlurEffectParameters(float dx, float dy)
+        void CalcBlurParam(float dx, float dy)
         {
             // Look up the sample weight and offset effect parameters.
             EffectParameter weightsParameter, offsetsParameter;
@@ -207,7 +210,7 @@ namespace CyberCommando.Engine
             Vector2[] sampleOffsets = new Vector2[sampleCount];
 
             // The first sample always has a zero offset.
-            sampleWeights[0] = ComputeGaussian(0);
+            sampleWeights[0] = CalcGaussian(0);
             sampleOffsets[0] = new Vector2(0);
 
             // Maintain a sum of all the weighting values.
@@ -218,7 +221,7 @@ namespace CyberCommando.Engine
             for (int i = 0; i < sampleCount / 2; i++)
             {
                 // Store weights for the positive and negative taps.
-                float weight = ComputeGaussian(i + 1);
+                float weight = CalcGaussian(i + 1);
 
                 sampleWeights[i * 2 + 1] = weight;
                 sampleWeights[i * 2 + 2] = weight;
@@ -242,7 +245,7 @@ namespace CyberCommando.Engine
             offsetsParameter.SetValue(sampleOffsets);
         }
 
-        private float ComputeGaussian(float n)
+        private float CalcGaussian(float n)
         {
             float theta = Settings.BlurAmount;
 
