@@ -34,6 +34,10 @@ namespace CyberCommando.Services.Utils
         {
             this.GraphDev = graphdev;
             this.CoreGame = game;
+
+            this.FWidth = graphdev.Viewport.Width;
+            this.FHeight = graphdev.Viewport.Height;
+
             IsInitialized = true;
             SScale = 1.0f;
         }

@@ -14,6 +14,7 @@ namespace CyberCommando.Engine
 {
     class BloomRenderComponent : DrawableGameComponent
     {
+        GraphicsDevice  GraphDev;
         SpriteBatch     Batcher;
         ContentManager  Content;
 
@@ -44,10 +45,11 @@ namespace CyberCommando.Engine
 
         public BloomRenderComponent(Game game) : base(game)
         {
+            this.GraphDev = game.GraphicsDevice;
             this.Content = game.Content;
-            SColor = Color.Gray;
-            Settings = BloomParams.BModes[BloomStates.SOFT];
-            IBuffer = IntermediateBuffer.Final;
+            this.SColor = Color.Gray;
+            this.Settings = BloomParams.BModes[BloomStates.SOFT];
+            this.IBuffer = IntermediateBuffer.Final;
         }
 
         public void ChangeMode(BloomStates state)
@@ -55,17 +57,16 @@ namespace CyberCommando.Engine
             Settings = BloomParams.BModes[state];
         }
 
-
         public void BeginDraw()
         {
-            GraphicsDevice.SetRenderTarget(SceneRSource);
-            GraphicsDevice.Clear(SColor);
+            GraphDev.SetRenderTarget(SceneRSource);
+            GraphDev.Clear(SColor);
         }
 
         public void EndDraw()
         {
-            GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(SColor);
+            GraphDev.SetRenderTarget(null);
+            GraphDev.Clear(SColor);
         }
 
         protected override void LoadContent()
@@ -74,15 +75,15 @@ namespace CyberCommando.Engine
             EBloomCombine = Content.Load<Effect>(ServiceLocator.Instance.PLManager.NEBloomComdine);
             EGaussianBlur = Content.Load<Effect>(ServiceLocator.Instance.PLManager.NEGaussBlur);
 
-            Batcher = new SpriteBatch(GraphicsDevice);
+            Batcher = new SpriteBatch(GraphDev);
 
-            var pp = Game.GraphicsDevice.PresentationParameters;
+            var pp = GraphDev.PresentationParameters;
             int width = pp.BackBufferWidth;
             int height = pp.BackBufferHeight;
             SurfaceFormat format = pp.BackBufferFormat;
 
             // source texture for rendering all bloom effect textures
-            SceneRSource = new RenderTarget2D(GraphicsDevice,
+            SceneRSource = new RenderTarget2D(GraphDev,
                                                     width,
                                                     height,
                                                     false,
@@ -92,7 +93,7 @@ namespace CyberCommando.Engine
                                                     RenderTargetUsage.DiscardContents);
 
             // final texture for rendering all bloomed to the screen
-            SceneRFinal = new RenderTarget2D(GraphicsDevice,
+            SceneRFinal = new RenderTarget2D(GraphDev,
                                                     width,
                                                     height,
                                                     false,
@@ -106,8 +107,8 @@ namespace CyberCommando.Engine
             width /= 2;
             height /= 2;
 
-            RTarget1 = new RenderTarget2D(GraphicsDevice, width, height, false, format, DepthFormat.None);
-            RTarget2 = new RenderTarget2D(GraphicsDevice, width, height, false, format, DepthFormat.None);
+            RTarget1 = new RenderTarget2D(GraphDev, width, height, false, format, DepthFormat.None);
+            RTarget2 = new RenderTarget2D(GraphDev, width, height, false, format, DepthFormat.None);
         }
 
         protected override void UnloadContent()
@@ -123,8 +124,8 @@ namespace CyberCommando.Engine
         {
             Batcher.Begin(0, BlendState.AlphaBlend);
             Batcher.Draw(SceneRFinal, 
-                new Rectangle(0, 0, Game.GraphicsDevice.PresentationParameters.BackBufferWidth,
-                                    Game.GraphicsDevice.PresentationParameters.BackBufferHeight), 
+                new Rectangle(0, 0, GraphDev.PresentationParameters.BackBufferWidth,
+                                    GraphDev.PresentationParameters.BackBufferHeight), 
                                                                                     Color.White);
             Batcher.End();
         }
@@ -137,23 +138,23 @@ namespace CyberCommando.Engine
 
             // Draw source scene to bloom it
             DrawFullScreenQuadRender(SceneRSource, RTarget1,
-                               EBloomExtract,
-                               IntermediateBuffer.PreProcessBloom);
+                                       EBloomExtract,
+                                       IntermediateBuffer.PreProcessBloom);
 
             // using a shader to apply a horizontal gaussian blur filter.
             CalcBlurParam(1.0f / (float)RTarget1.Width, 0);
             DrawFullScreenQuadRender(RTarget1, RTarget2,
-                               EGaussianBlur,
-                               IntermediateBuffer.BHorizontally);
+                                       EGaussianBlur,
+                                       IntermediateBuffer.BHorizontally);
 
             // using a shader to apply a vertical gaussian blur filter.
             CalcBlurParam(0, 1.0f / (float)RTarget1.Height);
             DrawFullScreenQuadRender(RTarget2, RTarget1,
-                               EGaussianBlur,
-                               IntermediateBuffer.BVerticaly);
+                                       EGaussianBlur,
+                                       IntermediateBuffer.BVerticaly);
 
             // shader that combines them to produce the final bloomed result.
-            GraphicsDevice.SetRenderTarget(SceneRFinal);
+            GraphDev.SetRenderTarget(SceneRFinal);
 
             EffectParameterCollection parameters = EBloomCombine.Parameters;
 
@@ -166,21 +167,21 @@ namespace CyberCommando.Engine
             GraphicsDevice.Textures[1] = SceneRSource;
 
             DrawFullScreenQuadRender(RTarget1,
-                               GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
-                               EBloomCombine,
-                               IntermediateBuffer.Final);
+                                       GraphDev.Viewport.Width, GraphDev.Viewport.Height,
+                                       EBloomCombine,
+                                       IntermediateBuffer.Final);
         }
 
         public void DrawFullScreenQuadRender(Texture2D texture, RenderTarget2D renderTarget, 
-                                        Effect effect, IntermediateBuffer currentBuffer)
+                                                Effect effect, IntermediateBuffer currentBuffer)
         {
-            Game.GraphicsDevice.SetRenderTarget(renderTarget);
+            GraphDev.SetRenderTarget(renderTarget);
 
             DrawFullScreenQuadRender(texture, renderTarget.Width, renderTarget.Height, effect, currentBuffer);
         }
 
         void DrawFullScreenQuadRender(Texture2D texture, int width, int height, Effect effect, 
-                                    IntermediateBuffer currentBuffer)
+                                                                IntermediateBuffer currentBuffer)
         {
             // for intermidiate buffer options, still draw
             if (IBuffer < currentBuffer)
@@ -190,11 +191,12 @@ namespace CyberCommando.Engine
                                 BlendState.Opaque, 
                                 null, null, null, 
                                 effect);
+
             Batcher.Draw(texture, new Rectangle(0, 0, width, height), Color.White);
             Batcher.End();
         }
 
-        void CalcBlurParam(float dx, float dy)
+        private void CalcBlurParam(float dx, float dy)
         {
             // Look up the sample weight and offset effect parameters.
             EffectParameter weightsParameter, offsetsParameter;
@@ -222,18 +224,19 @@ namespace CyberCommando.Engine
             {
                 // Store weights for the positive and negative taps.
                 float weight = CalcGaussian(i + 1);
+                var doubleI = i * 2 + 1;
 
-                sampleWeights[i * 2 + 1] = weight;
-                sampleWeights[i * 2 + 2] = weight;
+                sampleWeights[doubleI] = weight;
+                sampleWeights[doubleI + 1] = weight;
 
                 totalWeights += weight * 2;
-                float sampleOffset = i * 2 + 1.5f;
+                float sampleOffset = doubleI + .5f;
 
                 Vector2 delta = new Vector2(dx, dy) * sampleOffset;
 
                 // Store texture coordinate offsets for the positive and negative
-                sampleOffsets[i * 2 + 1] = delta;
-                sampleOffsets[i * 2 + 2] = -delta;
+                sampleOffsets[doubleI] = delta;
+                sampleOffsets[doubleI + 1] = -delta;
             }
 
             // Normalize the list of sample weightings, so they will always sum to  one.

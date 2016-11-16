@@ -16,14 +16,16 @@ namespace CyberCommando.Services.Utils
 {
     class GameScreen : Screen
     {
-        World                   WCore;
-        Color                   ShadowColor = Color.Gray;
+        World   WCore;
+        Color   ShadowColor = Color.Gray;
 
-        bool                    ShadowEffect = true;
-        QuadRenderComponent     SQuadRender;
-        bool                    BloomEffect = true;
+        bool    ShadowEffect = false;
+        bool    BloomEffect = false;
+
+        KeyboardState Kstate = Keyboard.GetState();
+
         BloomRenderComponent    BloomRender;
-
+        QuadRenderComponent     SQuadRender;
         ShadowResolver          ShadowRender;
 
         int LLimit      { get; set; }
@@ -81,6 +83,16 @@ namespace CyberCommando.Services.Utils
         public override void Update(GameTime gameTime)
         {
             WCore.Update(gameTime);
+
+            KeyboardState state = Keyboard.GetState();
+
+            if (state.IsKeyDown(Keys.P) && Kstate.IsKeyUp(Keys.P))
+                ShadowEffect = !ShadowEffect;
+
+            if (state.IsKeyDown(Keys.O) && Kstate.IsKeyUp(Keys.O))
+                BloomEffect = !BloomEffect;
+
+            Kstate = state;
         }
 
         /// <summary>
@@ -91,7 +103,6 @@ namespace CyberCommando.Services.Utils
             batcher.Begin(SpriteSortMode.Deferred,
                             BlendState.Additive,
                             null, null, null, null, null);
-            // world.Services.Camera.GetViewMatrix(new Vector2(0.9f))
 
             foreach (var light in WCore.LevelLight)
             {
@@ -171,7 +182,7 @@ namespace CyberCommando.Services.Utils
             if (ShadowEffect)
                 ShadowRender.DisplayShadowCast();
 
-            //base.Draw(gameTime);
+            base.Draw(batcher, gameTime);
 
             // DrawCharacter without effects cause all effects already accured
             WCore.DrawCharacter(gameTime, batcher);

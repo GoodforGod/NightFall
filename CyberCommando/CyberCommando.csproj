@@ -45,6 +45,9 @@
     <Compile Include="Entities\Enviroment\LightingBolt.cs" />
     <Compile Include="Entities\Enviroment\Platform.cs" />
     <Compile Include="Entities\Enviroment\SegmentLine.cs" />
+    <Compile Include="Entities\Utils\AMSprite.cs" />
+    <Compile Include="Entities\Utils\IMovableInterface.cs" />
+    <Compile Include="Entities\Utils\TMSprite.cs" />
     <Compile Include="Services\LevelManager.cs" />
     <Compile Include="Services\Utils\GameScreen.cs" />
     <Compile Include="Services\Utils\MenuScreen.cs" />
@@ -55,9 +58,9 @@
     <Compile Include="Engine\LightSpot.cs" />
     <Compile Include="Engine\QuadRenderComponent.cs" />
     <Compile Include="Engine\ShadowResolver.cs" />
-    <Compile Include="Entities\Utils\SpriteTextured.cs" />
-    <Compile Include="Entities\Utils\SpriteAnimated.cs" />
-    <Compile Include="Entities\Utils\Sprite.cs" />
+    <Compile Include="Entities\Utils\TSprite.cs" />
+    <Compile Include="Entities\Utils\ASprite.cs" />
+    <Compile Include="Entities\Utils\SSprite.cs" />
     <Compile Include="Entities\Weapons\Gun.cs" />
     <Compile Include="Services\LoadManager.cs" />
     <Compile Include="Controllers\CharStateHandler.cs" />

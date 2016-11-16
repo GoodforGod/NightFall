@@ -41,9 +41,9 @@ namespace CyberCommando.Animations
         /// <param name="spritesheetName">
         /// Name of the texture/sprite for the animations
         /// </param>
-        public void LoadAnimations(LoadManager loader, string spritesheetName)
+        public void LoadAnimations(string spritesheetName)
         {
-            Animations = loader.LoadAnimations<TEnum>(spritesheetName);
+            Animations = ServiceLocator.Instance.LManager.LoadAnimations<TEnum>(spritesheetName);
             if (Animations == null || Animations.Count == 0)
                 throw new NullReferenceException("Animations is null or empty, check animation files for: " + spritesheetName);
         }
@@ -101,6 +101,11 @@ namespace CyberCommando.Animations
                 secondsIntoAnimation % CurrentAnimation.Duration.TotalSeconds;
 
             CurrentAnimation.TimeIntoAnimation = TimeSpan.FromSeconds(remainder);
+        }
+
+        public void Unload()
+        {
+            Animations.Clear();
         }
     }
 }

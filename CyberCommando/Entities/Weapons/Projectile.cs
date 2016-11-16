@@ -15,8 +15,8 @@ namespace CyberCommando.Entities.Weapons
     /// </summary>
     class Projectile : Entity
     {
-        private Rectangle   Source { get; set; }
-        public GunState     State { get; set; }
+        private Rectangle   Source  { get; set; }
+        public GunState     State   { get; set; }
 
         public Projectile(World world, Vector2 position, GunState state, Texture2D texture, Rectangle source) 
             : base(world)
@@ -26,7 +26,7 @@ namespace CyberCommando.Entities.Weapons
             this.Sprite = texture;
             this.Source = source;
             this.CVelocity = new Vector2(5f, 5f);
-            Scale = ResScale = 0.3f;
+            Scale = ResScale = 0.2f;
         }
 
         public override Entity Clone()

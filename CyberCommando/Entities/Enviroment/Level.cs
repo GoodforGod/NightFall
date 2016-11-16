@@ -24,9 +24,10 @@ namespace CyberCommando.Entities.Enviroment
         BACKGROUND = 1,
         BACK = 2,
         MIDDLE = 4,
-        FRONT = 8,
-        BLURY = 16,
-        STATIC = 32
+        FRONT_NOT_EFFECTED = 8,
+        FRONT_EFFECTED = 16,
+        BLURY = 32,
+        STATIC = 64
     }
 
     /// <summary>
@@ -67,13 +68,22 @@ namespace CyberCommando.Entities.Enviroment
 
         public void Dispose()
         {
-            foreach (var layer in Layers)
-                layer.Value.Dispose();
+            if (Layers != null)
+            {
+                foreach (var layer in Layers)
+                    if (layer.Value != null)
+                        layer.Value.Dispose();
+            }
 
-            LBranchSprite.Dispose();
+            if (LBranch != null)
+                LBranchSprite.Dispose();
             LBranch = null;
-            Layers.Clear();
-            Lights.Clear();
+
+            if (Layers != null)
+                Layers.Clear();
+
+            if (Lights != null)
+                Lights.Clear();
         }
 
         public void LayersUpdate(int pos, int FWidthHalf)
@@ -120,21 +130,24 @@ namespace CyberCommando.Entities.Enviroment
                     layer.Value.UpdateScale(scale);
         }
 
-        public void DrawSpecificLayer(SpriteBatch batcher, Vector2 limits, LevelState lStates, bool endBatcher)
+        public void DrawSpecificLayers(SpriteBatch batcher, Vector2 limits, LevelState lvlStates, LevelState stoplvlState)
         {
-            foreach (LevelState state in Enum.GetValues(lStates.GetType()))
+            foreach (LevelState state in Enum.GetValues(lvlStates.GetType()))
             {
-                if (lStates.HasFlag(state) && state != LevelState.NONE)
+                if (lvlStates.HasFlag(state) && state != LevelState.NONE)
                 {
                     if (Layers[state] != null)
                     {
                         LDrawEndState = state;
                         if (state == LevelState.BACK && LBranch != null)
                             DrawLighting(batcher, Layers[state].Camera.GetViewMatrix(Layers[state].Parallax));
-                        Layers[state].Draw(batcher, limits);
+                        if (state == LevelState.FRONT_NOT_EFFECTED)
+                            Layers[state].Draw(batcher, limits);
+                        else Layers[state].Draw(batcher);
                     }
+                    if (state != stoplvlState)
+                        Layers[state].EndDraw(batcher);
                 }
-                Layers[state].EndDraw(batcher);
             }
         }
 
@@ -152,18 +165,6 @@ namespace CyberCommando.Entities.Enviroment
                                 layerCamMatrix);
             LBranch.Draw(batcher);
             batcher.End();
-        }
-
-        public void DrawBackground(SpriteBatch batcher)
-        {
-            foreach (var layer in Layers)
-                if (layer.Value.State != LevelState.FRONT)
-                {
-                    if (layer.Value.State == LevelState.BACK && LBranch != null)
-                        DrawLighting(batcher, layer.Value.Camera.GetViewMatrix(layer.Value.Parallax));
-                    layer.Value.Draw(batcher);
-                    layer.Value.EndDraw(batcher);
-                }
         }
     }
 }

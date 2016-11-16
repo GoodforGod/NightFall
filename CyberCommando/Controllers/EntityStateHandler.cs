@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 
 using CyberCommando.Entities;
 using CyberCommando.Animations;
+using CyberCommando.Entities.Weapons;
 
 namespace CyberCommando.Controllers
 {
@@ -47,6 +48,8 @@ namespace CyberCommando.Controllers
 
         public virtual void Fire(Entity entity)
         {
+            entity.Cooldown = DateTime.Now;
+            entity.WCore.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.FireAngle, entity.BulletVelocuty);
             //entity.AniState = AnimationState.FIRE;
         }
 
@@ -94,8 +97,12 @@ namespace CyberCommando.Controllers
         /// <param name="entity"></param>
         public virtual void Gravity(Entity entity)
         {
+            //if (entity.IsOnPlatform)
+            //    return;
+
             if (entity.IsGrounded = entity.CheckIfIsGrounded())
                 return;
+
             entity.AniState = AnimationState.JUMP;
             entity.CVelocity.Y += entity.WCore.Gravity;
         }

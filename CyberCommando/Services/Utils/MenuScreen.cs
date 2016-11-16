@@ -10,10 +10,16 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 using CyberCommando.Entities.Enviroment;
+using CyberCommando.Animations;
 
 namespace CyberCommando.Services.Utils
 {
-    public enum MenuState
+    enum MenuAnimations
+    {
+        M, E, N, U, W, L, O, A, D, P, X, I, T, S, R, B, C, K, RAIN
+    }
+
+    enum MenuState
     {
         MAIN,
         NEW_GAME,
@@ -32,11 +38,16 @@ namespace CyberCommando.Services.Utils
     {
         LevelNames  LName { get; set; }
         MenuState   MState { get; set; }
+
         bool        IsSoundOn;
         bool        Direction;
         int         FWidthHalf;
+        int         FCamRightPos;
+        int         FCamLeftPos;
 
         string MLable;
+
+        AnimationManager<MenuAnimations> AniManager;
 
         KeyboardState   KState;
         SpriteFont      Font;
@@ -46,71 +57,16 @@ namespace CyberCommando.Services.Utils
         public override void Initialize(GraphicsDevice graphdev, Game game, params object[] param)
         {
             base.Initialize(graphdev, game);
-            Direction = false;
-            FWidthHalf = FWidth / 2;
-            LVLManager = LevelManager.Instance;
-            MCamPosition = new Vector2(GraphDev.Viewport.Width / 2, GraphDev.Viewport.Height / 2);
-            MState = MenuState.NEW_GAME;
-            MLable = MState.ToString();
-            LName = LevelNames.CYBERTOWN;
-        }
+            this.Direction = false;
+            this.FWidthHalf = FCamLeftPos = FWidth / 2;
+            this.FCamRightPos = (int) (FWidth / 1.5);
 
-        private void InitMenuArray()
-        {
-            /*
-            MArrays = new Dictionary<MenuState, int[,]>()
-            {
-                {MenuState.MAIN, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,1,1,0,1,0,0,1},
-                    {1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,0,1,1,0}} },
-                {MenuState.NEW_GAME, new int[,] {
-                    {1,1,1,0,1,0,0,0,0,1,0,0,1,0,0,1},
-                    {1,0,1,0,1,0,0,0,1,0,1,0,0,1,0,1},
-                    {1,1,1,0,1,0,0,0,1,1,1,0,0,0,1,0},
-                    {1,0,0,0,1,0,0,0,1,0,1,0,0,1,0,0},
-                    {1,0,0,0,1,1,1,0,1,0,1,0,1,0,0,0}} },
-                {MenuState.LOAD_GAME, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
-                {MenuState.OPTIONS, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
-                {MenuState.EXIT, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
-                {MenuState.SOUND, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
-                {MenuState.RESOLUTION, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
-                {MenuState.BACK, new int[,] {
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,1,1,0,1,0,0,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1},
-                    {1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1}} },
+            this.LVLManager = LevelManager.Instance;
+            this.MCamPosition = new Vector2(GraphDev.Viewport.Width / 2, GraphDev.Viewport.Height / 2);
 
-            };
-            */
+            this.MState = MenuState.NEW_GAME;
+            this.MLable = MState.ToString();
+            this.LName = LevelNames.CYBERTOWN;
         }
 
         public override void LoadContent(ContentManager content)
@@ -126,11 +82,16 @@ namespace CyberCommando.Services.Utils
         public override void UnloadContent()
         {
             base.UnloadContent();
+            LVLManager.Unload();
         }
 
         public override void Resize(ResolutionState res, int width, int height)
         {
             base.Resize(res, width, height);
+
+            this.FCamRightPos = (int)(FWidth / 1.5);
+            this.FCamLeftPos = FWidth / 2;
+
             LVLManager.UpdateScale(SScale, new Vector2(width, height), CoreGame.GraphicsDevice.Viewport);
         }
 
@@ -255,7 +216,7 @@ namespace CyberCommando.Services.Utils
             }
             else
             {
-                if (MCamPosition.X > FWidth)
+                if (MCamPosition.X > FCamRightPos)
                     Direction = !Direction;
                 MCamPosition.X += 0.9f;
             }
@@ -275,15 +236,16 @@ namespace CyberCommando.Services.Utils
             LVLManager.DrawSpecific(batcher, 
                                     new Vector2(MCamPosition.X + FWidthHalf, MCamPosition.X - FWidthHalf), 
                                     LevelState.BACKGROUND | LevelState.BACK | LevelState.MIDDLE, 
-                                    true);
+                                    LevelState.NONE);
+
             LVLManager.DrawSpecific(batcher, 
                                     new Vector2(MCamPosition.X + FWidthHalf, MCamPosition.X - FWidthHalf), 
-                                    LevelState.FRONT, 
-                                    false);
-            batcher.Begin();
+                                    LevelState.FRONT_NOT_EFFECTED, 
+                                    LevelState.FRONT_NOT_EFFECTED);
+
             batcher.DrawString(Font, MLable, MCamPosition, Color.White);
-            batcher.End();
-            LVLManager.EndDrawFront(batcher);
+
+            LVLManager.EndDrawLastLayer(batcher);
         }
     }
 }

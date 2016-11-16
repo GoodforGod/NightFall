@@ -70,16 +70,18 @@ namespace CyberCommando
             int height = 9 * (int)res;
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
-            graphics.ApplyChanges();
-            ServiceLocator.Instance.Initialize(this.Content, 
-                                                this.GraphicsDevice, 
-                                                graphics.PreferredBackBufferWidth,
-                                                graphics.PreferredBackBufferHeight);
-            SManager.UpdateResolution(ResolutionCurrent);
             Window.Position = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - width / 2,
                                          GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - height / 2);
+            graphics.ApplyChanges();
 
-            CoreBatcher = new SpriteBatch(GraphicsDevice);
+            if (!ServiceLocator.Instance.IsInitialized)
+                ServiceLocator.Instance.Initialize(this.Content,
+                                                    this.GraphicsDevice,
+                                                    graphics.PreferredBackBufferWidth,
+                                                    graphics.PreferredBackBufferHeight);
+            else ServiceLocator.Instance.Resize(res, width, height);
+
+            SManager.UpdateResolution(ResolutionCurrent);
         }
 
         /// <summary>
@@ -131,7 +133,7 @@ namespace CyberCommando
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             SManager.Draw(CoreBatcher, gameTime);
 

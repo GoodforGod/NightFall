@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input;
 using CyberCommando.Services;
 using CyberCommando.Entities.Weapons;
 using CyberCommando.Engine;
+using CyberCommando.Entities.Enemies;
 
 namespace CyberCommando.Entities.Enviroment
 {
@@ -22,6 +23,8 @@ namespace CyberCommando.Entities.Enviroment
         public readonly Game    CoreGame;
         LevelManager            LVLManager  { get; }
         ServiceLocator          Services    { get; }
+
+        MouseState MStatePrev;
 
         public int              FWidth   { get; set; }
         public int              FHeight  { get; set; }
@@ -47,7 +50,6 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         List<Entity>    EntitiesToKill  = new List<Entity>();
 
-
         /// <summary>
         /// Entities whome will be spawn in game
         /// </summary>
@@ -65,10 +67,11 @@ namespace CyberCommando.Entities.Enviroment
         /// </summary>
         internal Character Player { get; private set; }
 
-
         public World(Game game, int height, int width, Viewport viewport)
         {
             this.CoreGame = game;
+
+            MStatePrev = Mouse.GetState();
 
             ResScale = 1f;
             FWidth = width;
@@ -80,21 +83,35 @@ namespace CyberCommando.Entities.Enviroment
             Services.Camera.Limits = LVLManager.CLimits;
 
             Platforms = new List<Platform>();
-            Platforms.Add(new Platform(new Vector2(), LVLManager.CLevel.Layers[0].Texture, new Rectangle(1000, 750, 100, 40)));
+            Platforms.Add(new Platform(new Vector2(), 
+                                        LVLManager.CLevel.Layers[LevelState.BACKGROUND].Texture, 
+                                        new Rectangle(1000, 750, 100, 40)));
         }
 
-        public virtual void Initialize() { Player = (Character) Spawn(typeof(Character).FullName); }
+        public virtual void Initialize()
+        {
+            Player = (Character) Spawn(typeof(Character).FullName);
+            Spawn(typeof(Enemy).FullName);
+        }
 
         public virtual Entity Spawn(string className) { return Spawn(className, Vector2.Zero); }
         public virtual Entity Spawn(string className, Vector2 position)
         {
-            var prms = new object[] { this };
+            var param = new object[] { this };
+
             if (className == typeof(Projectile).FullName)
-                prms = new object[] { this, position, GunState.LASER_BULLET, Services.PLManager.SGun, new Rectangle(652, 102, 100, 184) };
-            var entity = (Entity)Activator.CreateInstance(Type.GetType(className), prms);
+                param = new object[] { this,
+                                        position,
+                                        GunState.LASER_BULLET,
+                                        Services.PLManager.SGun,
+                                        Services.PLManager.RProjectileLaser };
+
+            var entity = (Entity)Activator.CreateInstance(Type.GetType(className), param);
+
             entity.WPosition = position;
             entity.Handler = Services.IOHandler;
             Entities.Add(entity);
+
             return entity;
         }
         public virtual Entity Spawn(string className, Vector2 position, float angle)
@@ -157,16 +174,22 @@ namespace CyberCommando.Entities.Enviroment
         {
             MouseState state = Mouse.GetState();
 
+            if(state.RightButton == ButtonState.Pressed && MStatePrev.RightButton == ButtonState.Released)
+            {
+                AddToSpawnQueue(typeof(Enemy).FullName);
+            }
             // Spawn all entities in the list
             foreach (var entity in EntitiesToAdd)
             {
                 var ent = Spawn(entity.Item1, entity.Item2, entity.Item3, entity.Item4);
                 if (ent is Projectile)
-                    ent.CVelocity = new Vector2(state.X - Player.DPosition.X,
-                                                        state.Y - Player.DPosition.Y);
+                    ent.CVelocity = entity.Item4;
             }
             // Wipe list
             EntitiesToAdd.Clear();
+
+            MStatePrev = state;
+
         }
 
         public virtual void Update(GameTime gameTime)
@@ -184,13 +207,15 @@ namespace CyberCommando.Entities.Enviroment
                 if (entity.IsGrounded)
                     continue;
 
+                entity.IsOnPlatform = false;
+
                 foreach (var platform in Platforms)
                 {
                     if (entity.BoundingBox.Intersects(platform.BoundingBox))
                     {
                         if(entity.BoundingBox.Bottom > platform.BoundingBox.Top)
                         {
-                            entity.IsGrounded = true;
+                            entity.IsOnPlatform = true;
                         }
                     }
                 }
@@ -214,6 +239,10 @@ namespace CyberCommando.Entities.Enviroment
                         if (a.BoundingBox.Intersects(b.BoundingBox))
                         {
                             a.Touch(b);
+                            if (a is Projectile && b is Entity)
+                                b.Kill(b);
+                            if (b is Projectile && a is Entity)
+                                a.Kill(a);
                         }
                     }
                 }
@@ -256,7 +285,7 @@ namespace CyberCommando.Entities.Enviroment
         {
             LVLManager.DrawSpecific(batcher, 
                                     new Vector2(Services.Camera.Position.X + FWidth, Services.Camera.Position.X), 
-                                    LevelState.BACKGROUND | LevelState.BACK | LevelState.MIDDLE, true);
+                                    LevelState.BACKGROUND | LevelState.BACK | LevelState.MIDDLE, LevelState.NONE);
         }
 
         /// <summary>
@@ -265,8 +294,8 @@ namespace CyberCommando.Entities.Enviroment
         public virtual void DrawLVLFront(GameTime gameTime, SpriteBatch batcher)
         {
             LVLManager.DrawSpecific(batcher, 
-                                    new Vector2(Services.Camera.Position.X + FWidth, Services.Camera.Position.X), 
-                                    LevelState.FRONT, true);
+                                    new Vector2(Services.Camera.Position.X + FWidth, Services.Camera.Position.X - FWidth / 2), 
+                                    LevelState.FRONT_NOT_EFFECTED, LevelState.FRONT_NOT_EFFECTED);
         }
 
         /// <summary>
@@ -280,7 +309,7 @@ namespace CyberCommando.Entities.Enviroment
                     entity.Draw(gameTime, batcher);
             }
 
-            LVLManager.EndDrawFront(batcher);
+            LVLManager.EndDrawLastLayer(batcher);
         }
 
         /// <summary>
@@ -296,7 +325,6 @@ namespace CyberCommando.Entities.Enviroment
 
             batcher.End();
         }
-       
 
         /// <summary>
         /// Draw all shadows which entities casts amount the level

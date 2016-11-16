@@ -37,6 +37,9 @@ namespace CyberCommando.Entities
         /// </summary>
         public World WCore { get; }
 
+        public Vector2 BulletVelocuty;
+        public float FireAngle { get; set; }
+        public DateTime Cooldown;
         internal InputHandler Handler { get; set; } 
 
         /// <summary>
@@ -77,6 +80,7 @@ namespace CyberCommando.Entities
         public virtual int  Health      { get; set; }
 
         public bool         IsGrounded  { get; set; }
+        public bool         IsOnPlatform{ get; set; }
 
         /// <summary>
         /// Entity rigbody, to check collision

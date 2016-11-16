@@ -48,7 +48,7 @@ namespace CyberCommando.Engine
         /// </summary>
         public Vector2 ToRelativePosition(Vector2 worldPosition)
         {
-            return worldPosition - (DPosition - LAreaSize * 0.5f);
+            return worldPosition - (WPosition - LAreaSize * 0.5f);
         }
 
         /// <summary>

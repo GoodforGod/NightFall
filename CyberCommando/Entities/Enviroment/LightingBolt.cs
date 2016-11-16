@@ -13,21 +13,21 @@ namespace CyberCommando.Entities.Enviroment
         public List<SegmentLine> Segments = new List<SegmentLine>();
         public Vector2  Start               { get { return Segments[0].SPoint; } }
         public Vector2  End                 { get { return Segments.Last().EPoint; } }
+        public Vector2  LBPosition          { get; set; }
 
         public float    Alpha               { get; set; }
         public float    AlphaMultiplier     { get; set; }
         public float    FadeOutRate         { get; set; }
         public Color    Tint                { get; set; }
 
-        public Vector2  LBPosition          { get; set; }
-
         public bool     IsComplete          { get { return Alpha <= 0; } }
         public bool     IsRendered          { get; private set; }
-        public Texture2D LBRender           { get; private set; }
-        RenderTarget2D LBRenderTarget;
-        Texture2D Sprite;
 
-        static Random rand = new Random(Guid.NewGuid().GetHashCode());
+        public Texture2D LBRender           { get; private set; }
+        RenderTarget2D  LBRenderTarget;
+        Texture2D       Sprite;
+
+        static Random RandomGen = new Random(Guid.NewGuid().GetHashCode());
 
         public LightningBolt(Vector2 source, Vector2 dest, Texture2D sprite)
                         : this(source, dest, sprite, new Color(0.9f, 0.8f, 1f)) { }
@@ -142,7 +142,7 @@ namespace CyberCommando.Entities.Enviroment
 
         private static float Rand(float min, float max)
         {
-            return (float)rand.NextDouble() * (max - min) + min;
+            return (float)RandomGen.NextDouble() * (max - min) + min;
         }
     }
 }

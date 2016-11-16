@@ -33,10 +33,10 @@ namespace CyberCommando.Services.Utils
         {
             base.LoadContent(content);
 
-            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.N);
+            Font = Content.Load<SpriteFont>(ServiceLocator.Instance.PLManager.NFTitleFont);
             scale = 1.0f;
             Begin = DateTime.Now;
-            titles = "Titles\nStart in ";
+            titles = "ERROR 404\n[NAME NOT FOUND]\nStart in ";
             origin = new Vector2(Font.MeasureString(titles).X / 2, Font.MeasureString(titles).Y);
             position = new Vector2(GraphDev.Viewport.Width / 2, GraphDev.Viewport.Height / 2);
         }
@@ -61,7 +61,7 @@ namespace CyberCommando.Services.Utils
             batcher.DrawString(Font,
                                 titles + (int)time, 
                                 position, 
-                                Color.Black, 
+                                Color.Wheat, 
                                 .0f, 
                                 origin,
                                 scale * SScale, 

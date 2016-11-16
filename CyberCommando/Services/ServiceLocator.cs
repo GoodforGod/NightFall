@@ -20,13 +20,15 @@ namespace CyberCommando.Services
     {
         internal GraphicsDevice GraphDev { get; private set; }
 
-        internal Camera             Camera  { get; private set; }
-        internal LoadManager        LManager { get; private set; }
-        internal InputHandler       IOHandler { get; private set; }
-        internal AudioManager       AUManager { get; private set; }
-        internal PipelineManager    PLManager { get; private set; }
-        internal LevelManager       LVLManager { get; private set; }
-        internal ScreenManager      SManager { get; private set; }
+        internal Camera             Camera      { get; private set; }
+        internal LoadManager        LManager    { get; private set; }
+        internal InputHandler       IOHandler   { get; private set; }
+        internal AudioManager       AUManager   { get; private set; }
+        internal PipelineManager    PLManager   { get; private set; }
+        internal LevelManager       LVLManager  { get; private set; }
+        internal ScreenManager      SManager    { get; private set; }
+
+        public bool                 IsInitialized { get; private set; }
 
         private static ServiceLocator _Instance;
         public static ServiceLocator Instance
@@ -58,6 +60,13 @@ namespace CyberCommando.Services
             Camera = new Camera(GraphDev.Viewport);
             Camera.Position = new Vector2(0f, frameWidth / 2);
             Camera.Zoom = 1.0f;
+
+            IsInitialized = true;
+        }
+
+        public void Resize(ResolutionState res, int width, int height)
+        {
+            Camera.viewport = GraphDev.Viewport;
         }
 
         public void Unload()

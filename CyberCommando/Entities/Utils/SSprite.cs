@@ -11,38 +11,38 @@ namespace CyberCommando.Entities.Utils
     /// <summary>
     /// Simple sprite, representing texture/sprite rectangle and it possition in the world
     /// </summary>
-    class Sprite
+    class SSprite
     {
         public Rectangle Source     { get; set; }
         public Vector2   Position   { get; set; }
+        public Vector2   OPosition  { get; private set; }
 
         public float    Scale   { get; set; }
-        public float    RScale  { get; set; }
+        public float    OScale  { get; private set; }
 
-        public Sprite()
+        public SSprite()
         {
             this.Source = Rectangle.Empty;
-            this.Position = Vector2.One;
-            this.Scale = 1.0f;
-            this.RScale = 1.0f;
+            this.Position = OPosition = Vector2.One;
+            this.Scale = OScale = 1.0f;
         }
 
-        public Sprite(Rectangle source) 
+        public SSprite(Rectangle source) 
                                     : this ()
         {
             this.Source = source;
         }
 
-        public Sprite(Rectangle source, Vector2 position) 
+        public SSprite(Rectangle source, Vector2 position) 
                                                 : this (source)
         {
-            this.Position = position;
+            this.Position = OPosition = position;
         }
 
-        public Sprite(Rectangle source, Vector2 position, float scale) 
+        public SSprite(Rectangle source, Vector2 position, float scale) 
                                                     : this(source, position)
         {
-            this.Scale = scale;
+            this.Scale = OScale = scale;
         }
     }
 }

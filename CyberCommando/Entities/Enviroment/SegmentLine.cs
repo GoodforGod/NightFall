@@ -36,15 +36,14 @@ namespace CyberCommando.Entities.Enviroment
         Rectangle   SEnding;
         Rectangle   SMiddle;
 
-        public SegmentLine() { }
         public SegmentLine(Vector2 spoint, Vector2 epoint, Texture2D sprite, float thickness = 1)
         {
             this.Sprite = sprite;
             this.SPoint = spoint;
             this.EPoint = epoint;
             this.Thickness = thickness;
-            this.SEnding = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineEnding];
-            this.SMiddle = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.RSegmentLineMiddle]; 
+            this.SEnding = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.NRSegmentLineEnding];
+            this.SMiddle = ServiceLocator.Instance.LVLManager.SSources[ServiceLocator.Instance.PLManager.NRSegmentLineMiddle]; 
 
             Tan = EPoint - SPoint;
             Angle = (float)Math.Atan2(Tan.Y, Tan.X);

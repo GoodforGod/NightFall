@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework;
 
 namespace CyberCommando.Services
 {
@@ -31,14 +32,17 @@ namespace CyberCommando.Services
                 return _SPlayer;
             } }
 
-        readonly static string ERoot = "Effects/";
-        readonly static string SRoot = "Sprites/";
-        readonly static string FRoot = "Fonts/";
-        readonly static string ARoot = "Audio/";
+        public readonly static string ERoot = "Effects/";
+        public readonly static string SRoot = "Sprites/";
+        public readonly static string FRoot = "Fonts/";
+        public readonly static string ARoot = "Audio/";
 
-        public readonly string RSegmentLineMiddle = "SegmentLineM";
-        public readonly string RSegmentLineEnding = "SegmentLineE";
+        public readonly Rectangle RProjectileLaser = new Rectangle(652, 102, 100, 184);
 
+        public readonly string NRSegmentLineMiddle = "SegmentLineM";
+        public readonly string NRSegmentLineEnding = "SegmentLineE";
+
+        public readonly string NSDefault           = SRoot + "q";
         public readonly string NSPlayer            = SRoot + "c-test";
         public readonly string NSEnemy             = SRoot + "e-test";
         public readonly string NSGun               = SRoot + "g-test";
@@ -47,7 +51,7 @@ namespace CyberCommando.Services
         public readonly string NEBloomExtract      = ERoot + "BloomExtract";
         public readonly string NEBloomComdine      = ERoot + "BloomCombine";
         public readonly string NEGaussBlur         = ERoot + "GaussianBlur";
-        public readonly string NEShadowReduction         = ERoot + "reductionEffect";
+        public readonly string NEShadowReduction   = ERoot + "reductionEffect";
         public readonly string NEShadowResolver    = ERoot + "resolveShadowsEffect";
 
         public readonly string[] NLevels = { "menu", "prolog", "cybertown", "nighttown" };

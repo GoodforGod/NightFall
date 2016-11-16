@@ -125,11 +125,11 @@ namespace CyberCommando.Entities.Utils
         public Matrix GetViewMatrix(Vector2 parallax)
         {
             // Thanks to o KB o for this solution
-            return Matrix.CreateTranslation(new Vector3(-_Position * parallax, 0)) *
-                                       Matrix.CreateTranslation(new Vector3(-Origin, .0f)) *
-                                       Matrix.CreateRotationZ(RotationAngle) *
-                                       Matrix.CreateScale(new Vector3(_Zoom, _Zoom, 1)) *
-                                       Matrix.CreateTranslation(new Vector3(Origin, .0f));
+            return Matrix.CreateTranslation(new Vector3(-_Position * parallax, 0))
+                                               * Matrix.CreateTranslation(new Vector3(-Origin, .0f))
+                                               * Matrix.CreateRotationZ(RotationAngle)
+                                               * Matrix.CreateScale(new Vector3(_Zoom, _Zoom, 1))
+                                               * Matrix.CreateTranslation(new Vector3(Origin, .0f));
         } 
     }
 }

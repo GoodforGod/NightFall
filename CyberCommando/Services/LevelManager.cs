@@ -57,9 +57,12 @@ namespace CyberCommando.Services
 
         public void Unload()
         {
-            SSources.Clear();
-            CLights.Clear();
-            CLevel.Dispose();
+            if (SSources != null)
+                SSources.Clear();
+            if (CLights != null)
+                CLights.Clear();
+            if (CLevel != null)
+                CLevel.Dispose();
         }
 
         /// <summary>
@@ -82,23 +85,15 @@ namespace CyberCommando.Services
         /// <summary>
         /// 
         /// </summary>
-        public void DrawBack(SpriteBatch batcher)
+        public void DrawSpecific(SpriteBatch batcher, Vector2 limits, LevelState states, LevelState stoplvlState)
         {
-            CLevel.DrawBackground(batcher);
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DrawSpecific(SpriteBatch batcher, Vector2 limits, LevelState state, bool endBatcher)
-        {
-            CLevel.DrawSpecificLayer(batcher, limits, state, endBatcher);
+            CLevel.DrawSpecificLayers(batcher, limits, states, stoplvlState);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void EndDrawFront(SpriteBatch batcher)
+        public void EndDrawLastLayer(SpriteBatch batcher)
         {
             CLevel.EndDrawSpecificLayer(batcher);
         }

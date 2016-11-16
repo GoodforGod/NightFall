@@ -86,15 +86,16 @@ namespace CyberCommando.Controllers
         {
             MouseState mState = Mouse.GetState();
 
-            if (mState.LeftButton == ButtonState.Pressed && (DateTime.Now - Cooldown).TotalMilliseconds > 100)
+            if (mState.LeftButton == ButtonState.Pressed && (DateTime.Now - entity.Cooldown).TotalMilliseconds > 100)
             {
-                Cooldown = DateTime.Now;
-                entity.WCore.AddToSpawnQueue(typeof(Projectile).FullName, entity.WPosition, entity.ArmAngle);
+                CharHandler.Fire(entity);
             }
 
             if (mState.X < entity.DPosition.X)
                 entity.Direction = SpriteEffects.FlipHorizontally;
             else entity.Direction = SpriteEffects.None;
+
+            entity.BulletVelocuty = new Vector2(mState.X - entity.DPosition.X, mState.Y - entity.DPosition.Y);
 
             return Math.Atan2(mState.Y - entity.DPosition.Y, mState.X - entity.DPosition.X) - Math.PI / 2;
         }

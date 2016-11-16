@@ -34,7 +34,9 @@ namespace CyberCommando.Services
         }
 
         ContentManager  Content { get; set; }
-        Camera          Cam { get; set; }
+        Camera          Cam     { get; set; }
+
+        static Random RandomGen = new Random(Guid.NewGuid().GetHashCode());
 
         private LoadManager() { }
 
@@ -42,6 +44,11 @@ namespace CyberCommando.Services
         {
             this.Cam = new Camera(viewport);
             this.Content = content;
+        }
+
+        public void Resize(Viewport viewport)
+        {
+            this.Cam.viewport = viewport;
         }
 
         /// <summary>
@@ -60,15 +67,15 @@ namespace CyberCommando.Services
         {
             LevelState tState;
             LevelState lState = LevelState.NONE;
-            Rectangle limits = new Rectangle(0, 0, 1280, 720);
+            Rectangle limits = Rectangle.Empty;
 
             var lights = new List<LightSpot>();
             var layers = new Dictionary<LevelState, Layer>();
             var textures = new Dictionary<LevelState, Texture2D>();
-            var sprites = new List<Sprite>();
+            var sprites = new List<SSprite>();
 
             string textureName = "";
-            Texture2D texture = Content.Load<Texture2D>("q");
+            Texture2D texture = Content.Load<Texture2D>(ServiceLocator.Instance.PLManager.NSDefault);
 
             var LColor = Color.White;
             var parallax = new Vector2();
@@ -79,8 +86,6 @@ namespace CyberCommando.Services
             var innerCycles = cycles;
             var xInc = 0;
             var yInc = 0;
-
-            var rand = new Random(Guid.NewGuid().GetHashCode());
 
             // Line starts with #, is comment
             foreach (var cols in from row in dataFileLines
@@ -102,7 +107,7 @@ namespace CyberCommando.Services
                             if (textureName != cols[i + 1])
                             {
                                 textureName = cols[i + 1];
-                                texture = Content.Load<Texture2D>(cols[i + 1]);
+                                texture = Content.Load<Texture2D>(PipelineManager.SRoot + textureName);
                             }
                             textures.Add(tState, texture);
                         }
@@ -121,7 +126,7 @@ namespace CyberCommando.Services
                         }
                         catch (Exception ex)
                         {
-                            throw new ArgumentException("Inccorect limit format in: " + layerName, cols[0]);
+                            throw new ArgumentException(ex.Data + " | " + "Inccorect limit format in: " + layerName, cols[0]);
                         }
                         continue;
                     }
@@ -151,19 +156,19 @@ namespace CyberCommando.Services
                         position.X += xInc * step;
                         position.Y += yInc * step;
 
-                        switch (rand.Next(0, 9))
+                        switch (RandomGen.Next(0, 9))
                         {
-                            case 0: colorLight = Color.Tomato; break;
+                            case 0: colorLight = Color.White; break;
                             case 1: colorLight = Color.LightPink; break;
-                            case 2: colorLight = Color.LightGreen; break;
+                            case 2: colorLight = Color.LightCyan; break;
                             case 3: colorLight = Color.LightGoldenrodYellow; break;
-                            case 4: colorLight = Color.Blue; break;
+                            case 4: colorLight = Color.LightCyan; break;
                             case 5: colorLight = Color.White; break;
                             case 6: colorLight = Color.MediumPurple; break;
-                            case 7: colorLight = Color.SeaGreen; break;
-                            case 8: colorLight = Color.Orange; break;
+                            case 7: colorLight = Color.LightPink; break;
+                            case 8: colorLight = Color.LightGoldenrodYellow; break;
                             case 9: colorLight = Color.LightCyan; break;
-                            default: colorLight = Color.LightGreen; break;
+                            default: colorLight = Color.MediumPurple; break;
                         }
 
                         lights.Add(new LightSpot(graphdev, state, position, colorLight));
@@ -184,7 +189,7 @@ namespace CyberCommando.Services
                         }
                         catch (Exception ex)
                         {
-                            throw new ArgumentException("Inccorect rectangle special format in: " + layerName, cols[0]);
+                            throw new ArgumentException(ex.Data + " | " + "Inccorect rectangle special format in: " + layerName, cols[0]);
                         }
                         ServiceLocator.Instance.LVLManager.SSources.Add(cols[1], rect);
 
@@ -221,7 +226,7 @@ namespace CyberCommando.Services
 
                         LColor = new Color(new Color(r, g, b), alpha);
                         parallax = new Vector2(x, y);
-                        sprites = new List<Sprite>();
+                        sprites = new List<SSprite>();
                         continue;
                     }
                     else if (cols.Length != 5 && cols.Length != 7)
@@ -239,7 +244,7 @@ namespace CyberCommando.Services
                     }
                     catch (Exception ex)
                     {
-                        throw new ArgumentException("Inccorect rectangle format in: " + layerName, cols[0]);
+                        throw new ArgumentException(ex.Data + " | " + "Inccorect rectangle format in: " + layerName, cols[0]);
                     }
 
                     if (cols.Length == 5)
@@ -249,7 +254,7 @@ namespace CyberCommando.Services
                         if (!float.TryParse(cols[5], out scale))
                             throw new ArgumentException("Incorrect scale format in: " + layerName, cols[5]);
 
-                        sprites.Add(new Sprite(rectangle));
+                        sprites.Add(new SSprite(rectangle));
                     }
                     else if (cols.Length == 6 || cols.Length == 7)
                     {
@@ -282,7 +287,7 @@ namespace CyberCommando.Services
                             if (!float.TryParse(cols[6], out scale))
                                 throw new ArgumentException("Incorrect scale format in: " + layerName, cols[6]);
 
-                        sprites.Add(new Sprite(rectangle, position, scale));
+                        sprites.Add(new SSprite(rectangle, position, scale));
                     }
                 }
             }
@@ -334,7 +339,8 @@ namespace CyberCommando.Services
             var animation = new Animation();
 
             // Uses animation texture/sprite name and changes the file extention with .txt
-            var dataFile = Path.Combine(Content.RootDirectory, Path.ChangeExtension(spritesheetName, "txt"));
+            var dataFile = Path.Combine(Content.RootDirectory, 
+                                        Path.ChangeExtension(spritesheetName.Remove(0, PipelineManager.SRoot.Length), "txt"));
             var dataFileLines = File.ReadAllLines(dataFile);
 
             // Select all NonNullable rows and rows starting not with symbol '#', separate rows by symbol ';'

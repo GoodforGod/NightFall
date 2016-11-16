@@ -19,12 +19,12 @@ namespace CyberCommando.Entities.Enviroment
         public LevelState   State           { get; private set; }
         public Texture2D    Texture         { get; set; }
         public Vector2      Parallax        { get; set; }
-        public List<Sprite> LSprites    { get; private set; }
+        public List<SSprite> LSprites        { get; private set; }
         public Camera       Camera          { get; private set; }
         public Color        LColor          { get; set; }
         public float        ResScale        { get; set; }
 
-        public Layer(Camera camera, List<Sprite> layerRects, LevelState state, Color color)
+        public Layer(Camera camera, List<SSprite> layerRects, LevelState state, Color color)
         {
             ResScale = 1f;
             this.Camera = camera;
@@ -41,7 +41,7 @@ namespace CyberCommando.Entities.Enviroment
             Texture = null;
         }
 
-        public Layer(Camera camera, List<Sprite> layerRects, LevelState state, Color color, Vector2 parallax) 
+        public Layer(Camera camera, List<SSprite> layerRects, LevelState state, Color color, Vector2 parallax) 
                                                                             : this(camera, layerRects, state, color)
         {
             this.Parallax = parallax;
@@ -57,18 +57,21 @@ namespace CyberCommando.Entities.Enviroment
         public void UpdateScale(float scale)
         {
             foreach (var sprite in LSprites)
-                sprite.RScale = sprite.Scale * scale;
+            {
+                sprite.Scale = sprite.OScale * scale;
+                //sprite.Position = sprite.OPosition * scale;
+            }
         }
 
         private void InitDraw(SpriteBatch batcher)
         {
             batcher.Begin(SpriteSortMode.Deferred,
-                        BlendState.AlphaBlend,
-                        SamplerState.LinearWrap,
-                        DepthStencilState.Default,
-                        RasterizerState.CullNone,
-                        null,
-                        Camera.GetViewMatrix(Parallax));
+                            BlendState.AlphaBlend,
+                            SamplerState.LinearWrap,
+                            DepthStencilState.Default,
+                            RasterizerState.CullNone,
+                            null,
+                            Camera.GetViewMatrix(Parallax));
         }
 
         public void Draw(SpriteBatch batcher)
@@ -83,7 +86,7 @@ namespace CyberCommando.Entities.Enviroment
                                 LColor,
                                 .0f,
                                 Vector2.One,
-                                sprite.RScale,
+                                sprite.OScale,
                                 SpriteEffects.None,
                                 1.0f);
             }
@@ -98,14 +101,14 @@ namespace CyberCommando.Entities.Enviroment
 
             foreach (var sprite in LSprites)
             {
-                if (IsOnScreen(sprite.Position.X + sprite.Source.Width, sprite.Position.X, limL, limR))
+                if (IsOnScreen(sprite.Position.X + sprite.Source.Width * sprite.Scale, sprite.Position.X, limL, limR))
                     batcher.Draw(Texture,
                                     sprite.Position,
                                     sprite.Source,
                                     LColor,
                                     .0f,
                                     Vector2.One,
-                                    sprite.RScale,
+                                    sprite.Scale,
                                     SpriteEffects.None,
                                     1.0f);
             }

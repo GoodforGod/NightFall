@@ -24,24 +24,26 @@ namespace CyberCommando.Entities
 
         public float    ArmAngle { get; private set; }
 
-        Vector2 ArmLOffeset;
-        Vector2 ArmROffeset;
+        Vector2 ArmLOffeset = new Vector2(32, 13);
+        Vector2 ArmROffeset = new Vector2(25, 14);
         Vector2 ArmWPosition;
 
         AnimationManager<AnimationState> AniManager;
 
         public Character(World world) : base(world)
         {
-            DPosition = new Vector2(1,1);
             AniManager = new AnimationManager<AnimationState>();
-            AniManager.LoadAnimations(ServiceLocator.Instance.LManager, ServiceLocator.Instance.PLManager.NSPlayer);
-            Sprite = ServiceLocator.Instance.PLManager.SPlayer;
-            AniState = AnimationState.IDLE;
-            EntState = EntityState.ACTIVE;
+            AniManager.LoadAnimations(ServiceLocator.Instance.PLManager.NSPlayer);
             AniManager.CurrentAnimation = AniManager.Animations[AnimationState.IDLE];
-            SOffset = new Vector2(62 * 4, 90);
-            BoundingBox = new Rectangle((int)WPosition.X, (int)WPosition.Y, SHeight, SWidth);
-            IsGrounded = false;
+
+            this.Sprite = ServiceLocator.Instance.PLManager.SPlayer;
+            this.AniState = AnimationState.IDLE;
+            this.EntState = EntityState.ACTIVE;
+
+            this.SOffset = new Vector2(62 * 4, 90);
+            this.DPosition = new Vector2(1,1);
+            this.BoundingBox = new Rectangle((int)WPosition.X, (int)WPosition.Y, SHeight, SWidth);
+            this.IsGrounded = false;
         }
 
         public override bool IsOnScreen()
@@ -92,7 +94,7 @@ namespace CyberCommando.Entities
 
             DPosition.Y = WPosition.Y;
 
-            ArmAngle = (float)Handler.HandleMouseInput(this);
+            FireAngle = (float)Handler.HandleMouseInput(this);
             if (Direction == SpriteEffects.None)
                 ArmWPosition = WPosition + ArmROffeset;
             else ArmWPosition = WPosition + ArmLOffeset;
@@ -116,7 +118,7 @@ namespace CyberCommando.Entities
                            AniManager.CurrentAnimation.CurrentRectangle,
                            Color.White,
                            Angle,
-                           new Vector2(1, 1),
+                           Vector2.One,
                            ResScale,
                            Direction,
                            .0f);
@@ -126,8 +128,8 @@ namespace CyberCommando.Entities
                                 ArmWPosition,
                                 AniManager.Animations[AnimationState.FIRE].CurrentRectangle,
                                 Color.White,
-                                ArmAngle,
-                                new Vector2(1, 1),
+                                FireAngle,
+                                Vector2.One,
                                 ResScale,
                                 Direction,
                                 .0f);
@@ -140,7 +142,7 @@ namespace CyberCommando.Entities
                             AniManager.CurrentAnimation.CurrentRectangle,
                             color, 
                             Angle, 
-                            new Vector2(1,1), 
+                            Vector2.One, 
                             ResScale, 
                             Direction, 
                             .0f);
@@ -150,8 +152,8 @@ namespace CyberCommando.Entities
                                 lightArea.ToRelativePosition(ArmWPosition),
                                 AniManager.Animations[AnimationState.FIRE].CurrentRectangle,
                                 color,
-                                ArmAngle,
-                                new Vector2(1, 1),
+                                FireAngle,
+                                Vector2.One,
                                 ResScale,
                                 Direction,
                                 .0f);

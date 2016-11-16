@@ -12,6 +12,6 @@ namespace CyberCommando.Controllers
     /// </summary>
     class CharStateHandler : EntityStateHandler
     {
-
+        
     }
 }
