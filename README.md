@@ -4,10 +4,9 @@ Game was supposed to be a cyberpunk side-scroller/platformer, with cool shaders 
 So for now is kinda frozen, need time to reimagine the story-line and other detailes.
 
 ## Controll :exclamation:
-  - A/D or <-/-> to move left and right.
-  - W/^ to jump
-  - Mouse 
-  - SPACE to use Ultimate
+  - A/D to move left and right.
+  - W to jump
+  - Mouse to fire
 
 ## Used :bar_chart:
  - Monogame
